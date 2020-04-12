@@ -6,16 +6,14 @@ import (
 
 const (
 	// PacketHeaderSize is Serialkey(uint32) + PacketSize(uint16)
-	PacketHeaderSize uint32 = 6
-	// ExamplePacketSerialkey is Serialkey(uint32) + PacketSize(uint16)
-	ExamplePacketSerialkey uint32 = 0x5da9c31b
+	PacketHeaderSize uint32 = 10
 	// MaxPacketSize is Serialkey(uint32) + PacketSize(uint16)
 	MaxPacketSize uint16 = 0x1000
 )
 
 // HeaderChack check if the packet header normal
-func HeaderChack(buffer []byte) bool {
-	if ExamplePacketSerialkey == binary.LittleEndian.Uint32(buffer) {
+func HeaderChack(buffer []byte, serialkey uint32) bool {
+	if serialkey == binary.LittleEndian.Uint32(buffer) {
 		PacketSize := binary.LittleEndian.Uint16(buffer[4:])
 		if PacketSize <= MaxPacketSize {
 			return true
@@ -26,8 +24,9 @@ func HeaderChack(buffer []byte) bool {
 
 // Header is
 type Header struct {
-	serialkey  uint32
-	packetSize uint16
+	serialkey     uint32
+	packetSize    uint16
+	packetCommand uint32
 }
 
 // Packet is
@@ -44,10 +43,21 @@ func NewPacket(buffersize uint32) *Packet {
 	return &p
 }
 
+// GetByte packet transform to []byte
+func (p *Packet) GetByte() []byte {
+	buffer := make([]byte, PacketHeaderSize+uint32(p.getSize()))
+	binary.LittleEndian.PutUint32(buffer, p.header.serialkey)
+	binary.LittleEndian.PutUint16(buffer[4:], p.header.packetSize)
+	binary.LittleEndian.PutUint32(buffer[6:], p.header.packetCommand)
+	copy(buffer[10:], p.buffer[:p.header.packetSize])
+	return buffer
+}
+
 // SetHeader Set Header Info
-func (p *Packet) SetHeader(serialKey uint32, packetsize uint16) {
+func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand uint32) {
 	p.header.serialkey = serialKey
 	p.header.packetSize = packetsize
+	p.header.packetCommand = packetcommand
 }
 
 // CopyByte write byte to packet buffer
@@ -83,7 +93,7 @@ func (p *Packet) Write(data ...interface{}) {
 			b := []byte(v)
 			b = append(b, 0)
 			length := copy(p.buffer[p.getSize():], b)
-			p.addSize(uint16(length) + 1)
+			p.addSize(uint16(length))
 		}
 	}
 }

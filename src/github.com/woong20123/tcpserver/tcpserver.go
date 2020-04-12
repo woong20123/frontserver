@@ -16,6 +16,18 @@ const (
 	maxBufferSize        = 4096
 )
 
+var packetSerialkey uint32 = 0x5da9c31b
+
+// SetSerialKey is
+func SetSerialKey(key uint32) {
+	packetSerialkey = key
+}
+
+// GetSerialkey is
+func GetSerialkey() uint32 {
+	return packetSerialkey
+}
+
 // Assembly assembles a read buffer to make a packet.
 // kor : Assembly는 패킷을 만들기 위해서 read buffer를 조립합니다.
 func Assembly(buffer []byte, bufferpos uint32) (resultpos uint32) {
@@ -39,7 +51,7 @@ func Assembly(buffer []byte, bufferpos uint32) (resultpos uint32) {
 			break
 		}
 
-		if true == packet.HeaderChack(buffer[index:]) {
+		if true == packet.HeaderChack(buffer[index:], GetSerialkey()) {
 			headerFind = true
 
 			// 만약 패킷 헤더가 처음이 아니라면 나머지 버퍼를 버립니다.
@@ -54,14 +66,15 @@ func Assembly(buffer []byte, bufferpos uint32) (resultpos uint32) {
 	// 패킷 시작지점을 찾았다면
 	if true == headerFind {
 		PacketSize := uint32(binary.LittleEndian.Uint16(buffer[4:]))
+		PacketCommand := uint32(binary.LittleEndian.Uint16(buffer[6:]))
 		PacketHeaderSize := packet.PacketHeaderSize
 		TotalPacketSize := PacketSize + PacketHeaderSize
 
 		// 패킷을 만들 수 있을 만큼 패킷을 전달 받았다면 패킷을 만들고
 		// Logic 처리 goroutine에 전달합니다.
-		if TotalPacketSize < resultpos {
+		if TotalPacketSize <= resultpos {
 			packet := packet.NewPacket(PacketSize)
-			packet.SetHeader(0, uint16(PacketSize))
+			packet.SetHeader(0, uint16(PacketSize), PacketCommand)
 			packet.CopyByte(buffer[PacketHeaderSize:TotalPacketSize])
 			log.Println("Make packet logic")
 
@@ -130,9 +143,7 @@ func HandleConnection(serverCtx context.Context, conn *net.TCPConn, wg *sync.Wai
 
 	select {
 	case <-readCtx.Done():
-		log.Println("readCtx.Done()")
 	case <-serverCtx.Done():
-		log.Println("serverCtx.Done()")
 	}
 }
 

@@ -3,6 +3,7 @@ package main
 // "factored" import statment
 import (
 	"context"
+	"example/examlogic"
 	"log"
 	"os"
 	"os/signal"
@@ -21,6 +22,9 @@ func main() {
 	chClosed := make(chan struct{})
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
+
+	// regist serial key
+	tcpserver.SetSerialKey(examlogic.ExamplePacketSerialkey)
 
 	address := ":20224"
 	go tcpserver.HandleListener(serverCtx, address, &wg, chClosed)
