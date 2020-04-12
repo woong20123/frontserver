@@ -2,10 +2,13 @@ package tcpserver
 
 import (
 	"context"
+	"encoding/binary"
 	"log"
 	"net"
 	"strings"
 	"sync"
+
+	"github.com/woong20123/packet"
 )
 
 const (
@@ -13,11 +16,77 @@ const (
 	maxBufferSize        = 4096
 )
 
-// HandleRead 연결된 세션에 대한 패킷 Read 작업을 처리합니다.
+// Assembly assembles a read buffer to make a packet.
+// kor : Assembly는 패킷을 만들기 위해서 read buffer를 조립합니다.
+func Assembly(buffer []byte, bufferpos uint32) (resultpos uint32) {
+	resultpos = bufferpos
+	var headerFind bool = false
+
+	if resultpos < packet.PacketHeaderSize {
+		return
+	}
+
+	findIndex := resultpos - packet.PacketHeaderSize
+
+	// 전달받은 버퍼를 순회하면서 패킷이 정상적으로 전달되었는지 확인합니다.
+	for index := range buffer {
+		// must receive At least as much as the header
+		// 최소한 헤더만큼 수신받아야 처리 가능,
+		// 이곳에 들어왔다면 검사한 버퍼를 모두 버립니다.
+		if uint32(index) > findIndex {
+			copy(buffer, buffer[index:resultpos])
+			resultpos = resultpos - uint32(index)
+			break
+		}
+
+		if true == packet.HeaderChack(buffer[index:]) {
+			headerFind = true
+
+			// 만약 패킷 헤더가 처음이 아니라면 나머지 버퍼를 버립니다.
+			if index != 0 {
+				copy(buffer, buffer[index:resultpos])
+				resultpos = resultpos - uint32(index)
+			}
+			break
+		}
+	}
+
+	// 패킷 시작지점을 찾았다면
+	if true == headerFind {
+		PacketSize := uint32(binary.LittleEndian.Uint16(buffer[4:]))
+		PacketHeaderSize := packet.PacketHeaderSize
+		TotalPacketSize := PacketSize + PacketHeaderSize
+
+		// 패킷을 만들 수 있을 만큼 패킷을 전달 받았다면 패킷을 만들고
+		// Logic 처리 goroutine에 전달합니다.
+		if TotalPacketSize < resultpos {
+			packet := packet.NewPacket(PacketSize)
+			packet.SetHeader(0, uint16(PacketSize))
+			packet.CopyByte(buffer[PacketHeaderSize:TotalPacketSize])
+			log.Println("Make packet logic")
+
+			copy(buffer, buffer[TotalPacketSize:resultpos])
+			resultpos = resultpos - TotalPacketSize
+
+			// 남은 버퍼에서 패킷을 조립할 수 있을 수도 있기 때문에 재호출
+			resultpos = Assembly(buffer, resultpos)
+		}
+	}
+	return
+}
+
+// HandleRead handles packet read operations for connected sessions
+// kor : HandleRead 연결된 세션에 대한 패킷 Read 작업을 처리합니다.
 func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	defer errRead()
 
+	// sessesion을 통해서 전달받기 위한 버퍼 생성
 	recvBuf := make([]byte, maxBufferSize)
+
+	// session으로부터 전달받은 버퍼를 packet형태로 변환처리하기 위한 Packet
+	// TCP의 데이터 전달이 패킷단위로 전달되지 않기 때문에 조립 작업을 합니다.
+	AssemblyBuf := make([]byte, maxBufferSize+128)
+	var AssemPos uint32 = 0
 
 	for {
 		n, err := conn.Read(recvBuf)
@@ -40,14 +109,16 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 		}
 
 		if 0 < n {
-			data := recvBuf[:n]
-			log.Println(string(data))
+			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
+			AssemPos += uint32(copylength)
+			AssemPos = Assembly(AssemblyBuf, AssemPos)
 		}
 	}
 }
 
-// HandleConnection은 연결된 세션에 대한 작업을 등록합니다.
-func HandleConnection(conn *net.TCPConn, serverCtx context.Context, wg *sync.WaitGroup) {
+// HandleConnection register job for connected session
+// kor : HandleConnection은 연결된 세션에 대한 작업을 등록합니다.
+func HandleConnection(serverCtx context.Context, conn *net.TCPConn, wg *sync.WaitGroup) {
 	defer func() {
 		conn.Close()
 		wg.Done()
@@ -70,7 +141,7 @@ func listenerCloseError(err error) bool {
 }
 
 // HandleListener register the task to listen to the socket
-// HandleListener은 전달된 server address로 소켓을 Listen하는 작업 등록합니다.
+// kor : HandleListener은 전달된 server address로 소켓을 Listen하는 작업 등록합니다.
 func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGroup, chClosed chan struct{}) {
 
 	tcpAddr, err := net.ResolveTCPAddr("tcp", address)
@@ -115,6 +186,6 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 			return
 		}
 		wg.Add(1)
-		go HandleConnection(conn, ctxServer, wg)
+		go HandleConnection(ctxServer, conn, wg)
 	}
 }

@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	sigChan := make(chan os.Signal, 1)
 	signal.Ignore()
 	signal.Notify(sigChan, syscall.SIGINT)
