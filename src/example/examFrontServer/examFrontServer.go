@@ -3,10 +3,13 @@ package main
 // "factored" import statment
 import (
 	"context"
-	"example/examlogic"
+	"example/examFrontServer/examserverlogic"
+	"example/share"
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
+	"strconv"
 	"sync"
 	"syscall"
 
@@ -14,22 +17,27 @@ import (
 	"github.com/woong20123/tcpserver"
 )
 
-func main() {
+func constructTCPServer(port int) {
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Ignore()
 	signal.Notify(sigChan, syscall.SIGINT)
 
 	var wg sync.WaitGroup
 	chClosed := make(chan struct{})
-
 	serverCtx, shutdown := context.WithCancel(context.Background())
 
-	// regist serial key
+	// set LogicManager
 	lm := logicmanager.NewLogicManager()
-	//examserverlogic.RegistCommandLogic(lm)
-	tcpserver.Consturct(examlogic.ExamplePacketSerialkey, lm)
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	lm.RunLogicHandle(runtime.NumCPU())
 
-	address := ":20224"
+	// regist exam Logic
+	examserverlogic.RegistCommandLogic(lm)
+	tcpserver.Consturct(share.ExamplePacketSerialkey, lm)
+
+	// start server handler
+	address := ":" + strconv.Itoa(port)
 	go tcpserver.HandleListener(serverCtx, address, &wg, chClosed)
 	log.Println("On Server ", address)
 
@@ -45,5 +53,8 @@ func main() {
 	default:
 		panic("unexpected signal has been received")
 	}
+}
 
+func main() {
+	constructTCPServer(20224)
 }

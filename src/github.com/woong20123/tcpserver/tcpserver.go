@@ -23,13 +23,15 @@ var sd StaticData
 func Consturct(serialKey uint32, lm *logicmanager.LogicManager) {
 	sd = StaticData{}
 	sd.SetSerialkey(serialKey)
+	sd.lm = lm
 }
 
 // Assembly assembles a read buffer to make a packet.
 // kor : Assembly는 패킷을 만들기 위해서 read buffer를 조립합니다.
-func Assembly(buffer []byte, bufferpos uint32) (resultpos uint32) {
+func Assembly(conn *net.TCPConn, buffer []byte, bufferpos uint32) (resultpos uint32, onPacket bool) {
 	resultpos = bufferpos
 	var headerFind bool = false
+	onPacket = false
 
 	if resultpos < packet.PacketHeaderSize {
 		return
@@ -78,8 +80,8 @@ func Assembly(buffer []byte, bufferpos uint32) (resultpos uint32) {
 			copy(buffer, buffer[TotalPacketSize:resultpos])
 			resultpos = resultpos - TotalPacketSize
 
-			// 남은 버퍼에서 패킷을 조립할 수 있을 수도 있기 때문에 재호출
-			resultpos = Assembly(buffer, resultpos)
+			sd.lm.CallLogicFun(PacketCommand, conn, packet)
+			onPacket = true
 		}
 	}
 	return
@@ -97,6 +99,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	// TCP의 데이터 전달이 패킷단위로 전달되지 않기 때문에 조립 작업을 합니다.
 	AssemblyBuf := make([]byte, maxBufferSize+128)
 	var AssemPos uint32 = 0
+	onPacket := false
 
 	for {
 		n, err := conn.Read(recvBuf)
@@ -121,7 +124,13 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 		if 0 < n {
 			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
 			AssemPos += uint32(copylength)
-			AssemPos = Assembly(AssemblyBuf, AssemPos)
+
+			// 남은 버퍼에서 패킷을 조립할 수 있을 수도 있기 때문에 재호출
+			AssemPos, onPacket = Assembly(conn, AssemblyBuf, AssemPos)
+			for onPacket == true {
+				AssemPos, onPacket = Assembly(conn, AssemblyBuf, AssemPos)
+			}
+
 		}
 	}
 }

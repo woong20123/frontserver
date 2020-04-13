@@ -53,6 +53,11 @@ func (p *Packet) GetByte() []byte {
 	return buffer
 }
 
+// GetCommand is return packet command
+func (p *Packet) GetCommand() uint32 {
+	return p.header.packetCommand
+}
+
 // SetHeader Set Header Info
 func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand uint32) {
 	p.header.serialkey = serialKey

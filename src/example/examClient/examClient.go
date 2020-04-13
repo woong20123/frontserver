@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
-	"example/examlogic"
+	"example/share"
 	"log"
 	"net"
 	"os"
@@ -64,7 +64,9 @@ func handleSend(conn *net.TCPConn, errSend context.CancelFunc, sendPacketChan <-
 }
 
 // SocketClient is
-func SocketClient(ip string, port int, sendPacketChan <-chan *packet.Packet) {
+func SocketClient(errProc context.CancelFunc, ip string, port int, sendPacketChan <-chan *packet.Packet) {
+	defer errProc()
+
 	var remoteaddr net.TCPAddr
 	remoteaddr.IP = net.ParseIP(ip)
 	remoteaddr.Port = port
@@ -89,29 +91,40 @@ func SocketClient(ip string, port int, sendPacketChan <-chan *packet.Packet) {
 	}
 }
 
+func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packet) {
+	defer errProc()
+
+	reader := bufio.NewReader(os.Stdin)
+	p := packet.NewPacket(4096)
+	p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
+	p.Write("1")
+	sendPacketChan <- p
+
+	for {
+		msg, _ := reader.ReadString('\n')
+
+		p := packet.NewPacket(4096)
+		p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
+		p.Write(msg)
+		sendPacketChan <- p
+	}
+
+}
+
 func main() {
 	var (
 		ip   = "127.0.0.1"
 		port = 20224
 	)
 
-	sendPacketChannel := make(chan *packet.Packet, 1024)
+	ProcCtx, shutdown := context.WithCancel(context.Background())
+	sendPacketChan := make(chan *packet.Packet, 1024)
 
-	go SocketClient(ip, port, sendPacketChannel)
+	go SocketClient(shutdown, ip, port, sendPacketChan)
+	go handleInputIO(shutdown, sendPacketChan)
 
-	reader := bufio.NewReader(os.Stdin)
-
-	p := packet.NewPacket(4096)
-	p.SetHeader(examlogic.ExamplePacketSerialkey, 0, examlogic.S2CPacketCommandGolobalSendMsgRes)
-	p.Write("1")
-	sendPacketChannel <- p
-
-	for {
-		msg, _ := reader.ReadString('\n')
-
-		p := packet.NewPacket(4096)
-		p.SetHeader(examlogic.ExamplePacketSerialkey, 0, examlogic.S2CPacketCommandGolobalSendMsgRes)
-		p.Write(msg)
-		sendPacketChannel <- p
+	select {
+	case <-ProcCtx.Done():
+		shutdown()
 	}
 }

@@ -1,4 +1,4 @@
-package examlogic
+package share
 
 const (
 	// ExamplePacketSerialkey is Serialkey(uint32) + PacketSize(uint16)
