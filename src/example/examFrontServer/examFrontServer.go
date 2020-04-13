@@ -10,6 +10,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/woong20123/logicmanager"
 	"github.com/woong20123/tcpserver"
 )
 
@@ -24,7 +25,9 @@ func main() {
 	serverCtx, shutdown := context.WithCancel(context.Background())
 
 	// regist serial key
-	tcpserver.SetSerialKey(examlogic.ExamplePacketSerialkey)
+	lm := logicmanager.NewLogicManager()
+	//examserverlogic.RegistCommandLogic(lm)
+	tcpserver.Consturct(examlogic.ExamplePacketSerialkey, lm)
 
 	address := ":20224"
 	go tcpserver.HandleListener(serverCtx, address, &wg, chClosed)

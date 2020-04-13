@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/woong20123/logicmanager"
 	"github.com/woong20123/packet"
 )
 
@@ -16,16 +17,12 @@ const (
 	maxBufferSize        = 4096
 )
 
-var packetSerialkey uint32 = 0x5da9c31b
+var sd StaticData
 
-// SetSerialKey is
-func SetSerialKey(key uint32) {
-	packetSerialkey = key
-}
-
-// GetSerialkey is
-func GetSerialkey() uint32 {
-	return packetSerialkey
+// Consturct is
+func Consturct(serialKey uint32, lm *logicmanager.LogicManager) {
+	sd = StaticData{}
+	sd.SetSerialkey(serialKey)
 }
 
 // Assembly assembles a read buffer to make a packet.
@@ -51,7 +48,7 @@ func Assembly(buffer []byte, bufferpos uint32) (resultpos uint32) {
 			break
 		}
 
-		if true == packet.HeaderChack(buffer[index:], GetSerialkey()) {
+		if true == packet.HeaderChack(buffer[index:], sd.GetSerialkey()) {
 			headerFind = true
 
 			// 만약 패킷 헤더가 처음이 아니라면 나머지 버퍼를 버립니다.
