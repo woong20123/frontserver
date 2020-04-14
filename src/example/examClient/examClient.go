@@ -8,6 +8,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/woong20123/logicmanager"
+
 	"github.com/woong20123/packet"
 )
 
@@ -19,6 +21,9 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	defer errRead()
 
 	recvBuf := make([]byte, maxBufferSize)
+	AssemblyBuf := make([]byte, maxBufferSize+128)
+	var AssemPos uint32 = 0
+	var onPacket *packet.Packet = nil
 
 	// session으로부터 전달받은 버퍼를 packet형태로 변환처리하기 위한 Packet
 	// TCP의 데이터 전달이 패킷단위로 전달되지 않기 때문에 조립 작업을 합니다.
@@ -45,9 +50,13 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 
 		if 0 < n {
 			log.Println(recvBuf[:n])
-			// copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
-			// AssemPos += uint32(copylength)
-			// AssemPos = tcpserver.Assembly(AssemblyBuf, AssemPos)
+			for {
+				AssemPos = packet.AssemblyFromBuffer(onPacket, AssemblyBuf, AssemPos, share.ExamplePacketSerialkey)
+				if onPacket == nil {
+					break
+				}
+				//lm.CallLogicFun(onPacket.GetCommand(), conn, onPacket)
+			}
 		}
 	}
 }
@@ -111,6 +120,19 @@ func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Pac
 
 }
 
+// ContructLogicManager is
+func ContructLogicManager(lm *logicmanager.LogicManager) {
+	lm.RegistLogicfun(share.S2CPacketCommandLoginUserRes, func(conn *net.TCPConn, p *packet.Packet) {
+		log.Println("S2CPacketCommandLoginUserRes")
+		return
+	})
+
+	lm.RegistLogicfun(share.S2CPacketCommandGolobalSendMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
+		log.Println("S2CPacketCommandGolobalSendMsgRes")
+		return
+	})
+}
+
 func main() {
 	var (
 		ip   = "127.0.0.1"
@@ -119,6 +141,10 @@ func main() {
 
 	ProcCtx, shutdown := context.WithCancel(context.Background())
 	sendPacketChan := make(chan *packet.Packet, 1024)
+
+	// set LogicManager
+	lm := logicmanager.NewLogicManager()
+	ContructLogicManager(lm)
 
 	go SocketClient(shutdown, ip, port, sendPacketChan)
 	go handleInputIO(shutdown, sendPacketChan)

@@ -114,3 +114,56 @@ func (p *Packet) setSize(size uint16) {
 func (p *Packet) addSize(size uint16) {
 	p.header.packetSize += size
 }
+
+// AssemblyFromBuffer is make packet from buffer
+func AssemblyFromBuffer(pPacket *Packet, buffer []byte, bufferpos uint32, serialkey uint32) (resultpos uint32) {
+	resultpos = bufferpos
+	var headerFind bool = false
+	if resultpos < PacketHeaderSize {
+		return
+	}
+
+	findIndex := resultpos - PacketHeaderSize
+
+	// 전달받은 버퍼를 순회하면서 패킷이 정상적으로 전달되었는지 확인합니다.
+	for index := range buffer {
+		// must receive At least as much as the header
+		// 최소한 헤더만큼 수신받아야 처리 가능,
+		// 이곳에 들어왔다면 검사한 버퍼를 모두 버립니다.
+		if uint32(index) > findIndex {
+			copy(buffer, buffer[index:resultpos])
+			resultpos = resultpos - uint32(index)
+			break
+		}
+
+		if true == HeaderChack(buffer[index:], serialkey) {
+			headerFind = true
+
+			// 만약 패킷 헤더가 처음이 아니라면 나머지 버퍼를 버립니다.
+			if index != 0 {
+				copy(buffer, buffer[index:resultpos])
+				resultpos = resultpos - uint32(index)
+			}
+			break
+		}
+	}
+
+	// 패킷 시작지점을 찾았다면
+	if true == headerFind {
+		PacketSize := uint32(binary.LittleEndian.Uint16(buffer[4:]))
+		PacketCommand := uint32(binary.LittleEndian.Uint16(buffer[6:]))
+		TotalPacketSize := PacketSize + PacketHeaderSize
+
+		// 패킷을 만들 수 있을 만큼 패킷을 전달 받았다면 패킷을 만들고
+		// Logic 처리 goroutine에 전달합니다.
+		if TotalPacketSize <= resultpos {
+			pPacket = NewPacket(PacketSize)
+			pPacket.SetHeader(0, uint16(PacketSize), PacketCommand)
+			pPacket.CopyByte(buffer[PacketHeaderSize:TotalPacketSize])
+
+			copy(buffer, buffer[TotalPacketSize:resultpos])
+			resultpos = resultpos - TotalPacketSize
+		}
+	}
+	return
+}
