@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"context"
+	"example/examClient/clientobjmanager"
+	"example/examClient/clientuser"
 	"example/share"
 	"log"
 	"net"
 	"os"
+	"os/exec"
 
 	"github.com/woong20123/logicmanager"
 
@@ -86,6 +89,8 @@ func SocketClient(errProc context.CancelFunc, ip string, port int, sendPacketCha
 		os.Exit(1)
 	}
 
+	clientobjmanager.GetInstance().GetChanUserState() <- clientuser.UserStateEnum.ConnectedSTATE
+
 	defer conn.Close()
 
 	readCtx, errRead := context.WithCancel(context.Background())
@@ -100,24 +105,74 @@ func SocketClient(errProc context.CancelFunc, ip string, port int, sendPacketCha
 	}
 }
 
-func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packet) {
+func sceneClear() {
+	cmd := exec.Command("cmd", "/c", "cls")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+}
+
+func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packet, user *clientuser.ExamUser) {
 	defer errProc()
 
 	reader := bufio.NewReader(os.Stdin)
-	p := packet.NewPacket(4096)
-	p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
-	p.Write("1")
-	sendPacketChan <- p
+	cobjmgr := clientobjmanager.GetInstance()
+	chanState := cobjmgr.GetChanUserState()
+	log.Println("Input Start")
 
-	for {
-		msg, _ := reader.ReadString('\n')
+	user.RegistScene(clientuser.UserStateEnum.NoneSTATE, func() {
+		println("connecting server....")
+	})
+
+	user.RegistScene(clientuser.UserStateEnum.ConnectedSTATE, func() {
+		log.Println("[ConnectedSTATE]")
+		log.Println("UserID :")
+		userID, _ := reader.ReadString('\n')
 
 		p := packet.NewPacket(4096)
-		p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
-		p.Write(msg)
+		p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
+		p.Write(uint16(len(userID)))
+		p.Write(userID)
 		sendPacketChan <- p
-	}
 
+		chanState <- clientuser.UserStateEnum.LoginSTATE
+	})
+
+	user.RegistScene(clientuser.UserStateEnum.LoginSTATE, func() {
+		log.Println("[LoginSTATE]")
+		for {
+			msg, _ := reader.ReadString('\n')
+
+			p := packet.NewPacket(4096)
+			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
+			p.Write(uint16(len(msg)))
+			p.Write(msg)
+			sendPacketChan <- p
+		}
+	})
+
+	user.RegistScene(clientuser.UserStateEnum.RoomEnterSTATE, func() {
+		log.Println("[RoomEnterSTATE]")
+		for {
+			msg, _ := reader.ReadString('\n')
+
+			p := packet.NewPacket(4096)
+			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
+			p.Write(uint16(len(msg)))
+			p.Write(msg)
+			sendPacketChan <- p
+		}
+	})
+
+	for {
+		sceneClear()
+		curState := user.GetState()
+		user.RunScene(curState)
+
+		select {
+		case nextstate := <-chanState:
+			user.SetState(nextstate)
+		}
+	}
 }
 
 // ContructLogicManager is
@@ -139,6 +194,8 @@ func main() {
 		port = 20224
 	)
 
+	clientobjmanager.GetInstance()
+
 	ProcCtx, shutdown := context.WithCancel(context.Background())
 	sendPacketChan := make(chan *packet.Packet, 1024)
 
@@ -146,8 +203,11 @@ func main() {
 	lm := logicmanager.NewLogicManager()
 	ContructLogicManager(lm)
 
+	// make ExamUser
+	eu := clientuser.NewExamUser()
+
 	go SocketClient(shutdown, ip, port, sendPacketChan)
-	go handleInputIO(shutdown, sendPacketChan)
+	go handleInputIO(shutdown, sendPacketChan, eu)
 
 	select {
 	case <-ProcCtx.Done():

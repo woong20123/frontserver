@@ -1,7 +1,10 @@
 package clientuser
 
+import "log"
+
 // UStatelogicFunc is
 type UStatelogicFunc func()
+type UStateScene func()
 
 type statelist struct {
 	NoneSTATE      int
@@ -24,19 +27,46 @@ type ExamUser struct {
 	state        int
 	roomIdx      int
 	onSteteLogic map[int]UStatelogicFunc
+	SteteScene   map[int]UStateScene
+}
+
+// NewExamUser is make ExamUser
+func NewExamUser() *ExamUser {
+	eu := ExamUser{}
+	eu.state = UserStateEnum.NoneSTATE
+	eu.roomIdx = -1
+	eu.onSteteLogic = make(map[int]UStatelogicFunc)
+	eu.SteteScene = make(map[int]UStateScene)
+	return &eu
 }
 
 // SetState is set user's state
-func (u *ExamUser) SetState(state int) {
-	u.state = state
+func (eu *ExamUser) SetState(state int) {
+	eu.state = state
 }
 
 // GetState is return user's state
-func (u *ExamUser) GetState() int {
-	return u.state
+func (eu *ExamUser) GetState() int {
+	return eu.state
 }
 
 // RegistOnStateLogic is return user's state
-func (u *ExamUser) RegistOnStateLogic(state int, logicfunc UStatelogicFunc) {
-	u.onSteteLogic[state] = logicfunc
+func (eu *ExamUser) RegistOnStateLogic(state int, logicfunc UStatelogicFunc) {
+	eu.onSteteLogic[state] = logicfunc
+}
+
+// RegistScene is
+func (eu *ExamUser) RegistScene(state int, sceneFunc UStateScene) {
+	eu.SteteScene[state] = sceneFunc
+}
+
+// RunScene is
+func (eu *ExamUser) RunScene(state int) {
+	scene, exist := eu.SteteScene[state]
+	if exist {
+		go scene()
+	} else {
+		log.Println("[ExamUser] RunScene fail ", state)
+	}
+
 }
