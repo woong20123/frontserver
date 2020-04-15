@@ -1,7 +1,9 @@
 package packet
 
 import (
+	"bytes"
 	"encoding/binary"
+	"log"
 )
 
 const (
@@ -31,16 +33,23 @@ type Header struct {
 
 // Packet is
 type Packet struct {
-	header Header
-	buffer []byte
+	header  Header
+	buf     *bytes.Buffer
+	readPos uint16
 }
 
 // NewPacket allocate memory in the packet buffer
-func NewPacket(buffersize uint32) *Packet {
+func NewPacket() *Packet {
 	p := Packet{}
 	p.header = Header{}
-	p.buffer = make([]byte, buffersize)
+	p.buf = new(bytes.Buffer)
+	p.readPos = 0
 	return &p
+}
+
+// GetByteBuf is
+func (p *Packet) GetByteBuf() *bytes.Buffer {
+	return p.buf
 }
 
 // GetByte packet transform to []byte
@@ -49,7 +58,7 @@ func (p *Packet) GetByte() []byte {
 	binary.LittleEndian.PutUint32(buffer, p.header.serialkey)
 	binary.LittleEndian.PutUint16(buffer[4:], p.header.packetSize)
 	binary.LittleEndian.PutUint32(buffer[6:], p.header.packetCommand)
-	copy(buffer[10:], p.buffer[:p.header.packetSize])
+	copy(buffer[10:], p.buf.Bytes())
 	return buffer
 }
 
@@ -67,40 +76,8 @@ func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand ui
 
 // CopyByte write byte to packet buffer
 func (p *Packet) CopyByte(data []byte) {
-	length := copy(p.buffer[p.getSize():], data)
-	p.addSize(uint16(length))
-}
-
-// Write write various type to packet buffer
-func (p *Packet) Write(data ...interface{}) {
-	for _, value := range data {
-		switch v := value.(type) {
-		case uint8:
-		case int8:
-			p.buffer[p.getSize()] = byte(v)
-			p.addSize(1)
-		case uint16:
-		case int16:
-			binary.LittleEndian.PutUint16(p.buffer[p.getSize():], uint16(v))
-			p.addSize(2)
-		case uint32:
-		case int32:
-		case int:
-		case float32:
-			binary.LittleEndian.PutUint32(p.buffer[p.getSize():], uint32(v))
-			p.addSize(4)
-		case uint64:
-		case int64:
-		case float64:
-			binary.LittleEndian.PutUint64(p.buffer[p.getSize():], uint64(v))
-			p.addSize(8)
-		case string:
-			b := []byte(v)
-			b = append(b, 0)
-			length := copy(p.buffer[p.getSize():], b)
-			p.addSize(uint16(length))
-		}
-	}
+	p.buf.Write(data)
+	p.addSize(uint16(len(data)))
 }
 
 func (p *Packet) getSize() uint16 {
@@ -115,8 +92,62 @@ func (p *Packet) addSize(size uint16) {
 	p.header.packetSize += size
 }
 
+func (p *Packet) getReadPos() uint16 {
+	return p.readPos
+}
+
+func (p *Packet) setReadPos(pos uint16) {
+	p.readPos = pos
+}
+
+func (p *Packet) addReadPos(size uint16) {
+	p.readPos += size
+}
+
+func (p *Packet) Write(order binary.ByteOrder, data interface{}) {
+	err := binary.Write(p.buf, order, data)
+	if err != nil {
+		log.Println("Packet Write Fail", err)
+		return
+	}
+	p.setSize(uint16(p.buf.Len()))
+}
+
+// WriteString is
+func (p *Packet) WriteString(order binary.ByteOrder, data string) {
+	var length uint16 = uint16(len(data))
+	err := binary.Write(p.buf, order, length)
+	if err != nil {
+		log.Println("StringWrite Fail", err)
+		return
+	}
+	_, err = p.buf.WriteString(data)
+	if err != nil {
+		log.Println("StringWrite Fail", err)
+		return
+	}
+	p.setSize(uint16(p.buf.Len()))
+}
+
+func (p *Packet) Read(order binary.ByteOrder, data interface{}) {
+	err := binary.Read(p.buf, binary.LittleEndian, &data)
+	if err != nil {
+		log.Println("Packet Read Fail", err)
+		return
+	}
+}
+
+func (p *Packet) ReadString(order binary.ByteOrder, data *string) {
+	//err := binary.Read(p.buf, binary.LittleEndian, &data)
+	// *data, err = p.buf.ReadString()
+	// if err != nil {
+	// 	log.Println("Packet Read Fail", err)
+	// 	return
+	// }
+}
+
 // AssemblyFromBuffer is make packet from buffer
-func AssemblyFromBuffer(pPacket *Packet, buffer []byte, bufferpos uint32, serialkey uint32) (resultpos uint32) {
+func AssemblyFromBuffer(buffer []byte, bufferpos uint32, serialkey uint32) (resultpos uint32, pPacket *Packet) {
 	resultpos = bufferpos
 	var headerFind bool = false
 	if resultpos < PacketHeaderSize {
@@ -150,19 +181,20 @@ func AssemblyFromBuffer(pPacket *Packet, buffer []byte, bufferpos uint32, serial
 
 	// 패킷 시작지점을 찾았다면
 	if true == headerFind {
-		PacketSize := uint32(binary.LittleEndian.Uint16(buffer[4:]))
-		PacketCommand := uint32(binary.LittleEndian.Uint16(buffer[6:]))
-		TotalPacketSize := PacketSize + PacketHeaderSize
+		serialKey := uint32(binary.LittleEndian.Uint32(buffer))
+		packetSize := uint32(binary.LittleEndian.Uint16(buffer[4:]))
+		packetCommand := uint32(binary.LittleEndian.Uint16(buffer[6:]))
+		totalPacketSize := packetSize + PacketHeaderSize
 
 		// 패킷을 만들 수 있을 만큼 패킷을 전달 받았다면 패킷을 만들고
 		// Logic 처리 goroutine에 전달합니다.
-		if TotalPacketSize <= resultpos {
-			pPacket = NewPacket(PacketSize)
-			pPacket.SetHeader(0, uint16(PacketSize), PacketCommand)
-			pPacket.CopyByte(buffer[PacketHeaderSize:TotalPacketSize])
+		if totalPacketSize <= resultpos {
+			pPacket = NewPacket()
+			pPacket.SetHeader(serialKey, uint16(packetSize), packetCommand)
+			pPacket.CopyByte(buffer[PacketHeaderSize:totalPacketSize])
 
-			copy(buffer, buffer[TotalPacketSize:resultpos])
-			resultpos = resultpos - TotalPacketSize
+			copy(buffer, buffer[totalPacketSize:resultpos])
+			resultpos = resultpos - totalPacketSize
 		}
 	}
 	return

@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/binary"
 	"example/examClient/clientobjmanager"
 	"example/examClient/clientuser"
 	"example/share"
@@ -10,6 +11,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/woong20123/logicmanager"
 
@@ -30,8 +32,6 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 
 	// session으로부터 전달받은 버퍼를 packet형태로 변환처리하기 위한 Packet
 	// TCP의 데이터 전달이 패킷단위로 전달되지 않기 때문에 조립 작업을 합니다.
-	// AssemblyBuf := make([]byte, maxBufferSize+128)
-	// var AssemPos uint32 = 0
 
 	for {
 		n, err := conn.Read(recvBuf)
@@ -54,7 +54,7 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 		if 0 < n {
 			log.Println(recvBuf[:n])
 			for {
-				AssemPos = packet.AssemblyFromBuffer(onPacket, AssemblyBuf, AssemPos, share.ExamplePacketSerialkey)
+				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, share.ExamplePacketSerialkey)
 				if onPacket == nil {
 					break
 				}
@@ -89,7 +89,7 @@ func SocketClient(errProc context.CancelFunc, ip string, port int, sendPacketCha
 		os.Exit(1)
 	}
 
-	clientobjmanager.GetInstance().GetChanUserState() <- clientuser.UserStateEnum.ConnectedSTATE
+	sendUserSceneChan(clientuser.UserStateEnum.ConnectedSTATE)
 
 	defer conn.Close()
 
@@ -111,55 +111,64 @@ func sceneClear() {
 	cmd.Run()
 }
 
-func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packet, user *clientuser.ExamUser) {
+func sendUserSceneChan(state int) {
+	clientobjmanager.GetInstance().GetChanManager().GetChanUserState() <- state
+}
+
+func handleUserScene(errProc context.CancelFunc, user *clientuser.ExamUser) {
 	defer errProc()
 
-	reader := bufio.NewReader(os.Stdin)
 	cobjmgr := clientobjmanager.GetInstance()
-	chanState := cobjmgr.GetChanUserState()
+	chanState := cobjmgr.GetChanManager().GetChanUserState()
 	log.Println("Input Start")
 
-	user.RegistScene(clientuser.UserStateEnum.NoneSTATE, func() {
-		println("connecting server....")
-	})
+	// User가 NoneSTATE일때 Scene을 정의합니다.
+	user.RegistScene(clientuser.UserStateEnum.NoneSTATE, func(closechan chan int) {
+		timer := time.NewTimer(time.Millisecond * 500)
+		print("connecting server")
 
-	user.RegistScene(clientuser.UserStateEnum.ConnectedSTATE, func() {
-		log.Println("[ConnectedSTATE]")
-		log.Println("UserID :")
-		userID, _ := reader.ReadString('\n')
-
-		p := packet.NewPacket(4096)
-		p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
-		p.Write(uint16(len(userID)))
-		p.Write(userID)
-		sendPacketChan <- p
-
-		chanState <- clientuser.UserStateEnum.LoginSTATE
-	})
-
-	user.RegistScene(clientuser.UserStateEnum.LoginSTATE, func() {
-		log.Println("[LoginSTATE]")
 		for {
-			msg, _ := reader.ReadString('\n')
-
-			p := packet.NewPacket(4096)
-			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
-			p.Write(uint16(len(msg)))
-			p.Write(msg)
-			sendPacketChan <- p
+			select {
+			case <-timer.C:
+				print(".")
+				timer.Reset(time.Millisecond * 200)
+			case <-closechan:
+				return
+			}
 		}
 	})
 
-	user.RegistScene(clientuser.UserStateEnum.RoomEnterSTATE, func() {
-		log.Println("[RoomEnterSTATE]")
-		for {
-			msg, _ := reader.ReadString('\n')
+	// User가 ConnectedSTATE 일 때 Scene을 정의합니다.
+	user.RegistScene(clientuser.UserStateEnum.ConnectedSTATE, func(closechan chan int) {
+		println("127.0.0.1:20224", " 서버에 접속 하였습니다.")
+		print("접속하려는 ID를 입력해주세요 : ")
 
-			p := packet.NewPacket(4096)
-			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
-			p.Write(uint16(len(msg)))
-			p.Write(msg)
-			sendPacketChan <- p
+		select {
+		case <-closechan:
+			return
+		}
+		return
+	})
+
+	// User가 LoginSTATE 일 때 Scene을 정의합니다.
+	user.RegistScene(clientuser.UserStateEnum.LoginSTATE, func(closechan chan int) {
+		println("[LoginSTATE]")
+		for {
+			select {
+			case <-closechan:
+				return
+			}
+		}
+	})
+
+	// User가 RoomEnterSTATE 일 때 Scene을 정의합니다.
+	user.RegistScene(clientuser.UserStateEnum.RoomEnterSTATE, func(closechan chan int) {
+		println("[RoomEnterSTATE]")
+		for {
+			select {
+			case <-closechan:
+				return
+			}
 		}
 	})
 
@@ -171,7 +180,36 @@ func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Pac
 		select {
 		case nextstate := <-chanState:
 			user.SetState(nextstate)
+			user.CloseScene()
 		}
+	}
+}
+
+func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packet, user *clientuser.ExamUser) {
+	defer errProc()
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		switch user.GetState() {
+		case clientuser.UserStateEnum.ConnectedSTATE:
+			userid, _ := reader.ReadString('\n')
+			// User Login 패킷 전송
+			p := packet.NewPacket()
+			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
+			p.WriteString(binary.LittleEndian, userid)
+			sendPacketChan <- p
+
+		case clientuser.UserStateEnum.LoginSTATE:
+			msg, _ := reader.ReadString('\n')
+
+			// global msg 패킷 전송
+			p := packet.NewPacket()
+			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
+			p.Write(binary.LittleEndian, share.C2SPCGolobalSendMsgReq{msg})
+			sendPacketChan <- p
+
+		}
+		time.Sleep(1 * time.Millisecond)
 	}
 }
 
@@ -179,6 +217,8 @@ func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Pac
 func ContructLogicManager(lm *logicmanager.LogicManager) {
 	lm.RegistLogicfun(share.S2CPacketCommandLoginUserRes, func(conn *net.TCPConn, p *packet.Packet) {
 		log.Println("S2CPacketCommandLoginUserRes")
+		// 패킷을 확인하고 체크합니다.
+		sendUserSceneChan(clientuser.UserStateEnum.LoginSTATE)
 		return
 	})
 
@@ -208,6 +248,7 @@ func main() {
 
 	go SocketClient(shutdown, ip, port, sendPacketChan)
 	go handleInputIO(shutdown, sendPacketChan, eu)
+	go handleUserScene(shutdown, eu)
 
 	select {
 	case <-ProcCtx.Done():

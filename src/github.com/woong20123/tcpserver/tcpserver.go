@@ -11,16 +11,33 @@ import (
 	"github.com/woong20123/packet"
 )
 
+type staticData struct {
+	packetSerialkey uint32
+	lm              *logicmanager.LogicManager
+}
+
+// SetSerialkey is regist server serialkey
+func (sd *staticData) SetSerialkey(key uint32) {
+	sd.packetSerialkey = key
+}
+
+// GetSerialkey is get server serialkey
+func (sd *staticData) GetSerialkey() uint32 {
+	return sd.packetSerialkey
+}
+
 const (
 	listenerCloseMatcher = "use of closed network connection"
 	maxBufferSize        = 4096
 )
 
-var sd StaticData
+var sd *staticData = nil
 
 // Consturct is
 func Consturct(serialKey uint32, lm *logicmanager.LogicManager) {
-	sd = StaticData{}
+	if sd == nil {
+		sd = new(staticData)
+	}
 	sd.SetSerialkey(serialKey)
 	sd.lm = lm
 }
@@ -65,7 +82,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 
 			// 남은 버퍼에서 패킷을 조립할 수 있을 수도 있기 때문에 재호출
 			for {
-				AssemPos = packet.AssemblyFromBuffer(onPacket, AssemblyBuf, AssemPos, sd.GetSerialkey())
+				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, sd.GetSerialkey())
 				if onPacket == nil {
 					break
 				}

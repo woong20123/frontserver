@@ -4,7 +4,9 @@ import "log"
 
 // UStatelogicFunc is
 type UStatelogicFunc func()
-type UStateScene func()
+
+// UStateScene is
+type UStateScene func(chan int)
 
 type statelist struct {
 	NoneSTATE      int
@@ -23,11 +25,12 @@ var UserStateEnum = &statelist{
 
 // ExamUser = User object connected to the server
 type ExamUser struct {
-	id           string
-	state        int
-	roomIdx      int
-	onSteteLogic map[int]UStatelogicFunc
-	SteteScene   map[int]UStateScene
+	id             string
+	state          int
+	roomIdx        int
+	onSteteLogic   map[int]UStatelogicFunc
+	SteteScene     map[int]UStateScene
+	closeSceneChan chan int
 }
 
 // NewExamUser is make ExamUser
@@ -37,7 +40,13 @@ func NewExamUser() *ExamUser {
 	eu.roomIdx = -1
 	eu.onSteteLogic = make(map[int]UStatelogicFunc)
 	eu.SteteScene = make(map[int]UStateScene)
+	eu.closeSceneChan = make(chan int)
 	return &eu
+}
+
+// CloseScene is
+func (eu *ExamUser) CloseScene() {
+	eu.closeSceneChan <- 1
 }
 
 // SetState is set user's state
@@ -64,7 +73,7 @@ func (eu *ExamUser) RegistScene(state int, sceneFunc UStateScene) {
 func (eu *ExamUser) RunScene(state int) {
 	scene, exist := eu.SteteScene[state]
 	if exist {
-		go scene()
+		go scene(eu.closeSceneChan)
 	} else {
 		log.Println("[ExamUser] RunScene fail ", state)
 	}

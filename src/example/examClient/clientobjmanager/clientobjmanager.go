@@ -1,26 +1,61 @@
 package clientobjmanager
 
-// objmanager is client obj data manage
-type objmanager struct {
-	count         int
-	chanUserState chan int
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Objmanager is client obj data manage
+type Objmanager struct {
+	channelmgr *ClientChanmgr
 }
 
-func (objmgr *objmanager) Intialize() {
-	objmgr.chanUserState = make(chan int)
+// Intialize is
+func (objmgr *Objmanager) Intialize() {
+	objmgr.channelmgr = new(ClientChanmgr)
+	objmgr.channelmgr.Intialize()
 }
 
-func (objmgr *objmanager) GetChanUserState() chan int {
-	return objmgr.chanUserState
+// GetChanManager is
+func (objmgr *Objmanager) GetChanManager() *ClientChanmgr {
+	return objmgr.channelmgr
 }
 
-var instance *objmanager
+var instance *Objmanager
 
 // GetInstance is return singleton objmanager
-func GetInstance() *objmanager {
+func GetInstance() *Objmanager {
 	if instance == nil {
-		instance = new(objmanager)
+		instance = new(Objmanager)
 		instance.Intialize()
 	}
 	return instance
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ClientChanmgr is client channel data manage
+type ClientChanmgr struct {
+	chanUserState  chan int
+	chanSceneClose chan int
+}
+
+// NewChannelmanager is
+// func NewChannelmanager() *ClientChanmgr {
+// 	c := make(ClientChanmgr)
+// 	c.Intialize()
+// 	return &c
+// }
+
+// Intialize is
+func (chanmgr *ClientChanmgr) Intialize() {
+	chanmgr.chanUserState = make(chan int)
+	chanmgr.chanSceneClose = make(chan int)
+}
+
+// GetChanUserState is
+func (chanmgr *ClientChanmgr) GetChanUserState() chan int {
+	return chanmgr.chanUserState
+}
+
+// GetChanSceneClose is
+func (chanmgr *ClientChanmgr) GetChanSceneClose() chan int {
+	return chanmgr.chanSceneClose
 }
