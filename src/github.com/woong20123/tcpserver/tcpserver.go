@@ -70,12 +70,6 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 			return
 		}
 
-		n, err = conn.Write(recvBuf[:n])
-		if err != nil {
-			log.Println("Write", err)
-			return
-		}
-
 		if 0 < n {
 			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
 			AssemPos += uint32(copylength)
@@ -86,7 +80,6 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 				if onPacket == nil {
 					break
 				}
-				log.Println("OnPacket")
 				sd.lm.CallLogicFun(onPacket.GetCommand(), conn, onPacket)
 			}
 		}

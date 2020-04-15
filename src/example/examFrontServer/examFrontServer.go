@@ -28,7 +28,7 @@ func constructTCPServer(port int) {
 	serverCtx, shutdown := context.WithCancel(context.Background())
 
 	// set LogicManager
-	lm := logicmanager.NewLogicManager()
+	lm := logicmanager.GetInstance()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	lm.RunLogicHandle(runtime.NumCPU())
 

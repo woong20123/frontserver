@@ -1,7 +1,6 @@
 package examserverlogic
 
 import (
-	"encoding/binary"
 	"example/share"
 	"log"
 	"net"
@@ -13,16 +12,38 @@ import (
 // RegistCommandLogic is
 func RegistCommandLogic(lm *logicmanager.LogicManager) {
 	lm.RegistLogicfun(share.C2SPacketCommandLoginUserReq, func(conn *net.TCPConn, p *packet.Packet) {
-		var Userid string
-		p.Read(binary.LittleEndian, &Userid)
+
+		Userid := p.ReadString()
 		log.Println("C2SPacketCommandLoginUserReq userid = ", Userid)
+
+		// Send 응답 패킷
+		sendp := packet.NewPacket()
+		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLoginUserRes)
+		sendp.Write(uint32(1))
+		_, err := conn.Write(sendp.GetByte())
+		if err != nil {
+			log.Println("Write S2CPacketCommandLoginUserRes", err)
+			return
+		}
+
 		return
 	})
 
 	lm.RegistLogicfun(share.C2SPacketCommandGolobalSendMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
-		var creq share.C2SPCGolobalSendMsgReq
-		binary.Read(p.GetByteBuf(), binary.LittleEndian, &creq)
-		log.Println("C2SPacketCommandGolobalSendMsgReq msg = ", creq.Msg)
+
+		msg := p.ReadString()
+		log.Println("C2SPacketCommandGolobalSendMsgReq msg = ", msg)
+
+		// Send 응답 패킷
+		sendp := packet.NewPacket()
+		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandGolobalSendMsgRes)
+		sendp.Write(uint32(1))
+		_, err := conn.Write(sendp.GetByte())
+		if err != nil {
+			log.Println("Write S2CPacketCommandGolobalSendMsgRes ", err)
+			return
+		}
+
 		return
 	})
 }

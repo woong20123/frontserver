@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"context"
-	"encoding/binary"
 	"example/examClient/clientobjmanager"
 	"example/examClient/clientuser"
 	"example/share"
@@ -52,13 +51,15 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 		}
 
 		if 0 < n {
-			log.Println(recvBuf[:n])
+			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
+			AssemPos += uint32(copylength)
+
 			for {
 				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, share.ExamplePacketSerialkey)
 				if onPacket == nil {
 					break
 				}
-				//lm.CallLogicFun(onPacket.GetCommand(), conn, onPacket)
+				logicmanager.GetInstance().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
 			}
 		}
 	}
@@ -71,7 +72,6 @@ func handleSend(conn *net.TCPConn, errSend context.CancelFunc, sendPacketChan <-
 		// 패킷이 전달되면 패킷을 서버에 전송합니다
 		p := <-sendPacketChan
 		conn.Write(p.GetByte())
-		log.Println("On packet send")
 	}
 }
 
@@ -152,7 +152,8 @@ func handleUserScene(errProc context.CancelFunc, user *clientuser.ExamUser) {
 
 	// User가 LoginSTATE 일 때 Scene을 정의합니다.
 	user.RegistScene(clientuser.UserStateEnum.LoginSTATE, func(closechan chan int) {
-		println("[LoginSTATE]")
+		println("Login을 성공하였습니다.")
+		println("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
 		for {
 			select {
 			case <-closechan:
@@ -193,23 +194,23 @@ func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Pac
 		switch user.GetState() {
 		case clientuser.UserStateEnum.ConnectedSTATE:
 			userid, _ := reader.ReadString('\n')
+
 			// User Login 패킷 전송
 			p := packet.NewPacket()
 			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
-			p.WriteString(binary.LittleEndian, userid)
+			p.WriteString(userid)
 			sendPacketChan <- p
 
 		case clientuser.UserStateEnum.LoginSTATE:
 			msg, _ := reader.ReadString('\n')
-
 			// global msg 패킷 전송
 			p := packet.NewPacket()
 			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
-			p.Write(binary.LittleEndian, share.C2SPCGolobalSendMsgReq{msg})
+			p.WriteString(msg)
 			sendPacketChan <- p
 
 		}
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 }
 
@@ -226,6 +227,8 @@ func ContructLogicManager(lm *logicmanager.LogicManager) {
 		log.Println("S2CPacketCommandGolobalSendMsgRes")
 		return
 	})
+
+	lm.RunLogicHandle(1)
 }
 
 func main() {
@@ -240,7 +243,7 @@ func main() {
 	sendPacketChan := make(chan *packet.Packet, 1024)
 
 	// set LogicManager
-	lm := logicmanager.NewLogicManager()
+	lm := logicmanager.GetInstance()
 	ContructLogicManager(lm)
 
 	// make ExamUser
