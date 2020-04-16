@@ -1,6 +1,9 @@
 package clientuser
 
-import "log"
+import (
+	"log"
+	"net"
+)
 
 // UStatelogicFunc is
 type UStatelogicFunc func()
@@ -13,6 +16,7 @@ type statelist struct {
 	ConnectedSTATE int
 	LoginSTATE     int
 	RoomEnterSTATE int
+	CloseSTATE     int
 }
 
 // UserStateEnum for public use user state
@@ -21,10 +25,12 @@ var UserStateEnum = &statelist{
 	ConnectedSTATE: 0x11,
 	LoginSTATE:     0x12,
 	RoomEnterSTATE: 0x13,
+	CloseSTATE:     0x14,
 }
 
 // ExamUser = User object connected to the server
 type ExamUser struct {
+	conn           *net.TCPConn
 	id             string
 	state          int
 	roomIdx        int
@@ -42,6 +48,16 @@ func NewExamUser() *ExamUser {
 	eu.SteteScene = make(map[int]UStateScene)
 	eu.closeSceneChan = make(chan int)
 	return &eu
+}
+
+// SetConn is
+func (eu *ExamUser) SetConn(conn *net.TCPConn) {
+	eu.conn = conn
+}
+
+// GetConn is
+func (eu *ExamUser) GetConn() *net.TCPConn {
+	return eu.conn
 }
 
 // CloseScene is

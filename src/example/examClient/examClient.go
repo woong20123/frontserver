@@ -10,11 +10,11 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
-	"github.com/woong20123/logicmanager"
-
 	"github.com/woong20123/packet"
+	"github.com/woong20123/tcpserver"
 )
 
 const (
@@ -59,7 +59,7 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 				if onPacket == nil {
 					break
 				}
-				logicmanager.GetInstance().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
+				tcpserver.GetObjInstance().GetLogicManager().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
 			}
 		}
 	}
@@ -111,6 +111,13 @@ func sceneClear() {
 	cmd.Run()
 }
 
+func sceneCommand() {
+	println("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
+	println("[명령어]")
+	println("\"/RoomEnter <방이름>\" : 방입장")
+	println("\"/Close\" : 종료")
+}
+
 func sendUserSceneChan(state int) {
 	clientobjmanager.GetInstance().GetChanManager().GetChanUserState() <- state
 }
@@ -147,13 +154,12 @@ func handleUserScene(errProc context.CancelFunc, user *clientuser.ExamUser) {
 		case <-closechan:
 			return
 		}
-		return
 	})
 
 	// User가 LoginSTATE 일 때 Scene을 정의합니다.
 	user.RegistScene(clientuser.UserStateEnum.LoginSTATE, func(closechan chan int) {
 		println("Login을 성공하였습니다.")
-		println("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
+		sceneCommand()
 		for {
 			select {
 			case <-closechan:
@@ -171,6 +177,14 @@ func handleUserScene(errProc context.CancelFunc, user *clientuser.ExamUser) {
 				return
 			}
 		}
+	})
+
+	// User가 CloseSTATE 일 때 Scene을 정의합니다.
+	user.RegistScene(clientuser.UserStateEnum.CloseSTATE, func(closechan chan int) {
+		println("클라이언트를 종료합니다. 종료 처리 등록")
+		user.GetConn().Close()
+		time.Sleep(time.Millisecond * 1000)
+		errProc()
 	})
 
 	for {
@@ -203,19 +217,37 @@ func handleInputIO(errProc context.CancelFunc, sendPacketChan chan<- *packet.Pac
 
 		case clientuser.UserStateEnum.LoginSTATE:
 			msg, _ := reader.ReadString('\n')
-			// global msg 패킷 전송
-			p := packet.NewPacket()
-			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
-			p.WriteString(msg)
-			sendPacketChan <- p
 
+			if strings.Index(msg, "/") == 0 {
+				if strings.Contains(msg, "/RoomEnter") {
+					strs := strings.Fields(msg)
+					if 2 == len(strs) {
+						log.Println("방입장 패킷 => ", strs[1])
+					} else {
+						log.Println("정상적인 명령을 입력해주세요")
+					}
+				} else if strings.Contains(msg, "/Close") {
+					sendUserSceneChan(clientuser.UserStateEnum.CloseSTATE)
+				} else if strings.Contains(msg, "/?") {
+					sceneClear()
+					sceneCommand()
+				} else {
+					log.Println("정상적인 명령을 입력해주세요")
+				}
+			} else {
+				// global msg 패킷 전송
+				p := packet.NewPacket()
+				p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalSendMsgReq)
+				p.WriteString(msg)
+				sendPacketChan <- p
+			}
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
 }
 
 // ContructLogicManager is
-func ContructLogicManager(lm *logicmanager.LogicManager) {
+func ContructLogicManager(lm *tcpserver.LogicManager) {
 	lm.RegistLogicfun(share.S2CPacketCommandLoginUserRes, func(conn *net.TCPConn, p *packet.Packet) {
 		log.Println("S2CPacketCommandLoginUserRes")
 		// 패킷을 확인하고 체크합니다.
@@ -243,7 +275,7 @@ func main() {
 	sendPacketChan := make(chan *packet.Packet, 1024)
 
 	// set LogicManager
-	lm := logicmanager.GetInstance()
+	lm := tcpserver.GetObjInstance().GetLogicManager()
 	ContructLogicManager(lm)
 
 	// make ExamUser

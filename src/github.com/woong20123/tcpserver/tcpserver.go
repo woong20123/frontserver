@@ -7,39 +7,19 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/woong20123/logicmanager"
 	"github.com/woong20123/packet"
 )
-
-type staticData struct {
-	packetSerialkey uint32
-	lm              *logicmanager.LogicManager
-}
-
-// SetSerialkey is regist server serialkey
-func (sd *staticData) SetSerialkey(key uint32) {
-	sd.packetSerialkey = key
-}
-
-// GetSerialkey is get server serialkey
-func (sd *staticData) GetSerialkey() uint32 {
-	return sd.packetSerialkey
-}
 
 const (
 	listenerCloseMatcher = "use of closed network connection"
 	maxBufferSize        = 4096
 )
 
-var sd *staticData = nil
-
 // Consturct is
-func Consturct(serialKey uint32, lm *logicmanager.LogicManager) {
-	if sd == nil {
-		sd = new(staticData)
-	}
-	sd.SetSerialkey(serialKey)
-	sd.lm = lm
+func Consturct(serialKey uint32, logicProcessCount int, SendProcessCount int) {
+	GetObjInstance().SetSerialkey(serialKey)
+	GetObjInstance().GetLogicManager().RunLogicHandle(logicProcessCount)
+	GetObjInstance().GetSendManager().RunSendHandle(SendProcessCount)
 }
 
 // HandleRead handles packet read operations for connected sessions
@@ -55,6 +35,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	AssemblyBuf := make([]byte, maxBufferSize+128)
 	var AssemPos uint32 = 0
 	var onPacket *packet.Packet = nil
+	serialkey := GetObjInstance().GetSerialkey()
 
 	for {
 		n, err := conn.Read(recvBuf)
@@ -76,11 +57,11 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 
 			// 남은 버퍼에서 패킷을 조립할 수 있을 수도 있기 때문에 재호출
 			for {
-				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, sd.GetSerialkey())
+				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, serialkey)
 				if onPacket == nil {
 					break
 				}
-				sd.lm.CallLogicFun(onPacket.GetCommand(), conn, onPacket)
+				GetObjInstance().GetLogicManager().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
 			}
 		}
 	}

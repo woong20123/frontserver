@@ -13,7 +13,6 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/woong20123/logicmanager"
 	"github.com/woong20123/tcpserver"
 )
 
@@ -27,14 +26,13 @@ func constructTCPServer(port int) {
 	chClosed := make(chan struct{})
 	serverCtx, shutdown := context.WithCancel(context.Background())
 
-	// set LogicManager
-	lm := logicmanager.GetInstance()
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	lm.RunLogicHandle(runtime.NumCPU())
-
 	// regist exam Logic
+	lm := tcpserver.GetObjInstance().GetLogicManager()
 	examserverlogic.RegistCommandLogic(lm)
-	tcpserver.Consturct(share.ExamplePacketSerialkey, lm)
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	// server consturct
+	tcpserver.Consturct(share.ExamplePacketSerialkey, runtime.NumCPU(), runtime.NumCPU())
 
 	// start server handler
 	address := ":" + strconv.Itoa(port)

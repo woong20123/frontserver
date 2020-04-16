@@ -1,4 +1,4 @@
-package logicmanager
+package tcpserver
 
 import (
 	"log"
@@ -10,23 +10,6 @@ import (
 // TlogicFunc is trans request struct
 type TlogicFunc func(conn *net.TCPConn, p *packet.Packet)
 
-var instance *LogicManager
-
-// GetInstance is return singleton LogicManager
-func GetInstance() *LogicManager {
-	if instance == nil {
-		instance = newLogicManager()
-	}
-	return instance
-}
-
-func newLogicManager() *LogicManager {
-	lm := new(LogicManager)
-	lm.LogicConatiner = make(map[uint32]TlogicFunc)
-	lm.clientRequest = make(chan *Request, 2048)
-	return lm
-}
-
 // LogicManager is
 type LogicManager struct {
 	LogicConatiner map[uint32]TlogicFunc
@@ -37,6 +20,12 @@ type LogicManager struct {
 type Request struct {
 	conn *net.TCPConn
 	p    *packet.Packet
+}
+
+// Initialize is
+func (lm *LogicManager) Initialize() {
+	lm.LogicConatiner = make(map[uint32]TlogicFunc)
+	lm.clientRequest = make(chan *Request, 4096)
 }
 
 // RegistLogicfun regist packet processing logic

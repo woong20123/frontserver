@@ -1,9 +1,13 @@
-package examsvrsingleton
+package examserverlogic
 
-import "example/examFrontServer/serverobjmanager"
-
+//ExamSvrSingleton is
 type ExamSvrSingleton struct {
-	objmanager *serverobjmanager.SvrObjMgr
+	objmanager *SvrObjMgr
+}
+
+// GetObjMgr is
+func (s *ExamSvrSingleton) GetObjMgr() *SvrObjMgr {
+	return s.objmanager
 }
 
 var instance *ExamSvrSingleton = nil
@@ -19,7 +23,7 @@ func GetInstance() *ExamSvrSingleton {
 // newExamSvrSingleton is
 func newExamSvrSingleton() *ExamSvrSingleton {
 	ess := new(ExamSvrSingleton)
-	ess.objmanager = new(serverobjmanager.SvrObjMgr)
+	ess.objmanager = new(SvrObjMgr)
 	ess.objmanager.Initialize()
 
 	return ess

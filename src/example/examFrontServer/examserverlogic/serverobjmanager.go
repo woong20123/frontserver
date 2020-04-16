@@ -1,4 +1,4 @@
-package serverobjmanager
+package examserverlogic
 
 import (
 	"example/examFrontServer/serveruser"

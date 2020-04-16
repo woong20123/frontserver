@@ -31,12 +31,13 @@ type ExamUser struct {
 }
 
 // NewExamUser is make ExamUser
-func NewExamUser() *ExamUser {
+func NewExamUser(sn uint32) *ExamUser {
 	eu := ExamUser{}
 	eu.state = UserStateEnum.NoneSTATE
 	eu.roomIdx = -1
 	eu.onSteteLogic = make(map[int]UStatelogicFunc)
 	eu.conn = nil
+	eu.sn = sn
 	return &eu
 }
 
