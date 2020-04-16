@@ -1,4 +1,4 @@
-package clientobjmanager
+package examclientlogic
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,44 +18,36 @@ func (objmgr *Objmanager) GetChanManager() *ClientChanmgr {
 	return objmgr.channelmgr
 }
 
-var instance *Objmanager
-
-// GetInstance is return singleton objmanager
-func GetInstance() *Objmanager {
-	if instance == nil {
-		instance = new(Objmanager)
-		instance.Intialize()
-	}
-	return instance
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ClientChanmgr is client channel data manage
 type ClientChanmgr struct {
-	chanUserState  chan int
+	chanUserState  chan ChanUserStateRequest
 	chanSceneClose chan int
 }
 
-// NewChannelmanager is
-// func NewChannelmanager() *ClientChanmgr {
-// 	c := make(ClientChanmgr)
-// 	c.Intialize()
-// 	return &c
-// }
+type ChanUserStateRequest struct {
+	State            int
+	DelayMilliSecond int
+}
 
 // Intialize is
 func (chanmgr *ClientChanmgr) Intialize() {
-	chanmgr.chanUserState = make(chan int)
+	chanmgr.chanUserState = make(chan ChanUserStateRequest)
 	chanmgr.chanSceneClose = make(chan int)
 }
 
+// SendChanUserState is
+func (chanmgr *ClientChanmgr) SendChanUserState(state int, delay int) {
+	chanmgr.chanUserState <- ChanUserStateRequest{state, delay}
+}
+
 // GetChanUserState is
-func (chanmgr *ClientChanmgr) GetChanUserState() chan int {
+func (chanmgr *ClientChanmgr) GetChanUserState() chan ChanUserStateRequest {
 	return chanmgr.chanUserState
 }
 
-// GetChanSceneClose is
-func (chanmgr *ClientChanmgr) GetChanSceneClose() chan int {
-	return chanmgr.chanSceneClose
+// SendChanSceneClose is
+func (chanmgr *ClientChanmgr) SendChanSceneClose() {
+	chanmgr.chanSceneClose <- 1
 }

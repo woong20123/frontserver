@@ -26,19 +26,20 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 		// Send 응답 패킷
 		sendp := packet.NewPacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLoginUserRes)
-		sendp.Write(uint32(1))
+		sendp.Write(uint32(share.ResultSuccess), uint32(100))
+		sendp.WriteString(Userid)
 		tcpserver.GetObjInstance().GetSendManager().SendToConn(conn, sendp)
 		return
 	})
 
-	lm.RegistLogicfun(share.C2SPacketCommandGolobalSendMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(share.C2SPacketCommandGolobalMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
 
 		msg := p.ReadString()
 		log.Println("C2SPacketCommandGolobalSendMsgReq msg = ", msg)
 
 		// Send 응답 패킷
 		sendp := packet.NewPacket()
-		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandGolobalSendMsgRes)
+		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandGolobalMsgRes)
 		sendp.Write(uint32(1))
 		_, err := conn.Write(sendp.GetByte())
 		if err != nil {

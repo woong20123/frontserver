@@ -5,6 +5,11 @@ import (
 	"net"
 )
 
+const (
+	// NoneSN is
+	NoneSN = 0
+)
+
 // UStatelogicFunc is
 type UStatelogicFunc func()
 
@@ -32,8 +37,9 @@ var UserStateEnum = &statelist{
 type ExamUser struct {
 	conn           *net.TCPConn
 	id             string
+	sn             uint32
 	state          int
-	roomIdx        int
+	roomIdx        uint32
 	onSteteLogic   map[int]UStatelogicFunc
 	SteteScene     map[int]UStateScene
 	closeSceneChan chan int
@@ -43,7 +49,8 @@ type ExamUser struct {
 func NewExamUser() *ExamUser {
 	eu := ExamUser{}
 	eu.state = UserStateEnum.NoneSTATE
-	eu.roomIdx = -1
+	eu.sn = NoneSN
+	eu.roomIdx = NoneSN
 	eu.onSteteLogic = make(map[int]UStatelogicFunc)
 	eu.SteteScene = make(map[int]UStateScene)
 	eu.closeSceneChan = make(chan int)
