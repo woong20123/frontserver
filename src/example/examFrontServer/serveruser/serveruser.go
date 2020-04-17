@@ -31,13 +31,13 @@ type ExamUser struct {
 }
 
 // NewExamUser is make ExamUser
-func NewExamUser(sn uint32) *ExamUser {
+func NewExamUser() *ExamUser {
 	eu := ExamUser{}
 	eu.state = UserStateEnum.NoneSTATE
 	eu.roomIdx = -1
 	eu.onSteteLogic = make(map[int]UStatelogicFunc)
 	eu.conn = nil
-	eu.sn = sn
+	eu.sn = 0
 	return &eu
 }
 
@@ -59,6 +59,26 @@ func (eu *ExamUser) SetState(state uint32) {
 // GetState is return user's state
 func (eu *ExamUser) GetState() uint32 {
 	return eu.state
+}
+
+// SetUserID is set user's id
+func (eu *ExamUser) SetUserID(id string) {
+	eu.id = id
+}
+
+// GetUserId is return user's id
+func (eu *ExamUser) GetUserID() string {
+	return eu.id
+}
+
+// SetUserSn is set user's id
+func (eu *ExamUser) SetUserSn(sn uint32) {
+	eu.sn = sn
+}
+
+// GetUserSn is return user's id
+func (eu *ExamUser) GetUserSn() uint32 {
+	return eu.sn
 }
 
 // RegistOnStateLogic is return user's state

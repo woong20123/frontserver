@@ -194,7 +194,6 @@ func handleUserScene(errProc context.CancelFunc, user *clientuser.ExamUser) {
 
 		select {
 		case nextstate := <-chanState:
-			time.Sleep(time.Millisecond * time.Duration(nextstate.DelayMilliSecond))
 			user.SetState(nextstate.State)
 			user.CloseScene()
 		}

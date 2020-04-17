@@ -4,16 +4,19 @@ import (
 	"example/examFrontServer/serveruser"
 	"log"
 	"net"
+	"sync/atomic"
 )
 
 // SvrObjMgr is
 type SvrObjMgr struct {
 	userContainer map[*net.TCPConn]*serveruser.ExamUser
+	userSnKey     uint32
 }
 
 // Initialize is
 func (somgr *SvrObjMgr) Initialize() {
 	somgr.userContainer = make(map[*net.TCPConn]*serveruser.ExamUser)
+	somgr.userSnKey = 1
 }
 
 // AddUser is
@@ -36,4 +39,9 @@ func (somgr *SvrObjMgr) DelUser(conn *net.TCPConn) {
 func (somgr *SvrObjMgr) FindUser(conn *net.TCPConn) *serveruser.ExamUser {
 	eu, _ := somgr.userContainer[conn]
 	return eu
+}
+
+// GetUserSn is return Unique User Sn
+func (somgr *SvrObjMgr) GetUserSn() uint32 {
+	return atomic.AddUint32(&somgr.userSnKey, 1)
 }
