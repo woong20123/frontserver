@@ -3,8 +3,9 @@ package tcpserver
 // SingletonObj is
 type SingletonObj struct {
 	packetSerialkey uint32
-	lm              *LogicManager
-	sm              *SendManager
+	logicm          *LogicManager
+	sendm           *SendManager
+	sessionm        *SessionMgr
 }
 
 var instance *SingletonObj = nil
@@ -20,23 +21,31 @@ func GetObjInstance() *SingletonObj {
 func newSingletonObj() *SingletonObj {
 	so := new(SingletonObj)
 
-	so.lm = new(LogicManager)
-	so.lm.Initialize()
+	so.logicm = new(LogicManager)
+	so.logicm.Initialize()
 
-	so.sm = new(SendManager)
-	so.sm.Initialize()
+	so.sendm = new(SendManager)
+	so.sendm.Initialize()
+
+	so.sessionm = new(SessionMgr)
+	so.sessionm.Initialize()
 
 	return so
 }
 
 // GetLogicManager is return SingletonObj
 func (s *SingletonObj) GetLogicManager() *LogicManager {
-	return s.lm
+	return s.logicm
 }
 
-// GetSendManager is return SingletonObj
+// GetSendManager is return SendManager
 func (s *SingletonObj) GetSendManager() *SendManager {
-	return s.sm
+	return s.sendm
+}
+
+// GetSessionMgr is return GetSessionMgr
+func (s *SingletonObj) GetSessionMgr() *SessionMgr {
+	return s.sessionm
 }
 
 // SetSerialkey is regist server serialkey

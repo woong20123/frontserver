@@ -16,9 +16,8 @@ const (
 )
 
 // Consturct is
-func Consturct(serialKey uint32, logicProcessCount int, SendProcessCount int) {
+func Consturct(serialKey uint32, SendProcessCount int) {
 	GetObjInstance().SetSerialkey(serialKey)
-	GetObjInstance().GetLogicManager().RunLogicHandle(logicProcessCount)
 	GetObjInstance().GetSendManager().RunSendHandle(SendProcessCount)
 }
 
@@ -71,6 +70,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 // kor : HandleConnection은 연결된 세션에 대한 작업을 등록합니다.
 func HandleConnection(serverCtx context.Context, conn *net.TCPConn, wg *sync.WaitGroup) {
 	defer func() {
+		GetObjInstance().GetSessionMgr().RunStateFunc(SessionStateEnum.OnClosed, conn)
 		conn.Close()
 		wg.Done()
 	}()
@@ -134,6 +134,7 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 			log.Println("AcceptTcp", err)
 			return
 		}
+		GetObjInstance().GetSessionMgr().RunStateFunc(SessionStateEnum.OnConnected, conn)
 		wg.Add(1)
 		go HandleConnection(ctxServer, conn, wg)
 	}

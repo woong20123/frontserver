@@ -21,7 +21,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 		eu := serveruser.NewExamUser(1)
 		eu.SetConn(conn)
 		instance := GetInstance()
-		instance.GetObjMgr().AddUser(1, eu)
+		instance.GetObjMgr().AddUser(conn, eu)
 
 		// Send 응답 패킷
 		sendp := packet.NewPacket()

@@ -16,28 +16,44 @@ import (
 	"github.com/woong20123/tcpserver"
 )
 
-func constructTCPServer(port int) {
+func constructTCPSession() {
+	sessionm := tcpserver.GetObjInstance().GetSessionMgr()
+	examserverlogic.RegistSessionLogic(sessionm)
+}
 
-	sigChan := make(chan os.Signal, 1)
-	signal.Ignore()
-	signal.Notify(sigChan, syscall.SIGINT)
-
-	var wg sync.WaitGroup
-	chClosed := make(chan struct{})
-	serverCtx, shutdown := context.WithCancel(context.Background())
-
+func constructLogic() {
 	// regist exam Logic
 	lm := tcpserver.GetObjInstance().GetLogicManager()
 	examserverlogic.RegistCommandLogic(lm)
+	// set logic goroutines count
+	lm.RunLogicHandle(runtime.NumCPU())
+}
 
+func constructTCPServer(port int, chClosed chan struct{}) (wg sync.WaitGroup, cancel context.CancelFunc) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	serverCtx, shutdown := context.WithCancel(context.Background())
 	// server consturct
-	tcpserver.Consturct(share.ExamplePacketSerialkey, runtime.NumCPU(), runtime.NumCPU())
+	tcpserver.Consturct(share.ExamplePacketSerialkey, runtime.NumCPU())
 
 	// start server handler
 	address := ":" + strconv.Itoa(port)
 	go tcpserver.HandleListener(serverCtx, address, &wg, chClosed)
 	log.Println("On Server ", address)
+	cancel = shutdown
+	return
+}
+
+func main() {
+	chClosed := make(chan struct{})
+
+	constructTCPSession()
+	constructLogic()
+	wg, shutdown := constructTCPServer(20224, chClosed)
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Ignore()
+	signal.Notify(sigChan, syscall.SIGINT)
 
 	s := <-sigChan
 
@@ -51,8 +67,4 @@ func constructTCPServer(port int) {
 	default:
 		panic("unexpected signal has been received")
 	}
-}
-
-func main() {
-	constructTCPServer(20224)
 }
