@@ -1,29 +1,32 @@
 package examclientgui
 
 import (
+	"example/examClient/examclientlogic"
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
 
-var edit_box EditBox
+var editBox EditBox
 var readHigh int
 
-const edit_box_width = 100
+const editBoxWidth = 100
 
 var readString []string
-var readEvent chan string
-
-func SendReadString(msg string) {
-	readEvent <- msg
-}
 
 func runReadLogic() {
+	readEvent := examclientlogic.GetInstance().GetObjMgr().GetChanManager().GetchanRequestToGui()
 	for {
 		select {
-		case msg := <-readEvent:
-			insertReadmsg(msg)
+		case e := <-readEvent:
+			switch e.Type {
+			case examclientlogic.ToGUIEnum.TYPEMsgPrint:
+				insertReadmsg(e.Msg)
+			case examclientlogic.ToGUIEnum.TYPEWindowClear:
+				clearReadmsg()
+			}
+
 			redrawAll()
 		}
 	}
@@ -38,13 +41,19 @@ func insertReadmsg(msg string) {
 	}
 }
 
+func clearReadmsg() {
+	strlength := len(readString)
+	readString = readString[strlength:]
+}
+
 func printReadmsg() {
 	const coldef = termbox.ColorDefault
+	const wordcol = termbox.ColorGreen
 	w, _ := termbox.Size()
-	xpos := ((w / 2) - (edit_box_width / 2))
+	xpos := ((w / 2) - (editBoxWidth / 2))
 	ypos := 1
 	for index, value := range readString {
-		tbprint(xpos, ypos+index, coldef, coldef, value)
+		tbprint(xpos, ypos+index, wordcol, coldef, value)
 	}
 }
 
@@ -67,24 +76,24 @@ func redrawAll() {
 	termbox.Clear(coldef, coldef)
 	w, h := termbox.Size()
 
-	readHigh = (h * 60) / 100
+	readHigh = (h * 80) / 100
 	readBoxmidx := w / 2
 	readBoxmidy := readHigh / 2
 
 	// Read Box
-	drawBoxUI(readBoxmidx, readBoxmidy, edit_box_width+2, readHigh)
+	drawBoxUI(readBoxmidx, readBoxmidy, editBoxWidth+2, readHigh)
 	printReadmsg()
 
-	editCurmidx := (w - edit_box_width) / 2
+	editCurmidx := (w - editBoxWidth) / 2
 	editCurmidy := h - 3
 	editBoxmidx := w / 2
 	editBoxmidy := h - 3
 	editBoxHigh := 2
 
 	// Edit Box
-	drawBoxUI(editBoxmidx, editBoxmidy, edit_box_width+2, editBoxHigh)
-	edit_box.Draw(editCurmidx, editCurmidy, edit_box_width, 1)
-	termbox.SetCursor(editCurmidx+edit_box.CursorX(), editCurmidy)
+	drawBoxUI(editBoxmidx, editBoxmidy, editBoxWidth+2, editBoxHigh)
+	editBox.Draw(editCurmidx, editCurmidy, editBoxWidth, 1)
+	termbox.SetCursor(editCurmidx+editBox.CursorX(), editCurmidy)
 
 	termbox.Flush()
 }
@@ -92,7 +101,6 @@ func redrawAll() {
 func RunGui(GuiInitchan chan int) {
 	err := termbox.Init()
 	readString = make([]string, 0, 5)
-	readEvent = make(chan string, 1024)
 	go runReadLogic()
 	if err != nil {
 		panic(err)
@@ -111,28 +119,30 @@ mainloop:
 			case termbox.KeyEsc:
 				break mainloop
 			case termbox.KeyArrowLeft, termbox.KeyCtrlB:
-				edit_box.MoveCursorOneRuneBackward()
+				editBox.MoveCursorOneRuneBackward()
 			case termbox.KeyArrowRight, termbox.KeyCtrlF:
-				edit_box.MoveCursorOneRuneForward()
+				editBox.MoveCursorOneRuneForward()
 			case termbox.KeyBackspace, termbox.KeyBackspace2:
-				edit_box.DeleteRuneBackward()
+				editBox.DeleteRuneBackward()
 			case termbox.KeyDelete, termbox.KeyCtrlD:
-				edit_box.DeleteRuneForward()
+				editBox.DeleteRuneForward()
 			case termbox.KeyTab:
-				edit_box.InsertRune('\t')
+				editBox.InsertRune('\t')
 			case termbox.KeySpace:
-				edit_box.InsertRune(' ')
+				editBox.InsertRune(' ')
 			case termbox.KeyCtrlK:
-				edit_box.DeleteTheRestOfTheLine()
+				editBox.DeleteTheRestOfTheLine()
 			case termbox.KeyHome, termbox.KeyCtrlA:
-				edit_box.MoveCursorToBeginningOfTheLine()
+				editBox.MoveCursorToBeginningOfTheLine()
 			case termbox.KeyEnd, termbox.KeyCtrlE:
-				edit_box.MoveCursorToEndOfTheLine()
+				editBox.MoveCursorToEndOfTheLine()
 			case termbox.KeyEnter:
 				// 메시지 전송
+				examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestFromGui(editBox.getText())
+				editBox.AllClearRune()
 			default:
 				if ev.Ch != 0 {
-					edit_box.InsertRune(ev.Ch)
+					editBox.InsertRune(ev.Ch)
 				}
 			}
 		case termbox.EventError:
@@ -337,6 +347,15 @@ func (eb *EditBox) DeleteRuneBackward() {
 	eb.text = byte_slice_remove(eb.text, eb.cursor_boffset, eb.cursor_boffset+size)
 }
 
+// AllClearRune is
+func (eb *EditBox) AllClearRune() {
+	if eb.cursor_boffset == 0 {
+		return
+	}
+	eb.MoveCursorToBeginningOfTheLine()
+	eb.text = eb.text[:0]
+}
+
 func (eb *EditBox) DeleteRuneForward() {
 	if eb.cursor_boffset == len(eb.text) {
 		return
@@ -354,6 +373,10 @@ func (eb *EditBox) InsertRune(r rune) {
 	n := utf8.EncodeRune(buf[:], r)
 	eb.text = byte_slice_insert(eb.text, eb.cursor_boffset, buf[:n])
 	eb.MoveCursorOneRuneForward()
+}
+
+func (eb *EditBox) getText() string {
+	return string(eb.text)
 }
 
 // Please, keep in mind that cursor depends on the value of line_voffset, which

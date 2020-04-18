@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/woong20123/packet"
@@ -103,17 +104,19 @@ func SocketClient(errProc context.CancelFunc, ip string, port int, sendPacketCha
 	}
 }
 
-func sceneClear() {
-	// cmd := exec.Command("cmd", "/c", "cls")
-	// cmd.Stdout = os.Stdout
-	// cmd.Run()
+func readsceneClear() {
+	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEWindowClear, "")
+}
+
+func readSceneWrite(msg string) {
+	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEMsgPrint, msg)
 }
 
 func loginSceneCommand() {
-	examclientgui.SendReadString("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
-	examclientgui.SendReadString("[명령어]")
-	examclientgui.SendReadString("\"/RoomEnter <방이름>\" : 방입장")
-	examclientgui.SendReadString("\"/Close\" : 종료")
+	readSceneWrite("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
+	readSceneWrite("[명령어]")
+	readSceneWrite("\"/RoomEnter <방이름>\" : 방입장")
+	readSceneWrite("\"/Close\" : 종료")
 }
 
 func sendUserSceneChan(state int, msg string) {
@@ -126,17 +129,17 @@ func handleUserScene(errProc context.CancelFunc) {
 	cobjmgr := examclientlogic.GetInstance().GetObjMgr()
 	chanState := cobjmgr.GetChanManager().GetChanUserState()
 	user := cobjmgr.GetUser()
-	examclientgui.SendReadString("Input Start")
+	readSceneWrite("Input Start")
 
 	// User가 NoneSTATE일때 Scene을 정의합니다.
 	user.RegistScene(clientuser.UserStateEnum.NoneSTATE, func(closechan chan int) {
 		timer := time.NewTimer(time.Millisecond * 500)
-		examclientgui.SendReadString("connecting server")
+		readSceneWrite("connecting server")
 
 		for {
 			select {
 			case <-timer.C:
-				examclientgui.SendReadString(".")
+				readSceneWrite(".")
 				timer.Reset(time.Millisecond * 200)
 			case <-closechan:
 				return
@@ -146,7 +149,7 @@ func handleUserScene(errProc context.CancelFunc) {
 
 	// User가 ConnectedSTATE 일 때 Scene을 정의합니다.
 	user.RegistScene(clientuser.UserStateEnum.ConnectedSTATE, func(closechan chan int) {
-		examclientgui.SendReadString("접속하려는 ID를 입력해주세요 : ")
+		readSceneWrite("접속하려는 ID를 입력해주세요 : ")
 
 		select {
 		case <-closechan:
@@ -167,7 +170,7 @@ func handleUserScene(errProc context.CancelFunc) {
 
 	// User가 RoomEnterSTATE 일 때 Scene을 정의합니다.
 	user.RegistScene(clientuser.UserStateEnum.RoomEnterSTATE, func(closechan chan int) {
-		examclientgui.SendReadString("[RoomEnterSTATE]")
+		readSceneWrite("[RoomEnterSTATE]")
 		for {
 			select {
 			case <-closechan:
@@ -178,7 +181,7 @@ func handleUserScene(errProc context.CancelFunc) {
 
 	// User가 CloseSTATE 일 때 Scene을 정의합니다.
 	user.RegistScene(clientuser.UserStateEnum.CloseSTATE, func(closechan chan int) {
-		examclientgui.SendReadString("클라이언트를 종료합니다. 종료 처리 등록")
+		readSceneWrite("클라이언트를 종료합니다. 종료 처리 등록")
 		user.GetConn().Close()
 		time.Sleep(time.Millisecond * 500)
 		errProc()
@@ -191,9 +194,9 @@ func handleUserScene(errProc context.CancelFunc) {
 		select {
 		case nextstate := <-chanState:
 			user.SetState(nextstate.State)
-			sceneClear()
+			readsceneClear()
 			user.CloseScene()
-			examclientgui.SendReadString(nextstate.Msg)
+			readSceneWrite(nextstate.Msg)
 		}
 	}
 }
@@ -201,48 +204,52 @@ func handleUserScene(errProc context.CancelFunc) {
 func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packet) {
 	defer errProc()
 
-	user := examclientlogic.GetInstance().GetObjMgr().GetUser()
+	cobjmgr := examclientlogic.GetInstance().GetObjMgr()
+	user := cobjmgr.GetUser()
+	chanRequestFromGui := cobjmgr.GetChanManager().GetchanRequestFromGui()
 
 	for {
-		select {}
-		// 	case clientuser.UserStateEnum.ConnectedSTATE:
-		// 		userid, _ := reader.ReadString('\n')
-		// 		userid = strings.Trim(userid, "\n")
+		select {
+		case requestFromGui := <-chanRequestFromGui:
+			switch user.GetState() {
+			case clientuser.UserStateEnum.ConnectedSTATE:
+				userid := requestFromGui.Msg
+				userid = strings.Trim(userid, "\n")
 
-		// 		// User Login 패킷 전송
-		// 		p := packet.NewPacket()
-		// 		p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
-		// 		p.WriteString(userid)
-		// 		sendPacketChan <- p
+				// User Login 패킷 전송
+				p := packet.NewPacket()
+				p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
+				p.WriteString(userid)
+				sendPacketChan <- p
+			case clientuser.UserStateEnum.LoginSTATE:
+				msg := requestFromGui.Msg
+				msg = strings.Trim(msg, "\n")
 
-		// 	case clientuser.UserStateEnum.LoginSTATE:
-		// 		msg, _ := reader.ReadString('\n')
-		// 		msg = strings.Trim(msg, "\n")
-
-		// 		if strings.Index(msg, "/") == 0 {
-		// 			if strings.Contains(msg, "/RoomEnter") {
-		// 				strs := strings.Fields(msg)
-		// 				if 2 == len(strs) {
-		// 					examclientgui.SendReadString("방입장 패킷 => ", strs[1])
-		// 				} else {
-		// 					examclientgui.SendReadString("정상적인 명령을 입력해주세요")
-		// 				}
-		// 			} else if strings.Contains(msg, "/Close") {
-		// 				sendUserSceneChan(clientuser.UserStateEnum.CloseSTATE, "클라이언트를 종료합니다. Bye")
-		// 			} else if strings.Contains(msg, "/?") {
-		// 				sceneClear()
-		// 				loginSceneCommand()
-		// 			} else {
-		// 				examclientgui.SendReadString("정상적인 명령을 입력해주세요")
-		// 			}
-		// 		} else {
-		// 			// global msg 패킷 전송
-		// 			p := packet.NewPacket()
-		// 			p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
-		// 			p.WriteString(msg)
-		// 			sendPacketChan <- p
-		// 		}
-		// 	}
+				if strings.Index(msg, "/") == 0 {
+					if strings.Contains(msg, "/RoomEnter") {
+						// strs := strings.Fields(msg)
+						// if 2 == len(strs) {
+						// 	readSceneWrite("방입장 패킷 => ", strs[1])
+						// } else {
+						// 	readSceneWrite("정상적인 명령을 입력해주세요")
+						//}
+					} else if strings.Contains(msg, "/Close") {
+						sendUserSceneChan(clientuser.UserStateEnum.CloseSTATE, "클라이언트를 종료합니다. Bye")
+					} else if strings.Contains(msg, "/?") {
+						readsceneClear()
+						loginSceneCommand()
+					} else {
+						readSceneWrite("정상적인 명령을 입력해주세요")
+					}
+				} else {
+					// global msg 패킷 전송
+					p := packet.NewPacket()
+					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
+					p.WriteString(msg)
+					sendPacketChan <- p
+				}
+			}
+		}
 	}
 }
 

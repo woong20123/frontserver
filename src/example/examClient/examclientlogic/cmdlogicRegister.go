@@ -41,7 +41,7 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 		sb.WriteString(res.Userid)
 		sb.WriteString(" : ")
 		sb.WriteString(res.Msg)
-		fmt.Println(sb.String())
+		GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String())
 		return
 	})
 
