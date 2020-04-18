@@ -67,6 +67,26 @@ func (eu *ExamUser) GetConn() *net.TCPConn {
 	return eu.conn
 }
 
+// SetID is set user ID
+func (eu *ExamUser) SetID(id string) {
+	eu.id = id
+}
+
+// GetID is return user ID
+func (eu *ExamUser) GetID() string {
+	return eu.id
+}
+
+// SetSn is set user serial number
+func (eu *ExamUser) SetSn(sn uint32) {
+	eu.sn = sn
+}
+
+// GetSn is return user serial number
+func (eu *ExamUser) GetSn() uint32 {
+	return eu.sn
+}
+
 // CloseScene is
 func (eu *ExamUser) CloseScene() {
 	eu.closeSceneChan <- 1

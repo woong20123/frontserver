@@ -332,6 +332,13 @@ func (p *Packet) Read(datas ...interface{}) {
 				for i := range data {
 					data[i] = math.Float64frombits(binary.LittleEndian.Uint64(p.buffer[p.getReadPos():]))
 				}
+			case *string:
+				length := binary.LittleEndian.Uint16(p.buffer[p.getReadPos():])
+				p.addReadPos(2)
+				bs := make([]byte, length)
+				len := copy(bs, p.buffer[p.getReadPos():p.getReadPos()+length])
+				p.addReadPos(uint16(len))
+				*data = string(bs)
 			default:
 				log.Printf("not find tyep Packet Read")
 			}
@@ -486,6 +493,9 @@ func intDataSize(data interface{}) (typeSize int, TotalSize int) {
 	case []float64:
 		typeSize = 8
 		TotalSize = 8 * len(data)
+	case *string:
+		typeSize = 4
+		TotalSize = 4
 	}
 	return
 }

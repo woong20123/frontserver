@@ -16,7 +16,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 		userid := p.ReadString()
 		log.Println("C2SPacketCommandLoginUserReq userid = ", userid)
 
-		// regist user
+		// set user info
 		objmgr := GetInstance().GetObjMgr()
 		eu := objmgr.FindUser(conn)
 		if eu != nil {
@@ -35,14 +35,16 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 	})
 
 	lm.RegistLogicfun(share.C2SPacketCommandGolobalMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
-
-		msg := p.ReadString()
-		log.Println("C2SPacketCommandGolobalSendMsgReq msg = ", msg)
+		req := share.C2SPCGolobalSendMsgReq{}
+		p.Read(&req.Msg)
+		eu := GetInstance().GetObjMgr().FindUser(conn)
 
 		// Send 응답 패킷
 		sendp := packet.NewPacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandGolobalMsgRes)
 		sendp.Write(uint32(1))
+		sendp.WriteString(eu.GetUserID())
+		sendp.WriteString(req.Msg)
 		_, err := conn.Write(sendp.GetByte())
 		if err != nil {
 			log.Println("Write S2CPacketCommandGolobalSendMsgRes ", err)

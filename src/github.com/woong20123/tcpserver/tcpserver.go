@@ -6,8 +6,6 @@ import (
 	"net"
 	"strings"
 	"sync"
-
-	"github.com/woong20123/packet"
 )
 
 const (
@@ -33,8 +31,6 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	// TCP의 데이터 전달이 패킷단위로 전달되지 않기 때문에 조립 작업을 합니다.
 	AssemblyBuf := make([]byte, maxBufferSize+128)
 	var AssemPos uint32 = 0
-	var onPacket *packet.Packet = nil
-	serialkey := GetObjInstance().GetSerialkey()
 
 	for {
 		n, err := conn.Read(recvBuf)
@@ -54,14 +50,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
 			AssemPos += uint32(copylength)
 
-			// 남은 버퍼에서 패킷을 조립할 수 있을 수도 있기 때문에 재호출
-			for {
-				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, serialkey)
-				if onPacket == nil {
-					break
-				}
-				GetObjInstance().GetLogicManager().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
-			}
+			AssemPos = GetObjInstance().GetSessionMgr().RunRecvFunc(conn, AssemblyBuf, AssemPos)
 		}
 	}
 }
@@ -70,7 +59,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 // kor : HandleConnection은 연결된 세션에 대한 작업을 등록합니다.
 func HandleConnection(serverCtx context.Context, conn *net.TCPConn, wg *sync.WaitGroup) {
 	defer func() {
-		GetObjInstance().GetSessionMgr().RunStateFunc(SessionStateEnum.OnClosed, conn)
+		GetObjInstance().GetSessionMgr().RunConnectFunc(SessionStateEnum.OnClosed, conn)
 		conn.Close()
 		wg.Done()
 	}()
@@ -134,7 +123,7 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 			log.Println("AcceptTcp", err)
 			return
 		}
-		GetObjInstance().GetSessionMgr().RunStateFunc(SessionStateEnum.OnConnected, conn)
+		GetObjInstance().GetSessionMgr().RunConnectFunc(SessionStateEnum.OnConnected, conn)
 		wg.Add(1)
 		go HandleConnection(ctxServer, conn, wg)
 	}
