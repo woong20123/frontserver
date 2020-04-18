@@ -5,6 +5,7 @@ import (
 	"context"
 	"example/examFrontServer/examserverlogic"
 	"example/share"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -39,13 +40,15 @@ func constructTCPServer(port int, chClosed chan struct{}) (wg sync.WaitGroup, ca
 	// start server handler
 	address := ":" + strconv.Itoa(port)
 	go tcpserver.HandleListener(serverCtx, address, &wg, chClosed)
-	log.Println("On Server ", address)
+	println("[Server 정보] ", address)
 	cancel = shutdown
 	return
 }
 
 func main() {
 	chClosed := make(chan struct{})
+
+	println(fmt.Sprint("[Server Ver ", share.ExamVer, "]"))
 
 	constructTCPSession()
 	constructLogic()

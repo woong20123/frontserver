@@ -3,6 +3,7 @@ package share
 const (
 	// ExamplePacketSerialkey is Serialkey(uint32) + PacketSize(uint16)
 	ExamplePacketSerialkey uint32 = 0x5da9c31b
+	ExamVer                uint32 = 10
 )
 
 const (
