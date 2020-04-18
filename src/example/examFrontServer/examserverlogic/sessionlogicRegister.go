@@ -16,6 +16,7 @@ func RegistSessionLogic(sessionm *tcpserver.SessionMgr) {
 	sessionm.RegistConnectFunc(tcpserver.SessionStateEnum.OnConnected, func(conn *net.TCPConn) {
 		eu := serveruser.NewExamUser()
 		eu.SetConn(conn)
+		eu.SetState(serveruser.UserStateEnum.ConnectedSTATE)
 		GetInstance().GetObjMgr().AddUser(conn, eu)
 	})
 

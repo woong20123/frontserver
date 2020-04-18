@@ -3,10 +3,10 @@ package examclientlogic
 import (
 	"example/examClient/clientuser"
 	"example/share"
-	"fmt"
 	"net"
 	"strings"
 
+	"github.com/nsf/termbox-go"
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
 )
@@ -18,14 +18,13 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 	lm.RegistLogicfun(share.S2CPacketCommandLoginUserRes, func(conn *net.TCPConn, p *packet.Packet) {
 
 		res := share.S2CPCLoginUserRes{}
-		p.Read(&res.Result, &res.UserSn)
-		res.UserID = p.ReadString()
+		p.Read(&res.Result, &res.UserSn, &res.UserID)
 
 		if res.Result == share.ResultSuccess {
 			eu := GetInstance().GetObjMgr().GetUser()
 			eu.SetID(res.UserID)
 			eu.SetSn(res.UserSn)
-			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.LoginSTATE, fmt.Sprintln("Login에 성공하였습니다.\n[유저정보] SN = ", res.UserSn, " ID = ", res.UserID))
+			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.LobbySTATE, "Login에 성공하였습니다.")
 		} else {
 			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.ConnectedSTATE, "Login에 실패하였습니다.")
 		}
@@ -33,15 +32,15 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 	})
 
 	// S2CPacketCommandGolobalMsgRes에 대한 처리 작업을 등록합니다.
-	lm.RegistLogicfun(share.S2CPacketCommandGolobalMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
-		res := share.S2CPCGolobalSendMsgRes{}
+	lm.RegistLogicfun(share.S2CPacketCommandLobbyMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
+		res := share.S2CPCLobbySendMsgRes{}
 		p.Read(&res.Result, &res.Userid, &res.Msg)
 
 		var sb strings.Builder
 		sb.WriteString(res.Userid)
 		sb.WriteString(" : ")
 		sb.WriteString(res.Msg)
-		GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String())
+		GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorDefault)
 		return
 	})
 

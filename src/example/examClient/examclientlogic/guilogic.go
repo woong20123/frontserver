@@ -1,7 +1,6 @@
-package examclientgui
+package examclientlogic
 
 import (
-	"example/examClient/examclientlogic"
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
@@ -13,17 +12,22 @@ var readHigh int
 
 const editBoxWidth = 100
 
-var readString []string
+var readStrings []readString
+
+type readString struct {
+	msg     string
+	wordcol termbox.Attribute
+}
 
 func runReadLogic() {
-	readEvent := examclientlogic.GetInstance().GetObjMgr().GetChanManager().GetchanRequestToGui()
+	readEvent := GetInstance().GetObjMgr().GetChanManager().GetchanRequestToGui()
 	for {
 		select {
 		case e := <-readEvent:
 			switch e.Type {
-			case examclientlogic.ToGUIEnum.TYPEMsgPrint:
-				insertReadmsg(e.Msg)
-			case examclientlogic.ToGUIEnum.TYPEWindowClear:
+			case ToGUIEnum.TYPEMsgPrint:
+				insertReadmsg(e.Msg, e.wordcol)
+			case ToGUIEnum.TYPEWindowClear:
 				clearReadmsg()
 			}
 
@@ -32,28 +36,27 @@ func runReadLogic() {
 	}
 }
 
-func insertReadmsg(msg string) {
-	readString = append(readString, msg)
-	strlength := len(readString)
+func insertReadmsg(msg string, wordcol termbox.Attribute) {
+	readStrings = append(readStrings, readString{msg, wordcol})
+	strlength := len(readStrings)
 	readSize := readHigh - 1
 	if strlength >= readSize {
-		readString = readString[strlength-readSize:]
+		readStrings = readStrings[strlength-readSize:]
 	}
 }
 
 func clearReadmsg() {
-	strlength := len(readString)
-	readString = readString[strlength:]
+	strlength := len(readStrings)
+	readStrings = readStrings[strlength:]
 }
 
 func printReadmsg() {
 	const coldef = termbox.ColorDefault
-	const wordcol = termbox.ColorGreen
 	w, _ := termbox.Size()
 	xpos := ((w / 2) - (editBoxWidth / 2))
 	ypos := 1
-	for index, value := range readString {
-		tbprint(xpos, ypos+index, wordcol, coldef, value)
+	for index, value := range readStrings {
+		tbprint(xpos, ypos+index, value.wordcol, coldef, value.msg)
 	}
 }
 
@@ -98,9 +101,10 @@ func redrawAll() {
 	termbox.Flush()
 }
 
+// RunGui is
 func RunGui(GuiInitchan chan int) {
 	err := termbox.Init()
-	readString = make([]string, 0, 5)
+	readStrings = make([]readString, 0, 5)
 	go runReadLogic()
 	if err != nil {
 		panic(err)
@@ -137,8 +141,8 @@ mainloop:
 			case termbox.KeyEnd, termbox.KeyCtrlE:
 				editBox.MoveCursorToEndOfTheLine()
 			case termbox.KeyEnter:
-				// 메시지 전송
-				examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestFromGui(editBox.getText())
+				// Scene Handler로 메시지 전송합니다.
+				GetInstance().GetObjMgr().GetChanManager().SendchanRequestFromGui(editBox.getText())
 				editBox.AllClearRune()
 			default:
 				if ev.Ch != 0 {
@@ -167,25 +171,25 @@ func fill(x, y, w, h int, cell termbox.Cell) {
 	}
 }
 
-func rune_advance_len(r rune, pos int) int {
+func runeAdvanceLen(r rune, pos int) int {
 	if r == '\t' {
 		return tabstop_length - pos%tabstop_length
 	}
 	return runewidth.RuneWidth(r)
 }
 
-func voffset_coffset(text []byte, boffset int) (voffset, coffset int) {
+func voffsetCoffset(text []byte, boffset int) (voffset, coffset int) {
 	text = text[:boffset]
 	for len(text) > 0 {
 		r, size := utf8.DecodeRune(text)
 		text = text[size:]
-		coffset += 1
-		voffset += rune_advance_len(r, voffset)
+		coffset++
+		voffset += runeAdvanceLen(r, voffset)
 	}
 	return
 }
 
-func byte_slice_grow(s []byte, desired_cap int) []byte {
+func byteSliceGrow(s []byte, desired_cap int) []byte {
 	if cap(s) < desired_cap {
 		ns := make([]byte, len(s), desired_cap)
 		copy(ns, s)
@@ -201,9 +205,9 @@ func byte_slice_remove(text []byte, from, to int) []byte {
 	return text
 }
 
-func byte_slice_insert(text []byte, offset int, what []byte) []byte {
+func byteSliceInsert(text []byte, offset int, what []byte) []byte {
 	n := len(text) + len(what)
-	text = byte_slice_grow(text, n)
+	text = byteSliceGrow(text, n)
 	text = text[:n]
 	copy(text[offset+len(what):], text[offset:])
 	copy(text[offset:], what)
@@ -302,7 +306,7 @@ func (eb *EditBox) AdjustVOffset(width int) {
 
 func (eb *EditBox) MoveCursorTo(boffset int) {
 	eb.cursor_boffset = boffset
-	eb.cursor_voffset, eb.cursor_coffset = voffset_coffset(eb.text, boffset)
+	eb.cursor_voffset, eb.cursor_coffset = voffsetCoffset(eb.text, boffset)
 }
 
 func (eb *EditBox) RuneUnderCursor() (rune, int) {
@@ -371,7 +375,7 @@ func (eb *EditBox) DeleteTheRestOfTheLine() {
 func (eb *EditBox) InsertRune(r rune) {
 	var buf [utf8.UTFMax]byte
 	n := utf8.EncodeRune(buf[:], r)
-	eb.text = byte_slice_insert(eb.text, eb.cursor_boffset, buf[:n])
+	eb.text = byteSliceInsert(eb.text, eb.cursor_boffset, buf[:n])
 	eb.MoveCursorOneRuneForward()
 }
 

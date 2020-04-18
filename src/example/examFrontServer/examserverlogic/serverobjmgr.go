@@ -41,6 +41,13 @@ func (somgr *SvrObjMgr) FindUser(conn *net.TCPConn) *serveruser.ExamUser {
 	return eu
 }
 
+// ForEachFunc is
+func (somgr *SvrObjMgr) ForEachFunc(f func(eu *serveruser.ExamUser)) {
+	for _, user := range somgr.userContainer {
+		f(user)
+	}
+}
+
 // GetUserSn is return Unique User Sn
 func (somgr *SvrObjMgr) GetUserSn() uint32 {
 	return atomic.AddUint32(&somgr.userSnKey, 1)

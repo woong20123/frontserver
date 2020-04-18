@@ -21,8 +21,8 @@ const (
 
 	// C2SPacketCommandGolobalMsgReq is
 	C2SPacketCommandGolobalMsgReq = packetCommandStart + 3
-	// S2CPacketCommandGolobalMsgRes is
-	S2CPacketCommandGolobalMsgRes = packetCommandStart + 4
+	// S2CPacketCommandLobbyMsgRes is
+	S2CPacketCommandLobbyMsgRes = packetCommandStart + 4
 
 	// C2SPacketCommandRoomEnterReq is
 	C2SPacketCommandRoomEnterReq = packetCommandStart + 5
@@ -52,14 +52,14 @@ type S2CPCLoginUserRes struct {
 	UserID string
 }
 
-// C2SPCGolobalSendMsgReq is  C2SPacketCommandLoginUserReq packet struct
-type C2SPCGolobalSendMsgReq struct {
+// C2SPCLobbySendMsgReq is  C2SPacketCommandLoginUserReq packet struct
+type C2SPCLobbySendMsgReq struct {
 	UserSn uint32
 	Msg    string
 }
 
-// S2CPCGolobalSendMsgRes is  S2CPacketCommandLoginUserRes packet struct
-type S2CPCGolobalSendMsgRes struct {
+// S2CPCLobbySendMsgRes is  S2CPacketCommandLoginUserRes packet struct
+type S2CPCLobbySendMsgRes struct {
 	Result uint32
 	Userid string
 	Msg    string

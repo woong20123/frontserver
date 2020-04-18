@@ -348,16 +348,6 @@ func (p *Packet) Read(datas ...interface{}) {
 	}
 }
 
-// ReadString is
-func (p *Packet) ReadString() string {
-	var length uint16
-	p.Read(&length)
-	bs := make([]byte, length)
-	len := copy(bs, p.buffer[p.getReadPos():p.getReadPos()+length])
-	p.addReadPos(uint16(len))
-	return string(bs)
-}
-
 func (p *Packet) getSize() uint16 {
 	return p.header.packetSize
 }

@@ -62,8 +62,8 @@ func (eu *ExamUser) GetState() uint32 {
 }
 
 // SetUserID is set user's id
-func (eu *ExamUser) SetUserID(id string) {
-	eu.id = id
+func (eu *ExamUser) SetUserID(id *string) {
+	eu.id = *id
 }
 
 // GetUserId is return user's id
