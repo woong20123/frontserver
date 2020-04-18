@@ -59,7 +59,7 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 				if onPacket == nil {
 					break
 				}
-				tcpserver.GetObjInstance().GetLogicManager().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
+				tcpserver.GetInstance().GetLogicManager().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
 			}
 		}
 	}
@@ -255,7 +255,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				// User Login 패킷 전송
 				p := packet.NewPacket()
 				p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
-				p.WriteString(userid)
+				p.Write(&userid)
 				sendPacketChan <- p
 			case clientuser.UserStateEnum.LobbySTATE:
 				msg := requestFromGui.Msg
@@ -280,7 +280,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					// global msg 패킷 전송
 					p := packet.NewPacket()
 					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
-					p.WriteString(msg)
+					p.Write(&msg)
 					sendPacketChan <- p
 				}
 			}
@@ -302,7 +302,7 @@ func main() {
 	chanSendPacket := make(chan *packet.Packet, 1024)
 
 	// set LogicManager
-	lm := tcpserver.GetObjInstance().GetLogicManager()
+	lm := tcpserver.GetInstance().GetLogicManager()
 	examclientlogic.ContructLogicManager(lm)
 
 	go HandleNetwork(shutdown, chanSendPacket)

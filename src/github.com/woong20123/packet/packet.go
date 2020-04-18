@@ -217,6 +217,18 @@ func (p *Packet) Write(datas ...interface{}) {
 					binary.LittleEndian.PutUint64(p.buffer[p.getSize():], math.Float64bits(x))
 					p.addSize(typeSize)
 				}
+			case string:
+				length := uint16(len(v))
+				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], length)
+				p.addSize(2)
+				len := copy(p.buffer[p.getSize():], v)
+				p.addSize(uint16(len))
+			case *string:
+				length := uint16(len(*v))
+				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], length)
+				p.addSize(2)
+				len := copy(p.buffer[p.getSize():], *v)
+				p.addSize(uint16(len))
 			default:
 				log.Printf("not find type Packet Write")
 			}
@@ -227,12 +239,12 @@ func (p *Packet) Write(datas ...interface{}) {
 }
 
 // WriteString is
-func (p *Packet) WriteString(str string) {
-	length := uint16(len(str))
-	p.Write(length)
-	len := copy(p.buffer[p.getSize():], str)
-	p.addSize(uint16(len))
-}
+// func (p *Packet) WriteString(str string) {
+// 	length := uint16(len(str))
+// 	p.Write(length)
+// 	len := copy(p.buffer[p.getSize():], str)
+// 	p.addSize(uint16(len))
+// }
 
 func (p *Packet) Read(datas ...interface{}) {
 	for _, data := range datas {
@@ -483,7 +495,7 @@ func intDataSize(data interface{}) (typeSize int, TotalSize int) {
 	case []float64:
 		typeSize = 8
 		TotalSize = 8 * len(data)
-	case *string:
+	case string, *string:
 		typeSize = 4
 		TotalSize = 4
 	}

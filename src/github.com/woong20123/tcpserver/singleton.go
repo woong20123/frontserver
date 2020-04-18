@@ -10,8 +10,8 @@ type SingletonObj struct {
 
 var instance *SingletonObj = nil
 
-// GetObjInstance is return SingletonObj
-func GetObjInstance() *SingletonObj {
+// GetInstance is return SingletonObj
+func GetInstance() *SingletonObj {
 	if instance == nil {
 		instance = newSingletonObj()
 	}

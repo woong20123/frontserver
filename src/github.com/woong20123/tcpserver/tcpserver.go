@@ -15,8 +15,8 @@ const (
 
 // Consturct is
 func Consturct(serialKey uint32, SendProcessCount int) {
-	GetObjInstance().SetSerialkey(serialKey)
-	GetObjInstance().GetSendManager().RunSendHandle(SendProcessCount)
+	GetInstance().SetSerialkey(serialKey)
+	GetInstance().GetSendManager().RunSendHandle(SendProcessCount)
 }
 
 // HandleRead handles packet read operations for connected sessions
@@ -50,7 +50,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
 			AssemPos += uint32(copylength)
 
-			AssemPos = GetObjInstance().GetSessionMgr().RunRecvFunc(conn, AssemblyBuf, AssemPos)
+			AssemPos = GetInstance().GetSessionMgr().RunRecvFunc(conn, AssemblyBuf, AssemPos)
 		}
 	}
 }
@@ -59,7 +59,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 // kor : HandleConnection은 연결된 세션에 대한 작업을 등록합니다.
 func HandleConnection(serverCtx context.Context, conn *net.TCPConn, wg *sync.WaitGroup) {
 	defer func() {
-		GetObjInstance().GetSessionMgr().RunConnectFunc(SessionStateEnum.OnClosed, conn)
+		GetInstance().GetSessionMgr().RunConnectFunc(SessionStateEnum.OnClosed, conn)
 		conn.Close()
 		wg.Done()
 	}()
@@ -123,7 +123,7 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 			log.Println("AcceptTcp", err)
 			return
 		}
-		GetObjInstance().GetSessionMgr().RunConnectFunc(SessionStateEnum.OnConnected, conn)
+		GetInstance().GetSessionMgr().RunConnectFunc(SessionStateEnum.OnConnected, conn)
 		wg.Add(1)
 		go HandleConnection(ctxServer, conn, wg)
 	}

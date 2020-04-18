@@ -3,6 +3,7 @@ package examclientlogic
 import (
 	"example/examClient/clientuser"
 	"example/share"
+	"fmt"
 	"net"
 	"strings"
 
@@ -24,9 +25,13 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 			eu := GetInstance().GetObjMgr().GetUser()
 			eu.SetID(res.UserID)
 			eu.SetSn(res.UserSn)
-			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.LobbySTATE, "Login에 성공하였습니다.")
+			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.LobbySTATE, "[Login 성공]")
 		} else {
-			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.ConnectedSTATE, "Login에 실패하였습니다.")
+			if res.Result == share.ResultExistUserID {
+				GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.ConnectedSTATE, fmt.Sprint("[Login 실패] ", res.UserID, "  유저가 이미 존재합니다."))
+			} else {
+				GetInstance().GetObjMgr().GetChanManager().SendChanUserState(clientuser.UserStateEnum.ConnectedSTATE, "[Login 실패] ")
+			}
 		}
 		return
 	})

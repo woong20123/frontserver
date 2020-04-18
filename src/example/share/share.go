@@ -3,42 +3,45 @@ package share
 const (
 	// ExamplePacketSerialkey is Serialkey(uint32) + PacketSize(uint16)
 	ExamplePacketSerialkey uint32 = 0x5da9c31b
-	ExamVer                uint32 = 10
+	// ExamVer is exam project version
+	ExamVer uint32 = 10
 )
 
 const (
 	// ResultSuccess is Packet Request Success
-	ResultSuccess uint32 = 0x00
+	ResultSuccess uint32 = iota
 	// ResultFail is Packet Request Fail
-	ResultFail uint32 = 0x01
+	ResultFail
+	// ResultExistUserID is Exist UserID
+	ResultExistUserID
 )
 
 const (
-	packetCommandStart uint32 = 0x100
+	packetCommandStart uint32 = iota + 0x100
 	// C2SPacketCommandLoginUserReq is
-	C2SPacketCommandLoginUserReq = packetCommandStart + 1
+	C2SPacketCommandLoginUserReq
 	// S2CPacketCommandLoginUserRes is
-	S2CPacketCommandLoginUserRes = packetCommandStart + 2
+	S2CPacketCommandLoginUserRes
 
 	// C2SPacketCommandGolobalMsgReq is
-	C2SPacketCommandGolobalMsgReq = packetCommandStart + 3
+	C2SPacketCommandGolobalMsgReq
 	// S2CPacketCommandLobbyMsgRes is
-	S2CPacketCommandLobbyMsgRes = packetCommandStart + 4
+	S2CPacketCommandLobbyMsgRes
 
 	// C2SPacketCommandRoomEnterReq is
-	C2SPacketCommandRoomEnterReq = packetCommandStart + 5
+	C2SPacketCommandRoomEnterReq
 	// S2CPacketCommandRoomEnterRes is
-	S2CPacketCommandRoomEnterRes = packetCommandStart + 6
+	S2CPacketCommandRoomEnterRes
 
 	// C2SPacketCommandRoomLeaveReq is
-	C2SPacketCommandRoomLeaveReq = packetCommandStart + 7
+	C2SPacketCommandRoomLeaveReq
 	// S2CPacketCommandRoomLeaveRes is
-	S2CPacketCommandRoomLeaveRes = packetCommandStart + 8
+	S2CPacketCommandRoomLeaveRes
 
 	// C2SPacketCommandRoomMsgReq is
-	C2SPacketCommandRoomMsgReq = packetCommandStart + 9
+	C2SPacketCommandRoomMsgReq
 	// S2CPacketCommandRoomMsgRes is
-	S2CPacketCommandRoomMsgRes = packetCommandStart + 10
+	S2CPacketCommandRoomMsgRes
 )
 
 // C2SPCLoginUserReq is  C2SPacketCommandLoginUserReq packet struct
