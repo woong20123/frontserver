@@ -32,6 +32,10 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	var AssemPos uint32 = 0
 
 	for {
+		if conn == nil {
+			GetInstance().GetLoggerMgr().GetLogger().Println("conn == nil")
+			return
+		}
 		n, err := conn.Read(recvBuf)
 		if err != nil {
 			if ne, ok := err.(net.Error); ok {

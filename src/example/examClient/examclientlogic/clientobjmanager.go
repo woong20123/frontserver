@@ -1,22 +1,18 @@
 package examclientlogic
 
-import (
-	"example/examClient/clientuser"
-)
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Objmanager is client obj data manage
 type Objmanager struct {
 	channelmgr *ClientChanmgr
-	eu         *clientuser.ExamUser
+	eu         *ExamUser
 }
 
 // Intialize is
 func (objmgr *Objmanager) Intialize() {
 	objmgr.channelmgr = new(ClientChanmgr)
 	objmgr.channelmgr.Intialize()
-	objmgr.eu = clientuser.NewExamUser()
+	objmgr.eu = NewExamUser()
 }
 
 // GetChanManager is
@@ -25,7 +21,7 @@ func (objmgr *Objmanager) GetChanManager() *ClientChanmgr {
 }
 
 // GetUser is return user info
-func (objmgr *Objmanager) GetUser() *clientuser.ExamUser {
+func (objmgr *Objmanager) GetUser() *ExamUser {
 	return objmgr.eu
 }
 

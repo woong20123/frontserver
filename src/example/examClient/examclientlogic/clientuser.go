@@ -1,4 +1,4 @@
-package clientuser
+package examclientlogic
 
 import (
 	"log"
@@ -20,7 +20,7 @@ type statelist struct {
 	NoneSTATE      int
 	ConnectedSTATE int
 	LobbySTATE     int
-	RoomEnterSTATE int
+	RoomSTATE      int
 	CloseSTATE     int
 }
 
@@ -29,7 +29,7 @@ var UserStateEnum = &statelist{
 	NoneSTATE:      0x10,
 	ConnectedSTATE: 0x11,
 	LobbySTATE:     0x12,
-	RoomEnterSTATE: 0x13,
+	RoomSTATE:      0x13,
 	CloseSTATE:     0x14,
 }
 
@@ -40,6 +40,7 @@ type ExamUser struct {
 	sn             uint32
 	state          int
 	roomIdx        uint32
+	roomName       string
 	onSteteLogic   map[int]UStatelogicFunc
 	SteteScene     map[int]UStateScene
 	closeSceneChan chan int
@@ -85,6 +86,26 @@ func (eu *ExamUser) SetSn(sn uint32) {
 // GetSn is return user serial number
 func (eu *ExamUser) GetSn() uint32 {
 	return eu.sn
+}
+
+// SetRoomIdx is set user's room index
+func (eu *ExamUser) SetRoomIdx(idx uint32) {
+	eu.roomIdx = idx
+}
+
+// GetRoomIdx is return user's room index
+func (eu *ExamUser) GetRoomIdx() uint32 {
+	return eu.roomIdx
+}
+
+// SetRoomName is set user ID
+func (eu *ExamUser) SetRoomName(name string) {
+	eu.roomName = name
+}
+
+// GetRoomName is return user ID
+func (eu *ExamUser) GetRoomName() string {
+	return eu.roomName
 }
 
 // CloseScene is

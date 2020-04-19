@@ -26,11 +26,13 @@ func (sm *SendManager) SendToConn(conn *net.TCPConn, p *packet.Packet) {
 func (sm *SendManager) RunSendHandle(processCount int) {
 	for i := 0; i < processCount; i++ {
 		go handleRequestProcess(sm.serverRequest, func(cr *Request) {
-			_, err := cr.conn.Write(cr.p.GetByte())
-			if err != nil {
-				GetInstance().GetLoggerMgr().GetLogger().Println("RunSendHandle p command = ", cr.p.GetCommand(), " err = ", err)
+			if cr != nil && cr.conn != nil {
+				_, err := cr.conn.Write(cr.p.GetByte())
+				if err != nil {
+					GetInstance().GetLoggerMgr().GetLogger().Println("RunSendHandle p command = ", cr.p.GetCommand(), " err = ", err)
+				}
+				packet.GetPool().ReleasePacket(cr.p)
 			}
-			packet.GetPool().ReleasePacket(cr.p)
 		})
 	}
 }

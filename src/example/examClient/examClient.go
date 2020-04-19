@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"example/examClient/clientuser"
 	"example/examClient/examclientlogic"
 	"example/share"
 	"fmt"
@@ -71,8 +70,10 @@ func handleSend(conn *net.TCPConn, errSend context.CancelFunc, sendPacketChan <-
 	for {
 		// 패킷이 전달되면 패킷을 서버에 전송합니다
 		p := <-sendPacketChan
-		conn.Write(p.GetByte())
-		packet.GetPool().ReleasePacket(p)
+		if conn != nil {
+			conn.Write(p.GetByte())
+			packet.GetPool().ReleasePacket(p)
+		}
 	}
 }
 
@@ -93,7 +94,7 @@ func HandleNetwork(errProc context.CancelFunc, sendPacketChan <-chan *packet.Pac
 		os.Exit(1)
 	}
 
-	sendUserSceneChan(clientuser.UserStateEnum.ConnectedSTATE, fmt.Sprint("서버 접속 성공 [접속정보]", srvInfo.Ip, ":", srvInfo.Port, " "))
+	sendUserSceneChan(examclientlogic.UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), fmt.Sprint("서버 접속 성공 [접속정보]", srvInfo.Ip, ":", srvInfo.Port, " ")})
 
 	defer conn.Close()
 
@@ -137,14 +138,25 @@ func lobbySceneCommand() {
 	readSceneSystemWrite("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
 	readSceneSystemWrite("[명령어]")
 	readSceneSystemWrite("\"/?\" : 화면 클리어 및 명령어 재출력")
-	readSceneSystemWrite("\"/RoomEnter <방이름>\" : 방입장")
-	readSceneSystemWrite("\"/RoomList\" : 현재 생성된 방 목록")
+	readSceneSystemWrite("\"/RoomEnter <방이름>\" : 방입장요청 없으면 방을 생성합니다.")
+	//readSceneSystemWrite("\"/RoomList\" : 현재 생성된 방 목록")
 	readSceneSystemWrite("\"/Close\" : 종료")
 	readSceneSystemWrite("-----------------------------------------------------------")
 }
 
-func sendUserSceneChan(state int, msg string) {
-	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendChanUserState(state, msg)
+func roomSceneCommand() {
+	readSceneSystemWrite(fmt.Sprint("[유저정보] ID = ", examclientlogic.GetInstance().GetObjMgr().GetUser().GetID()))
+	readSceneSystemWrite(fmt.Sprint("[Room이름] = ", examclientlogic.GetInstance().GetObjMgr().GetUser().GetRoomName()))
+	readSceneSystemWrite("채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
+	readSceneSystemWrite("[명령어]")
+	readSceneSystemWrite("\"/?\" : 화면 클리어 및 명령어 재출력")
+	readSceneSystemWrite("\"/RoomLeave\" : 방을 나갑니다.")
+	readSceneSystemWrite("\"/Close\" : 종료")
+	readSceneSystemWrite("-----------------------------------------------------------")
+}
+
+func sendUserSceneChan(state int, msgs []string) {
+	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendChanUserState(state, msgs)
 }
 
 func handleUserScene(errProc context.CancelFunc) {
@@ -155,7 +167,7 @@ func handleUserScene(errProc context.CancelFunc) {
 	user := cobjmgr.GetUser()
 
 	// User가 NoneSTATE일때 Scene을 정의합니다.
-	user.RegistScene(clientuser.UserStateEnum.NoneSTATE, func(closechan chan int) {
+	user.RegistScene(examclientlogic.UserStateEnum.NoneSTATE, func(closechan chan int) {
 		noneStateSceneCommand()
 
 		select {
@@ -165,7 +177,7 @@ func handleUserScene(errProc context.CancelFunc) {
 	})
 
 	// User가 ConnectedSTATE 일 때 Scene을 정의합니다.
-	user.RegistScene(clientuser.UserStateEnum.ConnectedSTATE, func(closechan chan int) {
+	user.RegistScene(examclientlogic.UserStateEnum.ConnectedSTATE, func(closechan chan int) {
 		readSceneSystemWrite("접속시 사용할 ID를 입력해주세요")
 
 		select {
@@ -175,7 +187,7 @@ func handleUserScene(errProc context.CancelFunc) {
 	})
 
 	// User가 LoginSTATE 일 때 Scene을 정의합니다.
-	user.RegistScene(clientuser.UserStateEnum.LobbySTATE, func(closechan chan int) {
+	user.RegistScene(examclientlogic.UserStateEnum.LobbySTATE, func(closechan chan int) {
 		lobbySceneCommand()
 		for {
 			select {
@@ -186,7 +198,8 @@ func handleUserScene(errProc context.CancelFunc) {
 	})
 
 	// User가 RoomEnterSTATE 일 때 Scene을 정의합니다.
-	user.RegistScene(clientuser.UserStateEnum.RoomEnterSTATE, func(closechan chan int) {
+	user.RegistScene(examclientlogic.UserStateEnum.RoomSTATE, func(closechan chan int) {
+		roomSceneCommand()
 		for {
 			select {
 			case <-closechan:
@@ -196,7 +209,7 @@ func handleUserScene(errProc context.CancelFunc) {
 	})
 
 	// User가 CloseSTATE 일 때 Scene을 정의합니다.
-	user.RegistScene(clientuser.UserStateEnum.CloseSTATE, func(closechan chan int) {
+	user.RegistScene(examclientlogic.UserStateEnum.CloseSTATE, func(closechan chan int) {
 		readSceneErrorWrite("클라이언트를 종료합니다. 종료 처리 등록")
 		user.GetConn().Close()
 		time.Sleep(time.Millisecond * 500)
@@ -212,7 +225,10 @@ func handleUserScene(errProc context.CancelFunc) {
 			user.SetState(nextstate.State)
 			readsceneClear()
 			user.CloseScene()
-			readSceneSystemWrite(nextstate.Msg)
+			for _, msg := range nextstate.Msgs {
+				readSceneSystemWrite(msg)
+			}
+
 		}
 	}
 }
@@ -227,10 +243,12 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 	for {
 		select {
 		case requestFromGui := <-chanRequestFromGui:
+			msg := requestFromGui.Msg
+			msg = strings.Trim(msg, "\n")
+
 			switch user.GetState() {
-			case clientuser.UserStateEnum.NoneSTATE:
-				serverinfo := requestFromGui.Msg
-				serverinfo = strings.Trim(serverinfo, "\n")
+			case examclientlogic.UserStateEnum.NoneSTATE:
+				serverinfo := msg
 				if serverinfo == "" {
 					// 기본서버로 접속합니다.
 					cobjmgr.GetChanManager().SendChanSrvInfo(baseIp, basePort)
@@ -249,28 +267,41 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					}
 				}
 
-			case clientuser.UserStateEnum.ConnectedSTATE:
-				userid := requestFromGui.Msg
-				userid = strings.Trim(userid, "\n")
+			case examclientlogic.UserStateEnum.ConnectedSTATE:
+				userid := msg
+				if userid != "" {
+					// User Login 패킷 전송
+					p := packet.GetPool().AcquirePacket()
+					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
+					p.Write(&userid)
+					sendPacketChan <- p
+				} else {
+					readSceneErrorWrite("유저의 ID가 빈문자열입니다.")
+				}
 
-				// User Login 패킷 전송
-				p := packet.GetPool().AcquirePacket()
-				p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
-				p.Write(&userid)
-				sendPacketChan <- p
-			case clientuser.UserStateEnum.LobbySTATE:
-				msg := requestFromGui.Msg
-				msg = strings.Trim(msg, "\n")
-
+			case examclientlogic.UserStateEnum.LobbySTATE:
 				if strings.Index(msg, "/") == 0 {
-					if strings.Contains(msg, "/RoomEnter") {
-						readsceneClear()
-						lobbySceneCommand()
+					if strings.Contains(msg, "/RoomEnter ") {
+						readSceneErrorWrite("/RoomEnter 입력")
+						fileds := strings.Fields(msg)
+						if len(fileds) != 2 {
+							readSceneErrorWrite(fmt.Sprint("len(fileds) = ", len(fileds)))
+							continue
+						}
+
+						roomName := fileds[1]
+
+						p := packet.GetPool().AcquirePacket()
+						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomEnterReq)
+						p.Write(&roomName)
+						sendPacketChan <- p
+						readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomEnterReq name = ", roomName))
 					} else if strings.Contains(msg, "/RoomList") {
 						readsceneClear()
 						lobbySceneCommand()
 					} else if strings.Contains(msg, "/Close") {
-						sendUserSceneChan(clientuser.UserStateEnum.CloseSTATE, "클라이언트를 종료합니다. Bye")
+
+						sendUserSceneChan(examclientlogic.UserStateEnum.CloseSTATE, []string{})
 					} else if strings.Contains(msg, "/?") {
 						readsceneClear()
 						lobbySceneCommand()
@@ -278,11 +309,35 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						readSceneErrorWrite("정상적인 명령을 입력해주세요")
 					}
 				} else {
-					// global msg 패킷 전송
-					p := packet.GetPool().AcquirePacket()
-					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
-					p.Write(&msg)
-					sendPacketChan <- p
+					if msg != "" {
+						// lobby msg 패킷 전송
+						p := packet.GetPool().AcquirePacket()
+						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLobbyMsgReq)
+						p.Write(&msg)
+						sendPacketChan <- p
+					}
+				}
+			case examclientlogic.UserStateEnum.RoomSTATE:
+				if strings.Index(msg, "/") == 0 {
+					if strings.Contains(msg, "/RoomLeave") {
+						// global msg 패킷 전송
+						p := packet.GetPool().AcquirePacket()
+						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomLeaveReq)
+						sendPacketChan <- p
+					} else if strings.Contains(msg, "/?") {
+						readsceneClear()
+						roomSceneCommand()
+					} else if strings.Contains(msg, "/Close") {
+						sendUserSceneChan(examclientlogic.UserStateEnum.CloseSTATE, []string{})
+					}
+				} else {
+					if msg != "" {
+						// room msg 패킷 전송
+						p := packet.GetPool().AcquirePacket()
+						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomMsgReq)
+						p.Write(user.GetRoomIdx(), &msg)
+						sendPacketChan <- p
+					}
 				}
 			}
 		}

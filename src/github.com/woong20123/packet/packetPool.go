@@ -11,7 +11,7 @@ var instance *PacketPool = nil
 func GetPool() *PacketPool {
 	if instance == nil {
 		instance = new(PacketPool)
-		instance.Intialize(2048)
+		instance.Intialize(4096)
 	}
 	return instance
 }

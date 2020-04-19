@@ -20,7 +20,7 @@ type ChanSvrInfoRequest struct {
 // ChanUserStateRequest is
 type ChanUserStateRequest struct {
 	State int
-	Msg   string
+	Msgs  []string
 }
 
 // ChanRequestFromGui is
@@ -52,13 +52,13 @@ func (chanmgr *ClientChanmgr) Intialize() {
 	chanmgr.chanUserState = make(chan ChanUserStateRequest)
 	chanmgr.chanConnectSrvInfo = make(chan ChanSvrInfoRequest)
 	chanmgr.chanSceneClose = make(chan int)
-	chanmgr.chanRequestFromGui = make(chan ChanRequestFromGui, 512)
-	chanmgr.chanRequestToGui = make(chan ChanRequestToGui, 512)
+	chanmgr.chanRequestFromGui = make(chan ChanRequestFromGui, 2048)
+	chanmgr.chanRequestToGui = make(chan ChanRequestToGui, 2048)
 }
 
 // SendChanUserState is
-func (chanmgr *ClientChanmgr) SendChanUserState(state int, msg string) {
-	chanmgr.chanUserState <- ChanUserStateRequest{state, msg}
+func (chanmgr *ClientChanmgr) SendChanUserState(state int, msgs []string) {
+	chanmgr.chanUserState <- ChanUserStateRequest{state, msgs}
 }
 
 // GetChanUserState is

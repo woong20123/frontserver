@@ -1,4 +1,4 @@
-package serveruser
+package examserverlogic
 
 import "net"
 
@@ -8,16 +8,16 @@ type UStatelogicFunc func()
 type statelist struct {
 	NoneSTATE      uint32
 	ConnectedSTATE uint32
-	LoginSTATE     uint32
-	RoomEnterSTATE uint32
+	LobbySTATE     uint32
+	RoomSTATE      uint32
 }
 
 // UserStateEnum for public use user state
 var UserStateEnum = &statelist{
 	NoneSTATE:      0x10,
 	ConnectedSTATE: 0x11,
-	LoginSTATE:     0x12,
-	RoomEnterSTATE: 0x13,
+	LobbySTATE:     0x12,
+	RoomSTATE:      0x13,
 }
 
 // ExamUser = User object connected to the server
@@ -26,7 +26,7 @@ type ExamUser struct {
 	conn         *net.TCPConn
 	id           string
 	state        uint32
-	roomIdx      int
+	roomIdx      uint32
 	onSteteLogic map[int]UStatelogicFunc
 }
 
@@ -34,7 +34,7 @@ type ExamUser struct {
 func NewExamUser() *ExamUser {
 	eu := ExamUser{}
 	eu.state = UserStateEnum.NoneSTATE
-	eu.roomIdx = -1
+	eu.roomIdx = 0
 	eu.onSteteLogic = make(map[int]UStatelogicFunc)
 	eu.conn = nil
 	eu.sn = 0
@@ -79,6 +79,16 @@ func (eu *ExamUser) SetUserSn(sn uint32) {
 // GetUserSn is return user's id
 func (eu *ExamUser) GetUserSn() uint32 {
 	return eu.sn
+}
+
+// SetUserSn is set user's id
+func (eu *ExamUser) SetUserRoomIdx(roomIdx uint32) {
+	eu.roomIdx = roomIdx
+}
+
+// GetUserSn is return user's id
+func (eu *ExamUser) GetUserRoomIdx() uint32 {
+	return eu.roomIdx
 }
 
 // RegistOnStateLogic is return user's state

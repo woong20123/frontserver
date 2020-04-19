@@ -1,7 +1,6 @@
 package examserverlogic
 
 import (
-	"example/examFrontServer/serveruser"
 	"example/share"
 	"net"
 
@@ -14,9 +13,9 @@ func RegistSessionLogic(sessionm *tcpserver.SessionMgr) {
 
 	// 세션 연결시 ExamServer에서 해야 할 작업 등록
 	sessionm.RegistConnectFunc(tcpserver.SessionStateEnum.OnConnected, func(conn *net.TCPConn) {
-		eu := serveruser.NewExamUser()
+		eu := NewExamUser()
 		eu.SetConn(conn)
-		eu.SetState(serveruser.UserStateEnum.ConnectedSTATE)
+		eu.SetState(UserStateEnum.ConnectedSTATE)
 		GetInstance().GetObjMgr().AddUser(conn, eu)
 	})
 

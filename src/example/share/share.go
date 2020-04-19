@@ -14,6 +14,10 @@ const (
 	ResultFail
 	// ResultExistUserID is Exist UserID
 	ResultExistUserID
+	// ResultUserStateErr is user's state error
+	ResultUserStateErr
+	// ResultRoomCreateFail is fail create room object
+	ResultRoomCreateFail
 )
 
 const (
@@ -23,10 +27,15 @@ const (
 	// S2CPacketCommandLoginUserRes is
 	S2CPacketCommandLoginUserRes
 
-	// C2SPacketCommandGolobalMsgReq is
-	C2SPacketCommandGolobalMsgReq
+	// C2SPacketCommandLobbyMsgReq is
+	C2SPacketCommandLobbyMsgReq
 	// S2CPacketCommandLobbyMsgRes is
 	S2CPacketCommandLobbyMsgRes
+
+	// C2SPacketCommandRoomCreateReq is
+	C2SPacketCommandRoomCreateReq
+	// S2CPacketCommandRoomCreateRes is
+	S2CPacketCommandRoomCreateRes
 
 	// C2SPacketCommandRoomEnterReq is
 	C2SPacketCommandRoomEnterReq
@@ -42,6 +51,9 @@ const (
 	C2SPacketCommandRoomMsgReq
 	// S2CPacketCommandRoomMsgRes is
 	S2CPacketCommandRoomMsgRes
+
+	// S2CPacketCommandSystemMsgSend is
+	S2CPacketCommandSystemMsgSend
 )
 
 // C2SPCLoginUserReq is  C2SPacketCommandLoginUserReq packet struct
@@ -58,8 +70,7 @@ type S2CPCLoginUserRes struct {
 
 // C2SPCLobbySendMsgReq is  C2SPacketCommandLoginUserReq packet struct
 type C2SPCLobbySendMsgReq struct {
-	UserSn uint32
-	Msg    string
+	Msg string
 }
 
 // S2CPCLobbySendMsgRes is  S2CPacketCommandLoginUserRes packet struct
@@ -69,27 +80,59 @@ type S2CPCLobbySendMsgRes struct {
 	Msg    string
 }
 
+// C2SPCRoomCreateReq is  C2SPacketCommandRoomEnterReq packet struct
+type C2SPCRoomCreateReq struct {
+	RoomName string
+}
+
+// S2CPCRoomCreateRes is  C2SPacketCommandRoomLeaveReq packet struct
+type S2CPCRoomCreateRes struct {
+	Result      uint32
+	RoomIdx     uint32
+	RoomName    string
+	EnterUserSn uint32
+	EnterUserid string
+}
+
 // C2SPCRoomEnterReq is  C2SPacketCommandRoomEnterReq packet struct
 type C2SPCRoomEnterReq struct {
-	UserSn   uint32
 	RoomName string
 }
 
 // S2CPCRoomEnterRes is  C2SPacketCommandRoomLeaveReq packet struct
 type S2CPCRoomEnterRes struct {
-	Result  uint32
-	roomIdx uint32
+	Result      uint32
+	RoomIdx     uint32
+	RoomName    string
+	EnterUserSn uint32
+	EnterUserid string
 }
 
 // C2SPCRoomLeaveReq is  C2SPacketCommandRoomEnterReq packet struct
 type C2SPCRoomLeaveReq struct {
-	UserSn   uint32
-	RoomName string
 }
 
 // S2CPCRoomLeaveRes is  S2CPacketCommandRoomLeaveRes packet struct
 type S2CPCRoomLeaveRes struct {
+	Result      uint32
+	LeaveUserSn uint32
+	LeaveUserid string
+}
+
+// C2SPCRoomSendMsgReq is  C2SPacketCommandRoomMsgReq packet struct
+type C2SPCRoomSendMsgReq struct {
+	RoomIdx uint32
+	Msg     string
+}
+
+// S2CPCRoomSendMsgRes is  S2CPacketCommandRoomMsgRes packet struct
+type S2CPCRoomSendMsgRes struct {
 	Result uint32
 	Userid string
 	Msg    string
+}
+
+// S2CPCSystemMsgSend is  S2CPacketCommandSystemMsgSend packet struct
+type S2CPCSystemMsgSend struct {
+	Msg string
 }
