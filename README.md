@@ -5,6 +5,6 @@ golang으로 구성된 server 로직입니다.
 ## Quick Links
 * [설치방법](https://github.com/woong20123/frontserver/wiki/FrontServer_Set_Project)
 * [설명](https://github.com/woong20123/frontserver/wiki/FrontServer_doc) 
-* [예제](https://github.com/woong20123/frontserver/wiki/FrontServer_tutorial)
+* [ExampleServer](https://github.com/woong20123/frontserver/wiki/FrontServer_ExampleServer)
 
 
