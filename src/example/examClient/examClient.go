@@ -72,6 +72,7 @@ func handleSend(conn *net.TCPConn, errSend context.CancelFunc, sendPacketChan <-
 		// 패킷이 전달되면 패킷을 서버에 전송합니다
 		p := <-sendPacketChan
 		conn.Write(p.GetByte())
+		packet.GetPool().ReleasePacket(p)
 	}
 }
 
@@ -253,7 +254,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				userid = strings.Trim(userid, "\n")
 
 				// User Login 패킷 전송
-				p := packet.NewPacket()
+				p := packet.GetPool().AcquirePacket()
 				p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
 				p.Write(&userid)
 				sendPacketChan <- p
@@ -278,10 +279,13 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					}
 				} else {
 					// global msg 패킷 전송
-					p := packet.NewPacket()
-					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
-					p.Write(&msg)
-					sendPacketChan <- p
+					for {
+						p := packet.GetPool().AcquirePacket()
+						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
+						p.Write(&msg)
+						sendPacketChan <- p
+					}
+
 				}
 			}
 		}

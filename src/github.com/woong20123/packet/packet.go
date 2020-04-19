@@ -33,18 +33,17 @@ type Header struct {
 
 // Packet is
 type Packet struct {
-	header  Header
-	buffer  []byte
-	readPos uint16
+	header     Header
+	buffer     []byte
+	readPos    uint16
+	bAllocPool bool
 }
 
-// NewPacket allocate memory in the packet buffer
-func NewPacket() *Packet {
-	p := Packet{}
-	p.header = Header{}
-	p.buffer = make([]byte, MaxPacketSize)
+// Init is
+func (p *Packet) Init() {
+	p.header.packetCommand = 0
+	p.header.packetSize = 0
 	p.readPos = 0
-	return &p
 }
 
 // GetByte packet transform to []byte
@@ -238,14 +237,6 @@ func (p *Packet) Write(datas ...interface{}) {
 	}
 }
 
-// WriteString is
-// func (p *Packet) WriteString(str string) {
-// 	length := uint16(len(str))
-// 	p.Write(length)
-// 	len := copy(p.buffer[p.getSize():], str)
-// 	p.addSize(uint16(len))
-// }
-
 func (p *Packet) Read(datas ...interface{}) {
 	for _, data := range datas {
 		if t, _ := intDataSize(data); t != 0 {
@@ -360,6 +351,70 @@ func (p *Packet) Read(datas ...interface{}) {
 	}
 }
 
+// intDataSize returns the size of the data required to represent the data when encoded.
+// It returns zero if the type cannot be implemented by the fast path in Read or Write.
+func intDataSize(data interface{}) (typeSize int, TotalSize int) {
+	typeSize = 0
+	TotalSize = 0
+	switch data := data.(type) {
+	case bool, int8, uint8, *bool, *int8, *uint8:
+		typeSize = 1
+		TotalSize = 1
+	case []bool:
+		typeSize = 1
+		TotalSize = len(data)
+	case []int8:
+		typeSize = 1
+		TotalSize = len(data)
+	case []uint8:
+		typeSize = 1
+		TotalSize = len(data)
+	case int16, uint16, *int16, *uint16:
+		typeSize = 2
+		TotalSize = 2
+	case []int16:
+		typeSize = 2
+		TotalSize = 2 * len(data)
+	case []uint16:
+		typeSize = 2
+		TotalSize = 2 * len(data)
+	case int32, uint32, *int32, *uint32:
+		typeSize = 4
+		TotalSize = 4
+	case []int32:
+		typeSize = 4
+		TotalSize = 4 * len(data)
+	case []uint32:
+		typeSize = 4
+		TotalSize = 4 * len(data)
+	case int64, uint64, *int64, *uint64:
+		typeSize = 8
+		TotalSize = 8
+	case []int64:
+		typeSize = 8
+		TotalSize = 8 * len(data)
+	case []uint64:
+		typeSize = 8
+		TotalSize = 8 * len(data)
+	case float32, *float32:
+		typeSize = 4
+		TotalSize = 4
+	case float64, *float64:
+		typeSize = 8
+		TotalSize = 8
+	case []float32:
+		typeSize = 4
+		TotalSize = 4 * len(data)
+	case []float64:
+		typeSize = 8
+		TotalSize = 8 * len(data)
+	case string, *string:
+		typeSize = 4
+		TotalSize = 4
+	}
+	return
+}
+
 func (p *Packet) getSize() uint16 {
 	return p.header.packetSize
 }
@@ -427,77 +482,13 @@ func AssemblyFromBuffer(buffer []byte, bufferpos uint32, serialkey uint32) (resu
 		// 패킷을 만들 수 있을 만큼 패킷을 전달 받았다면 패킷을 만들고
 		// Logic 처리 goroutine에 전달합니다.
 		if totalPacketSize <= resultpos {
-			pPacket = NewPacket()
+			pPacket = GetPool().AcquirePacket()
 			pPacket.SetHeader(serialKey, 0, packetCommand)
 			pPacket.CopyByte(buffer[PacketHeaderSize:totalPacketSize])
 
 			copy(buffer, buffer[totalPacketSize:resultpos])
 			resultpos = resultpos - totalPacketSize
 		}
-	}
-	return
-}
-
-// intDataSize returns the size of the data required to represent the data when encoded.
-// It returns zero if the type cannot be implemented by the fast path in Read or Write.
-func intDataSize(data interface{}) (typeSize int, TotalSize int) {
-	typeSize = 0
-	TotalSize = 0
-	switch data := data.(type) {
-	case bool, int8, uint8, *bool, *int8, *uint8:
-		typeSize = 1
-		TotalSize = 1
-	case []bool:
-		typeSize = 1
-		TotalSize = len(data)
-	case []int8:
-		typeSize = 1
-		TotalSize = len(data)
-	case []uint8:
-		typeSize = 1
-		TotalSize = len(data)
-	case int16, uint16, *int16, *uint16:
-		typeSize = 2
-		TotalSize = 2
-	case []int16:
-		typeSize = 2
-		TotalSize = 2 * len(data)
-	case []uint16:
-		typeSize = 2
-		TotalSize = 2 * len(data)
-	case int32, uint32, *int32, *uint32:
-		typeSize = 4
-		TotalSize = 4
-	case []int32:
-		typeSize = 4
-		TotalSize = 4 * len(data)
-	case []uint32:
-		typeSize = 4
-		TotalSize = 4 * len(data)
-	case int64, uint64, *int64, *uint64:
-		typeSize = 8
-		TotalSize = 8
-	case []int64:
-		typeSize = 8
-		TotalSize = 8 * len(data)
-	case []uint64:
-		typeSize = 8
-		TotalSize = 8 * len(data)
-	case float32, *float32:
-		typeSize = 4
-		TotalSize = 4
-	case float64, *float64:
-		typeSize = 8
-		TotalSize = 8
-	case []float32:
-		typeSize = 4
-		TotalSize = 4 * len(data)
-	case []float64:
-		typeSize = 8
-		TotalSize = 8 * len(data)
-	case string, *string:
-		typeSize = 4
-		TotalSize = 4
 	}
 	return
 }

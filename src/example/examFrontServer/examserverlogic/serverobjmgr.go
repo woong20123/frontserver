@@ -39,8 +39,11 @@ func (somgr *SvrObjMgr) DelUser(conn *net.TCPConn) {
 
 // FindUser is Find the user in userContainer.
 func (somgr *SvrObjMgr) FindUser(conn *net.TCPConn) *serveruser.ExamUser {
-	eu, _ := somgr.userContainer[conn]
-	return eu
+	eu, exist := somgr.userContainer[conn]
+	if exist {
+		return eu
+	}
+	return nil
 }
 
 // ForEachFunc is Run function to All User

@@ -43,7 +43,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 		}
 
 		// Send 응답 패킷
-		sendp := packet.NewPacket()
+		sendp := packet.GetPool().AcquirePacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLoginUserRes)
 		sendp.Write(result, userSn, &req.UserID)
 		tcpserver.GetInstance().GetSendManager().SendToConn(conn, sendp)
@@ -54,17 +54,20 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 		req := share.C2SPCLobbySendMsgReq{}
 		p.Read(&req.Msg)
 		eu := GetInstance().GetObjMgr().FindUser(conn)
+		if eu == nil {
+			return
+		}
 
 		result := share.ResultSuccess
 
 		// Send 응답 패킷
-		sendp := packet.NewPacket()
+		sendp := packet.GetPool().AcquirePacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLobbyMsgRes)
 		sendp.Write(result, eu.GetUserID(), &req.Msg)
 
 		// 로비에 있는 유저들에게 메시지를 보냅니다.
 		GetInstance().GetObjMgr().ForEachFunc(func(eu *serveruser.ExamUser) {
-			if eu.GetState() == serveruser.UserStateEnum.LoginSTATE {
+			if eu != nil && eu.GetState() == serveruser.UserStateEnum.LoginSTATE {
 				tcpserver.GetInstance().GetSendManager().SendToConn(eu.GetConn(), sendp)
 			}
 		})

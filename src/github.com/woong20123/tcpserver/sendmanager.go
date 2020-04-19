@@ -29,8 +29,8 @@ func (sm *SendManager) RunSendHandle(processCount int) {
 			_, err := cr.conn.Write(cr.p.GetByte())
 			if err != nil {
 				GetInstance().GetLoggerMgr().GetLogger().Println("RunSendHandle p command = ", cr.p.GetCommand(), " err = ", err)
-				return
 			}
+			packet.GetPool().ReleasePacket(cr.p)
 		})
 	}
 }

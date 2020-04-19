@@ -61,6 +61,7 @@ func (lm *LogicManager) packetProcess(cr *Request) {
 	val, exist := lm.LogicConatiner[cmd]
 	if exist {
 		val(cr.conn, cr.p)
+		packet.GetPool().ReleasePacket(cr.p)
 	} else {
 		GetInstance().GetLoggerMgr().GetLogger().Println("call fail ", cmd)
 	}
