@@ -3,7 +3,6 @@ package examserverlogic
 import (
 	"example/examFrontServer/serveruser"
 	"example/share"
-	"log"
 	"net"
 
 	"github.com/woong20123/packet"
@@ -28,7 +27,7 @@ func RegistSessionLogic(sessionm *tcpserver.SessionMgr) {
 			eu.SetConn(nil)
 			userID := eu.GetUserID()
 			GetInstance().GetObjMgr().DelUserString(&userID)
-			log.Println("[", userID, "] 유저가 종료 하였습니다.")
+			GetLogger().Println("[", userID, "] 유저가 종료 하였습니다.")
 		}
 		GetInstance().GetObjMgr().DelUser(conn)
 	})

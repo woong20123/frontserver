@@ -3,7 +3,6 @@ package examserverlogic
 import (
 	"example/examFrontServer/serveruser"
 	"example/share"
-	"log"
 	"net"
 
 	"github.com/woong20123/packet"
@@ -39,7 +38,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 				// 접속한 유저의 ID 등록
 				objmgr.AddUserString(&req.UserID)
 
-				log.Println("[", req.UserID, "] 유저가 접속하였습니다.")
+				GetLogger().Println("[", req.UserID, "] 유저가 접속하였습니다.")
 			}
 		}
 

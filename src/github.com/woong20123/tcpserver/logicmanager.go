@@ -1,7 +1,6 @@
 package tcpserver
 
 import (
-	"log"
 	"net"
 
 	"github.com/woong20123/packet"
@@ -63,6 +62,6 @@ func (lm *LogicManager) packetProcess(cr *Request) {
 	if exist {
 		val(cr.conn, cr.p)
 	} else {
-		log.Println("call fail ", cmd)
+		GetInstance().GetLoggerMgr().GetLogger().Println("call fail ", cmd)
 	}
 }

@@ -1,5 +1,16 @@
 package examserverlogic
 
+import (
+	"log"
+
+	"github.com/woong20123/tcpserver"
+)
+
+// GetLogger is
+func GetLogger() *log.Logger {
+	return tcpserver.GetInstance().GetLoggerMgr().GetLogger()
+}
+
 //ExamSvrSingleton is
 type ExamSvrSingleton struct {
 	objmanager *SvrObjMgr

@@ -2,7 +2,6 @@ package tcpserver
 
 import (
 	"context"
-	"log"
 	"net"
 	"strings"
 	"sync"
@@ -42,7 +41,7 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 				}
 			}
 
-			log.Println("Read", err)
+			GetInstance().GetLoggerMgr().GetLogger().Println("Read", err)
 			return
 		}
 
@@ -84,13 +83,13 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 
 	tcpAddr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
-		log.Println("ResolveTCPAddr", err)
+		GetInstance().GetLoggerMgr().GetLogger().Println("ResolveTCPAddr", err)
 		return
 	}
 	tcpListen, err := net.ListenTCP("tcp", tcpAddr)
 
 	if nil != err {
-		log.Println("ListenTCP", err)
+		GetInstance().GetLoggerMgr().GetLogger().Println("ListenTCP", err)
 		return
 	}
 
@@ -107,7 +106,7 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 		if err != nil {
 			if ne, ok := err.(net.Error); ok {
 				if ne.Temporary() {
-					log.Println("AcceptTCP", err)
+					GetInstance().GetLoggerMgr().GetLogger().Println("AcceptTCP", err)
 					continue
 				}
 			}
@@ -120,7 +119,7 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 				}
 			}
 
-			log.Println("AcceptTcp", err)
+			GetInstance().GetLoggerMgr().GetLogger().Println("AcceptTcp", err)
 			return
 		}
 		GetInstance().GetSessionMgr().RunConnectFunc(SessionStateEnum.OnConnected, conn)

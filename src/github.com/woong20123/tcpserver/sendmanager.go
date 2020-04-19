@@ -1,7 +1,6 @@
 package tcpserver
 
 import (
-	"log"
 	"net"
 
 	"github.com/woong20123/packet"
@@ -29,7 +28,7 @@ func (sm *SendManager) RunSendHandle(processCount int) {
 		go handleRequestProcess(sm.serverRequest, func(cr *Request) {
 			_, err := cr.conn.Write(cr.p.GetByte())
 			if err != nil {
-				log.Println("RunSendHandle p command = ", cr.p.GetCommand(), " err = ", err)
+				GetInstance().GetLoggerMgr().GetLogger().Println("RunSendHandle p command = ", cr.p.GetCommand(), " err = ", err)
 				return
 			}
 		})

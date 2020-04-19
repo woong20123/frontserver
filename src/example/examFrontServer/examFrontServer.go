@@ -41,13 +41,14 @@ func constructTCPServer(port int, chClosed chan struct{}) (wg sync.WaitGroup, ca
 	address := ":" + strconv.Itoa(port)
 	go tcpserver.HandleListener(serverCtx, address, &wg, chClosed)
 	println("[Server 정보] ", address)
+	examserverlogic.GetLogger().Println("[Server 정보] ", address)
 	cancel = shutdown
 	return
 }
 
 func main() {
 	chClosed := make(chan struct{})
-
+	examserverlogic.GetLogger().Println(fmt.Sprint("[Server Ver ", share.ExamVer, "]"))
 	println(fmt.Sprint("[Server Ver ", share.ExamVer, "]"))
 
 	constructTCPSession()

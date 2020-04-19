@@ -1,7 +1,6 @@
 package tcpserver
 
 import (
-	"log"
 	"net"
 )
 
@@ -46,7 +45,7 @@ func (s *SessionMgr) RunConnectFunc(state uint32, conn *net.TCPConn) {
 	if exist {
 		fun(conn)
 	} else {
-		log.Println("RunConnectFunc fail ", state)
+		GetInstance().GetLoggerMgr().GetLogger().Println("RunConnectFunc fail ", state)
 	}
 }
 
