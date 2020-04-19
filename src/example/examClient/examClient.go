@@ -279,13 +279,10 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					}
 				} else {
 					// global msg 패킷 전송
-					for {
-						p := packet.GetPool().AcquirePacket()
-						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
-						p.Write(&msg)
-						sendPacketChan <- p
-					}
-
+					p := packet.GetPool().AcquirePacket()
+					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandGolobalMsgReq)
+					p.Write(&msg)
+					sendPacketChan <- p
 				}
 			}
 		}
