@@ -62,12 +62,12 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 					sendp := packet.GetPool().AcquirePacket()
 					sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLoginUserRes)
 					sendp.Write(res.Result, res.UserSn, &res.UserID)
-					tcpserver.GetInstance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
+					tcpserver.Instance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
 				} else {
 					sendp := packet.GetPool().AcquirePacket()
 					sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandSystemMsgSend)
 					sendp.Write(fmt.Sprint("[", res.UserID, "] 유저가 로비에 접속하였습니다."))
-					tcpserver.GetInstance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
+					tcpserver.Instance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
 				}
 
 			}
@@ -97,7 +97,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 				sendp := packet.GetPool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLobbyMsgRes)
 				sendp.Write(res.Result, &res.Userid, &res.Msg)
-				tcpserver.GetInstance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
+				tcpserver.Instance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
 				GetLogger().Println("[Send Room Msg] send user ", &res.Userid, " recv user ", loop_eu.GetUserID(), " :  ", req.Msg)
 			}
 		})
@@ -153,14 +153,14 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				sendp := packet.GetPool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomEnterRes)
 				sendp.Write(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
-				tcpserver.GetInstance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
+				tcpserver.Instance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
 			})
 		} else {
 			// Send 응답 패킷
 			sendp := packet.GetPool().AcquirePacket()
 			sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomEnterRes)
 			sendp.Write(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
-			tcpserver.GetInstance().GetSendManager().SendToConn(eu.GetConn(), sendp)
+			tcpserver.Instance().GetSendManager().SendToConn(eu.GetConn(), sendp)
 		}
 	})
 
@@ -193,7 +193,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				sendp := packet.GetPool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomLeaveRes)
 				sendp.Write(res.Result, res.LeaveUserSn, &res.LeaveUserid)
-				tcpserver.GetInstance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
+				tcpserver.Instance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
 			})
 		}
 
@@ -201,7 +201,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		sendp := packet.GetPool().AcquirePacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomLeaveRes)
 		sendp.Write(res.Result, res.LeaveUserSn, &res.LeaveUserid)
-		tcpserver.GetInstance().GetSendManager().SendToConn(eu.GetConn(), sendp)
+		tcpserver.Instance().GetSendManager().SendToConn(eu.GetConn(), sendp)
 	})
 
 	// C2SPacketCommandRoomMsgReq Packet Logic
@@ -231,7 +231,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 			sendp := packet.GetPool().AcquirePacket()
 			sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomMsgRes)
 			sendp.Write(res.Result, res.Userid, &req.Msg)
-			tcpserver.GetInstance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
+			tcpserver.Instance().GetSendManager().SendToConn(loop_eu.GetConn(), sendp)
 			GetLogger().Println("[Send Room Msg] send user ", res.Userid, " recv user ", loop_eu.GetUserID(), " :  ", req.Msg)
 		})
 

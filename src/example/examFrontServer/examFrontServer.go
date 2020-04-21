@@ -18,13 +18,13 @@ import (
 )
 
 func constructTCPSession() {
-	sessionm := tcpserver.GetInstance().GetSessionMgr()
+	sessionm := tcpserver.Instance().GetSessionMgr()
 	examserverlogic.RegistSessionLogic(sessionm)
 }
 
 func constructLogic() {
 	// regist exam Logic
-	lm := tcpserver.GetInstance().GetLogicManager()
+	lm := tcpserver.Instance().LogicManager()
 	examserverlogic.RegistCommandLogic(lm)
 	// set logic goroutines count
 	lm.RunLogicHandle(runtime.NumCPU())

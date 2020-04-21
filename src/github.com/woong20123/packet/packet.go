@@ -57,7 +57,7 @@ func (p *Packet) GetByte() []byte {
 }
 
 // GetCommand is return packet command
-func (p *Packet) GetCommand() uint32 {
+func (p *Packet) Command() uint32 {
 	return p.header.packetCommand
 }
 

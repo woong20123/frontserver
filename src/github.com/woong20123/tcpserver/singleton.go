@@ -12,7 +12,7 @@ type SingletonObj struct {
 var instance *SingletonObj = nil
 
 // GetInstance is return SingletonObj
-func GetInstance() *SingletonObj {
+func Instance() *SingletonObj {
 	if instance == nil {
 		instance = newSingletonObj()
 	}
@@ -38,7 +38,7 @@ func newSingletonObj() *SingletonObj {
 }
 
 // GetLogicManager is return SingletonObj
-func (s *SingletonObj) GetLogicManager() *LogicManager {
+func (s *SingletonObj) LogicManager() *LogicManager {
 	return s.logicm
 }
 

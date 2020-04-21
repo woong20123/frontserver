@@ -40,7 +40,7 @@ func RegistSessionLogic(sessionm *tcpserver.SessionMgr) {
 			if onPacket == nil {
 				break
 			}
-			tcpserver.GetInstance().GetLogicManager().CallLogicFun(onPacket.GetCommand(), conn, onPacket)
+			tcpserver.Instance().LogicManager().CallLogicFun(onPacket.Command(), conn, onPacket)
 		}
 		return pos
 	})
