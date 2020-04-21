@@ -21,6 +21,6 @@ func (l *LoggerManager) Intialize() {
 }
 
 // GetLogger is
-func (l *LoggerManager) GetLogger() *log.Logger {
+func (l *LoggerManager) Logger() *log.Logger {
 	return l.loggerObj
 }

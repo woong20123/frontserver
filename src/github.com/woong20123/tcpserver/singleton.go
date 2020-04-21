@@ -12,7 +12,7 @@ type SingletonObj struct {
 var instance *SingletonObj = nil
 
 // GetInstance is return SingletonObj
-func GetInstance() *SingletonObj {
+func Instance() *SingletonObj {
 	if instance == nil {
 		instance = newSingletonObj()
 	}
@@ -38,17 +38,17 @@ func newSingletonObj() *SingletonObj {
 }
 
 // GetLogicManager is return SingletonObj
-func (s *SingletonObj) GetLogicManager() *LogicManager {
+func (s *SingletonObj) LogicManager() *LogicManager {
 	return s.logicm
 }
 
 // GetSendManager is return SendManager
-func (s *SingletonObj) GetSendManager() *SendManager {
+func (s *SingletonObj) SendManager() *SendManager {
 	return s.sendm
 }
 
 // GetSessionMgr is return GetSessionMgr
-func (s *SingletonObj) GetSessionMgr() *SessionMgr {
+func (s *SingletonObj) SessionMgr() *SessionMgr {
 	return s.sessionm
 }
 
@@ -63,6 +63,6 @@ func (s *SingletonObj) GetSerialkey() uint32 {
 }
 
 // GetLoggerMgr is
-func (s *SingletonObj) GetLoggerMgr() *LoggerManager {
+func (s *SingletonObj) LoggerMgr() *LoggerManager {
 	return s.loggerm
 }

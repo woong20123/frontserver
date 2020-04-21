@@ -132,11 +132,11 @@ func (r *ChatRoom) EnterUser(eu *ExamUser) bool {
 	if eu == nil {
 		return false
 	}
-	_, exist := r.userContainer[eu.GetUserSn()]
+	_, exist := r.userContainer[eu.UserSn()]
 	if exist {
 		return false
 	}
-	r.userContainer[eu.GetUserSn()] = eu
+	r.userContainer[eu.UserSn()] = eu
 	return true
 }
 
@@ -145,9 +145,9 @@ func (r *ChatRoom) LeaveUser(eu *ExamUser) bool {
 	if eu == nil {
 		return false
 	}
-	_, exist := r.userContainer[eu.GetUserSn()]
+	_, exist := r.userContainer[eu.UserSn()]
 	if exist {
-		delete(r.userContainer, eu.GetUserSn())
+		delete(r.userContainer, eu.UserSn())
 		return true
 	}
 

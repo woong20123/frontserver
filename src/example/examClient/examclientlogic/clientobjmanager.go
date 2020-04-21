@@ -16,12 +16,12 @@ func (objmgr *Objmanager) Intialize() {
 }
 
 // GetChanManager is
-func (objmgr *Objmanager) GetChanManager() *ClientChanmgr {
+func (objmgr *Objmanager) ChanManager() *ClientChanmgr {
 	return objmgr.channelmgr
 }
 
 // GetUser is return user info
-func (objmgr *Objmanager) GetUser() *ExamUser {
+func (objmgr *Objmanager) User() *ExamUser {
 	return objmgr.eu
 }
 

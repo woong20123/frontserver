@@ -7,8 +7,8 @@ import (
 )
 
 // GetLogger is
-func GetLogger() *log.Logger {
-	return tcpserver.GetInstance().GetLoggerMgr().GetLogger()
+func Logger() *log.Logger {
+	return tcpserver.Instance().LoggerMgr().Logger()
 }
 
 //ExamSvrSingleton is
@@ -18,19 +18,19 @@ type ExamSvrSingleton struct {
 }
 
 // GetObjMgr is
-func (s *ExamSvrSingleton) GetObjMgr() *SvrObjMgr {
+func (s *ExamSvrSingleton) ObjMgr() *SvrObjMgr {
 	return s.objmanager
 }
 
 // GetChatRoomMgr is
-func (s *ExamSvrSingleton) GetChatRoomMgr() *ChatRoomMgr {
+func (s *ExamSvrSingleton) ChatRoomMgr() *ChatRoomMgr {
 	return s.chatroomMgr
 }
 
 var instance *ExamSvrSingleton = nil
 
 // GetInstance is
-func GetInstance() *ExamSvrSingleton {
+func Instance() *ExamSvrSingleton {
 	if instance == nil {
 		instance = newExamSvrSingleton()
 	}

@@ -47,7 +47,7 @@ func (eu *ExamUser) SetConn(conn *net.TCPConn) {
 }
 
 // GetConn is set connection obj
-func (eu *ExamUser) GetConn() *net.TCPConn {
+func (eu *ExamUser) Conn() *net.TCPConn {
 	return eu.conn
 }
 
@@ -57,7 +57,7 @@ func (eu *ExamUser) SetState(state uint32) {
 }
 
 // GetState is return user's state
-func (eu *ExamUser) GetState() uint32 {
+func (eu *ExamUser) State() uint32 {
 	return eu.state
 }
 
@@ -67,7 +67,7 @@ func (eu *ExamUser) SetUserID(id *string) {
 }
 
 // GetUserId is return user's id
-func (eu *ExamUser) GetUserID() string {
+func (eu *ExamUser) UserID() string {
 	return eu.id
 }
 
@@ -77,7 +77,7 @@ func (eu *ExamUser) SetUserSn(sn uint32) {
 }
 
 // GetUserSn is return user's id
-func (eu *ExamUser) GetUserSn() uint32 {
+func (eu *ExamUser) UserSn() uint32 {
 	return eu.sn
 }
 
@@ -87,7 +87,7 @@ func (eu *ExamUser) SetUserRoomIdx(roomIdx uint32) {
 }
 
 // GetUserSn is return user's id
-func (eu *ExamUser) GetUserRoomIdx() uint32 {
+func (eu *ExamUser) UserRoomIdx() uint32 {
 	return eu.roomIdx
 }
 

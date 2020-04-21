@@ -8,7 +8,7 @@ type PacketPool struct {
 var instance *PacketPool = nil
 
 // GetInstance is return SingletonObj
-func GetPool() *PacketPool {
+func Pool() *PacketPool {
 	if instance == nil {
 		instance = new(PacketPool)
 		instance.Intialize(4096)

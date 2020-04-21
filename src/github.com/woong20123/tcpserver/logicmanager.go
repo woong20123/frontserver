@@ -57,12 +57,12 @@ func (lm *LogicManager) handleRequest(queue chan *Request) {
 }
 
 func (lm *LogicManager) packetProcess(cr *Request) {
-	cmd := cr.p.GetCommand()
+	cmd := cr.p.Command()
 	val, exist := lm.LogicConatiner[cmd]
 	if exist {
 		val(cr.conn, cr.p)
-		packet.GetPool().ReleasePacket(cr.p)
+		packet.Pool().ReleasePacket(cr.p)
 	} else {
-		GetInstance().GetLoggerMgr().GetLogger().Println("call fail ", cmd)
+		Instance().LoggerMgr().Logger().Println("call fail ", cmd)
 	}
 }

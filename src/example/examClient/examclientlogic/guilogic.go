@@ -20,7 +20,7 @@ type readString struct {
 }
 
 func runReadLogic() {
-	readEvent := GetInstance().GetObjMgr().GetChanManager().GetchanRequestToGui()
+	readEvent := Instance().ObjMgr().ChanManager().ChanRequestToGui()
 	for {
 		select {
 		case e := <-readEvent:
@@ -142,7 +142,7 @@ mainloop:
 				editBox.MoveCursorToEndOfTheLine()
 			case termbox.KeyEnter:
 				// Scene Handler로 메시지 전송합니다.
-				GetInstance().GetObjMgr().GetChanManager().SendchanRequestFromGui(editBox.getText())
+				Instance().ObjMgr().ChanManager().SendchanRequestFromGui(editBox.getText())
 				editBox.AllClearRune()
 			default:
 				if ev.Ch != 0 {

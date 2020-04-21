@@ -27,11 +27,11 @@ func (sm *SendManager) RunSendHandle(processCount int) {
 	for i := 0; i < processCount; i++ {
 		go handleRequestProcess(sm.serverRequest, func(cr *Request) {
 			if cr != nil && cr.conn != nil {
-				_, err := cr.conn.Write(cr.p.GetByte())
+				_, err := cr.conn.Write(cr.p.Byte())
 				if err != nil {
-					GetInstance().GetLoggerMgr().GetLogger().Println("RunSendHandle p command = ", cr.p.GetCommand(), " err = ", err)
+					Instance().LoggerMgr().Logger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
 				}
-				packet.GetPool().ReleasePacket(cr.p)
+				packet.Pool().ReleasePacket(cr.p)
 			}
 		})
 	}
