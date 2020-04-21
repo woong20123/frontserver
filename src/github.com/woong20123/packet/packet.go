@@ -47,7 +47,7 @@ func (p *Packet) Init() {
 }
 
 // GetByte packet transform to []byte
-func (p *Packet) GetByte() []byte {
+func (p *Packet) Byte() []byte {
 	buffer := make([]byte, PacketHeaderSize+uint32(p.getSize()))
 	binary.LittleEndian.PutUint32(buffer, p.header.serialkey)
 	binary.LittleEndian.PutUint16(buffer[4:], p.header.packetSize)
@@ -482,7 +482,7 @@ func AssemblyFromBuffer(buffer []byte, bufferpos uint32, serialkey uint32) (resu
 		// 패킷을 만들 수 있을 만큼 패킷을 전달 받았다면 패킷을 만들고
 		// Logic 처리 goroutine에 전달합니다.
 		if totalPacketSize <= resultpos {
-			pPacket = GetPool().AcquirePacket()
+			pPacket = Pool().AcquirePacket()
 			pPacket.SetHeader(serialKey, 0, packetCommand)
 			pPacket.CopyByte(buffer[PacketHeaderSize:totalPacketSize])
 

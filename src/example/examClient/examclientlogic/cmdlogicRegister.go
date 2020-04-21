@@ -23,16 +23,16 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 
 		switch res.Result {
 		case share.ResultSuccess:
-			eu := GetInstance().GetObjMgr().GetUser()
+			eu := Instance().ObjMgr().User()
 			if eu != nil {
 				eu.SetID(res.UserID)
 				eu.SetSn(res.UserSn)
-				GetInstance().GetObjMgr().GetChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "==========================")})
+				Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "==========================")})
 			}
 		case share.ResultExistUserID:
-			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), fmt.Sprint("[Login 실패] ", res.UserID, "  유저가 이미 존재합니다.")})
+			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), fmt.Sprint("[Login 실패] ", res.UserID, "  유저가 이미 존재합니다.")})
 		default:
-			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), "[Login 실패]"})
+			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), "[Login 실패]"})
 		}
 
 		return
@@ -48,14 +48,14 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 		sb.WriteString(res.Userid)
 		sb.WriteString(" : ")
 		sb.WriteString(res.Msg)
-		GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorDefault)
+		Instance().ObjMgr().ChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorDefault)
 		return
 	})
 
 	lm.RegistLogicfun(share.S2CPacketCommandSystemMsgSend, func(conn *net.TCPConn, p *packet.Packet) {
 		res := share.S2CPCSystemMsgSend{}
 		p.Read(&res.Msg)
-		GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, res.Msg, termbox.ColorGreen)
+		Instance().ObjMgr().ChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, res.Msg, termbox.ColorGreen)
 		return
 	})
 
@@ -71,7 +71,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	lm.RegistLogicfun(share.S2CPacketCommandRoomEnterRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := share.S2CPCRoomEnterRes{}
 		p.Read(&res.Result, &res.RoomIdx, &res.RoomName, &res.EnterUserSn, &res.EnterUserid)
-		eu := GetInstance().GetObjMgr().GetUser()
+		eu := Instance().ObjMgr().User()
 		if eu == nil {
 			return
 		}
@@ -79,20 +79,20 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		switch res.Result {
 		case share.ResultSuccess:
 			// 자기 자신이면 씬전환 작업을 진행합니다. 다른 유저면 입장 메시지 출력합니다.
-			if res.EnterUserSn == eu.GetSn() {
+			if res.EnterUserSn == eu.Sn() {
 				eu.roomIdx = res.RoomIdx
 				eu.roomName = res.RoomName
-				GetInstance().GetObjMgr().GetChanManager().SendChanUserState(UserStateEnum.RoomSTATE, []string{fmt.Sprint("==========================", "[ 채 팅 방 화 면 ]", "==========================")})
+				Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.RoomSTATE, []string{fmt.Sprint("==========================", "[ 채 팅 방 화 면 ]", "==========================")})
 			} else {
 				var sb strings.Builder
 				sb.WriteString("[")
 				sb.WriteString(res.EnterUserid)
 				sb.WriteString("] 유저가 방에 입장하였습니다.")
-				GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorGreen)
+				Instance().ObjMgr().ChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorGreen)
 			}
 		default:
 
-			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "=========================="), fmt.Sprint("[방생성 실패] ", res.RoomName)})
+			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "=========================="), fmt.Sprint("[방생성 실패] ", res.RoomName)})
 		}
 	})
 
@@ -102,7 +102,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		res := share.S2CPCRoomLeaveRes{}
 		p.Read(&res.Result, &res.LeaveUserSn, &res.LeaveUserid)
 
-		eu := GetInstance().GetObjMgr().GetUser()
+		eu := Instance().ObjMgr().User()
 		if eu == nil {
 			return
 		}
@@ -110,19 +110,19 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		switch res.Result {
 		case share.ResultSuccess:
 			// 자기 자신이면 씬전환 작업을 진행합니다. 다른 유저면 입장 메시지 출력합니다.
-			if res.LeaveUserSn == eu.GetSn() {
+			if res.LeaveUserSn == eu.Sn() {
 				eu.roomIdx = 0
 				eu.roomName = ""
-				GetInstance().GetObjMgr().GetChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "==========================")})
+				Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "==========================")})
 			} else {
 				var sb strings.Builder
 				sb.WriteString("[")
 				sb.WriteString(res.LeaveUserid)
 				sb.WriteString("] 유저가 퇴장하였습니다.")
-				GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorGreen)
+				Instance().ObjMgr().ChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorGreen)
 			}
 		default:
-			GetInstance().GetObjMgr().GetChanManager().SendChanUserState(UserStateEnum.RoomSTATE, []string{fmt.Sprint("==========================", "[ 채 팅 방 화 면 ]", "==========================")})
+			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.RoomSTATE, []string{fmt.Sprint("==========================", "[ 채 팅 방 화 면 ]", "==========================")})
 		}
 	})
 
@@ -137,7 +137,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		sb.WriteString(res.Userid)
 		sb.WriteString(" : ")
 		sb.WriteString(res.Msg)
-		GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorDefault)
+		Instance().ObjMgr().ChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, sb.String(), termbox.ColorDefault)
 		return
 	})
 }

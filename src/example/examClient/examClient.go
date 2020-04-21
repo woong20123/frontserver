@@ -71,8 +71,8 @@ func handleSend(conn *net.TCPConn, errSend context.CancelFunc, sendPacketChan <-
 		// 패킷이 전달되면 패킷을 서버에 전송합니다
 		p := <-sendPacketChan
 		if conn != nil {
-			conn.Write(p.GetByte())
-			packet.GetPool().ReleasePacket(p)
+			conn.Write(p.Byte())
+			packet.Pool().ReleasePacket(p)
 		}
 	}
 }
@@ -81,7 +81,7 @@ func handleSend(conn *net.TCPConn, errSend context.CancelFunc, sendPacketChan <-
 func HandleNetwork(errProc context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
 	defer errProc()
 
-	chanConnectSrvInfo := examclientlogic.GetInstance().GetObjMgr().GetChanManager().GetChanSrvInfo()
+	chanConnectSrvInfo := examclientlogic.Instance().ObjMgr().ChanManager().ChanSrvInfo()
 	srvInfo := <-chanConnectSrvInfo
 
 	var remoteaddr net.TCPAddr
@@ -111,19 +111,19 @@ func HandleNetwork(errProc context.CancelFunc, sendPacketChan <-chan *packet.Pac
 }
 
 func readsceneClear() {
-	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEWindowClear, "", termbox.ColorDefault)
+	examclientlogic.Instance().ObjMgr().ChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEWindowClear, "", termbox.ColorDefault)
 }
 
 func readSceneSystemWrite(msg string) {
-	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEMsgPrint, msg, termbox.ColorYellow)
+	examclientlogic.Instance().ObjMgr().ChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEMsgPrint, msg, termbox.ColorYellow)
 }
 
 func readSceneErrorWrite(msg string) {
-	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEMsgPrint, msg, termbox.ColorRed)
+	examclientlogic.Instance().ObjMgr().ChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEMsgPrint, msg, termbox.ColorRed)
 }
 
 func readSceneWrite(msg string, colword termbox.Attribute) {
-	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEMsgPrint, msg, colword)
+	examclientlogic.Instance().ObjMgr().ChanManager().SendchanRequestToGui(examclientlogic.ToGUIEnum.TYPEMsgPrint, msg, colword)
 }
 
 func noneStateSceneCommand() {
@@ -134,7 +134,7 @@ func noneStateSceneCommand() {
 }
 
 func lobbySceneCommand() {
-	readSceneSystemWrite(fmt.Sprint("[유저정보] ID = ", examclientlogic.GetInstance().GetObjMgr().GetUser().GetID()))
+	readSceneSystemWrite(fmt.Sprint("[유저정보] ID = ", examclientlogic.Instance().ObjMgr().User().ID()))
 	readSceneSystemWrite("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
 	readSceneSystemWrite("[명령어]")
 	readSceneSystemWrite("\"/?\" : 화면 클리어 및 명령어 재출력")
@@ -145,8 +145,8 @@ func lobbySceneCommand() {
 }
 
 func roomSceneCommand() {
-	readSceneSystemWrite(fmt.Sprint("[유저정보] ID = ", examclientlogic.GetInstance().GetObjMgr().GetUser().GetID()))
-	readSceneSystemWrite(fmt.Sprint("[Room이름] = ", examclientlogic.GetInstance().GetObjMgr().GetUser().GetRoomName()))
+	readSceneSystemWrite(fmt.Sprint("[유저정보] ID = ", examclientlogic.Instance().ObjMgr().User().ID()))
+	readSceneSystemWrite(fmt.Sprint("[Room이름] = ", examclientlogic.Instance().ObjMgr().User().RoomName()))
 	readSceneSystemWrite("채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
 	readSceneSystemWrite("[명령어]")
 	readSceneSystemWrite("\"/?\" : 화면 클리어 및 명령어 재출력")
@@ -156,15 +156,15 @@ func roomSceneCommand() {
 }
 
 func sendUserSceneChan(state int, msgs []string) {
-	examclientlogic.GetInstance().GetObjMgr().GetChanManager().SendChanUserState(state, msgs)
+	examclientlogic.Instance().ObjMgr().ChanManager().SendChanUserState(state, msgs)
 }
 
 func handleUserScene(errProc context.CancelFunc) {
 	defer errProc()
 
-	cobjmgr := examclientlogic.GetInstance().GetObjMgr()
-	chanState := cobjmgr.GetChanManager().GetChanUserState()
-	user := cobjmgr.GetUser()
+	cobjmgr := examclientlogic.Instance().ObjMgr()
+	chanState := cobjmgr.ChanManager().ChanUserState()
+	user := cobjmgr.User()
 
 	// User가 NoneSTATE일때 Scene을 정의합니다.
 	user.RegistScene(examclientlogic.UserStateEnum.NoneSTATE, func(closechan chan int) {
@@ -211,13 +211,13 @@ func handleUserScene(errProc context.CancelFunc) {
 	// User가 CloseSTATE 일 때 Scene을 정의합니다.
 	user.RegistScene(examclientlogic.UserStateEnum.CloseSTATE, func(closechan chan int) {
 		readSceneErrorWrite("클라이언트를 종료합니다. 종료 처리 등록")
-		user.GetConn().Close()
+		user.Conn().Close()
 		time.Sleep(time.Millisecond * 500)
 		errProc()
 	})
 
 	for {
-		curState := user.GetState()
+		curState := user.State()
 		user.RunScene(curState)
 
 		select {
@@ -236,9 +236,9 @@ func handleUserScene(errProc context.CancelFunc) {
 func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packet) {
 	defer errProc()
 
-	cobjmgr := examclientlogic.GetInstance().GetObjMgr()
-	user := cobjmgr.GetUser()
-	chanRequestFromGui := cobjmgr.GetChanManager().GetchanRequestFromGui()
+	cobjmgr := examclientlogic.Instance().ObjMgr()
+	user := cobjmgr.User()
+	chanRequestFromGui := cobjmgr.ChanManager().GetchanRequestFromGui()
 
 	for {
 		select {
@@ -246,12 +246,12 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 			msg := requestFromGui.Msg
 			msg = strings.Trim(msg, "\n")
 
-			switch user.GetState() {
+			switch user.State() {
 			case examclientlogic.UserStateEnum.NoneSTATE:
 				serverinfo := msg
 				if serverinfo == "" {
 					// 기본서버로 접속합니다.
-					cobjmgr.GetChanManager().SendChanSrvInfo(baseIp, basePort)
+					cobjmgr.ChanManager().SendChanSrvInfo(baseIp, basePort)
 					readSceneSystemWrite(fmt.Sprint(baseIp, ":", basePort, "서버에 접속을 요청합니다."))
 				} else {
 					infos := strings.Split(serverinfo, ":")
@@ -259,7 +259,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if len(infos) == 2 {
 						port, err := strconv.Atoi(infos[1])
 						if err == nil {
-							cobjmgr.GetChanManager().SendChanSrvInfo(infos[0], port)
+							cobjmgr.ChanManager().SendChanSrvInfo(infos[0], port)
 							readSceneSystemWrite(fmt.Sprint(infos[0], ":", port, "서버에 접속을 요청합니다."))
 						}
 					} else {
@@ -271,7 +271,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				userid := msg
 				if userid != "" {
 					// User Login 패킷 전송
-					p := packet.GetPool().AcquirePacket()
+					p := packet.Pool().AcquirePacket()
 					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
 					p.Write(&userid)
 					sendPacketChan <- p
@@ -291,7 +291,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 
 						roomName := fileds[1]
 
-						p := packet.GetPool().AcquirePacket()
+						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomEnterReq)
 						p.Write(&roomName)
 						sendPacketChan <- p
@@ -311,7 +311,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				} else {
 					if msg != "" {
 						// lobby msg 패킷 전송
-						p := packet.GetPool().AcquirePacket()
+						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLobbyMsgReq)
 						p.Write(&msg)
 						sendPacketChan <- p
@@ -321,7 +321,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				if strings.Index(msg, "/") == 0 {
 					if strings.Contains(msg, "/RoomLeave") {
 						// global msg 패킷 전송
-						p := packet.GetPool().AcquirePacket()
+						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomLeaveReq)
 						sendPacketChan <- p
 					} else if strings.Contains(msg, "/?") {
@@ -333,7 +333,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				} else {
 					if msg != "" {
 						// room msg 패킷 전송
-						p := packet.GetPool().AcquirePacket()
+						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomMsgReq)
 						p.Write(user.GetRoomIdx(), &msg)
 						sendPacketChan <- p

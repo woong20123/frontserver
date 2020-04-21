@@ -43,12 +43,12 @@ func (s *SingletonObj) LogicManager() *LogicManager {
 }
 
 // GetSendManager is return SendManager
-func (s *SingletonObj) GetSendManager() *SendManager {
+func (s *SingletonObj) SendManager() *SendManager {
 	return s.sendm
 }
 
 // GetSessionMgr is return GetSessionMgr
-func (s *SingletonObj) GetSessionMgr() *SessionMgr {
+func (s *SingletonObj) SessionMgr() *SessionMgr {
 	return s.sessionm
 }
 

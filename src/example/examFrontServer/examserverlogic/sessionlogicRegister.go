@@ -16,19 +16,19 @@ func RegistSessionLogic(sessionm *tcpserver.SessionMgr) {
 		eu := NewExamUser()
 		eu.SetConn(conn)
 		eu.SetState(UserStateEnum.ConnectedSTATE)
-		GetInstance().GetObjMgr().AddUser(conn, eu)
+		Instance().ObjMgr().AddUser(conn, eu)
 	})
 
 	// 세션 종료시 ExamServer에서 해야 할 작업 등록
 	sessionm.RegistConnectFunc(tcpserver.SessionStateEnum.OnClosed, func(conn *net.TCPConn) {
-		eu := GetInstance().GetObjMgr().FindUser(conn)
+		eu := Instance().ObjMgr().FindUser(conn)
 		if eu != nil {
 			eu.SetConn(nil)
-			userID := eu.GetUserID()
-			GetInstance().GetObjMgr().DelUserString(&userID)
-			GetLogger().Println("[", userID, "] 유저가 종료 하였습니다.")
+			userID := eu.UserID()
+			Instance().ObjMgr().DelUserString(&userID)
+			Logger().Println("[", userID, "] 유저가 종료 하였습니다.")
 		}
-		GetInstance().GetObjMgr().DelUser(conn)
+		Instance().ObjMgr().DelUser(conn)
 	})
 
 	// 세션으로 데이터가 들어오면 해야 할 작업 등록

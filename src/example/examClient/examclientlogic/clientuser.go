@@ -64,7 +64,7 @@ func (eu *ExamUser) SetConn(conn *net.TCPConn) {
 }
 
 // GetConn is
-func (eu *ExamUser) GetConn() *net.TCPConn {
+func (eu *ExamUser) Conn() *net.TCPConn {
 	return eu.conn
 }
 
@@ -74,7 +74,7 @@ func (eu *ExamUser) SetID(id string) {
 }
 
 // GetID is return user ID
-func (eu *ExamUser) GetID() string {
+func (eu *ExamUser) ID() string {
 	return eu.id
 }
 
@@ -84,7 +84,7 @@ func (eu *ExamUser) SetSn(sn uint32) {
 }
 
 // GetSn is return user serial number
-func (eu *ExamUser) GetSn() uint32 {
+func (eu *ExamUser) Sn() uint32 {
 	return eu.sn
 }
 
@@ -104,7 +104,7 @@ func (eu *ExamUser) SetRoomName(name string) {
 }
 
 // GetRoomName is return user ID
-func (eu *ExamUser) GetRoomName() string {
+func (eu *ExamUser) RoomName() string {
 	return eu.roomName
 }
 
@@ -119,7 +119,7 @@ func (eu *ExamUser) SetState(state int) {
 }
 
 // GetState is return user's state
-func (eu *ExamUser) GetState() int {
+func (eu *ExamUser) State() int {
 	return eu.state
 }
 

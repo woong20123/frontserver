@@ -62,7 +62,7 @@ func (chanmgr *ClientChanmgr) SendChanUserState(state int, msgs []string) {
 }
 
 // GetChanUserState is
-func (chanmgr *ClientChanmgr) GetChanUserState() chan ChanUserStateRequest {
+func (chanmgr *ClientChanmgr) ChanUserState() chan ChanUserStateRequest {
 	return chanmgr.chanUserState
 }
 
@@ -72,7 +72,7 @@ func (chanmgr *ClientChanmgr) SendChanSrvInfo(ip string, port int) {
 }
 
 // GetChanSrvInfo is
-func (chanmgr *ClientChanmgr) GetChanSrvInfo() chan ChanSvrInfoRequest {
+func (chanmgr *ClientChanmgr) ChanSrvInfo() chan ChanSvrInfoRequest {
 	return chanmgr.chanConnectSrvInfo
 }
 

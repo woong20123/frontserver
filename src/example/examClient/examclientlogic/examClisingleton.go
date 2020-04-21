@@ -8,7 +8,7 @@ type ExamCliSingleton struct {
 var instance *ExamCliSingleton = nil
 
 // GetInstance is
-func GetInstance() *ExamCliSingleton {
+func Instance() *ExamCliSingleton {
 	if instance == nil {
 		instance = newExamCliSingleton()
 	}
@@ -25,6 +25,6 @@ func newExamCliSingleton() *ExamCliSingleton {
 }
 
 // GetObjMgr is
-func (s *ExamCliSingleton) GetObjMgr() *Objmanager {
+func (s *ExamCliSingleton) ObjMgr() *Objmanager {
 	return s.objmanager
 }
