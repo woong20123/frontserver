@@ -29,7 +29,7 @@ func (sm *SendManager) RunSendHandle(processCount int) {
 			if cr != nil && cr.conn != nil {
 				_, err := cr.conn.Write(cr.p.Byte())
 				if err != nil {
-					Instance().GetLoggerMgr().GetLogger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
+					Instance().LoggerMgr().Logger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
 				}
 				packet.Pool().ReleasePacket(cr.p)
 			}

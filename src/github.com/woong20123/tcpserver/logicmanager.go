@@ -63,6 +63,6 @@ func (lm *LogicManager) packetProcess(cr *Request) {
 		val(cr.conn, cr.p)
 		packet.Pool().ReleasePacket(cr.p)
 	} else {
-		Instance().GetLoggerMgr().GetLogger().Println("call fail ", cmd)
+		Instance().LoggerMgr().Logger().Println("call fail ", cmd)
 	}
 }

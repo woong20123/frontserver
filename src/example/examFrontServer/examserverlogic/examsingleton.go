@@ -8,7 +8,7 @@ import (
 
 // GetLogger is
 func Logger() *log.Logger {
-	return tcpserver.Instance().GetLoggerMgr().GetLogger()
+	return tcpserver.Instance().LoggerMgr().Logger()
 }
 
 //ExamSvrSingleton is

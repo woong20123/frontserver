@@ -61,7 +61,7 @@ func (chanmgr *ClientChanmgr) SendChanUserState(state int, msgs []string) {
 	chanmgr.chanUserState <- ChanUserStateRequest{state, msgs}
 }
 
-// GetChanUserState is
+// ChanUserState is
 func (chanmgr *ClientChanmgr) ChanUserState() chan ChanUserStateRequest {
 	return chanmgr.chanUserState
 }
@@ -71,7 +71,7 @@ func (chanmgr *ClientChanmgr) SendChanSrvInfo(ip string, port int) {
 	chanmgr.chanConnectSrvInfo <- ChanSvrInfoRequest{ip, port}
 }
 
-// GetChanSrvInfo is
+// ChanSrvInfo is
 func (chanmgr *ClientChanmgr) ChanSrvInfo() chan ChanSvrInfoRequest {
 	return chanmgr.chanConnectSrvInfo
 }
@@ -81,8 +81,8 @@ func (chanmgr *ClientChanmgr) SendChanSceneClose() {
 	chanmgr.chanSceneClose <- 1
 }
 
-// GetchanRequestFromGui is
-func (chanmgr *ClientChanmgr) GetchanRequestFromGui() chan ChanRequestFromGui {
+// ChanRequestFromGui is
+func (chanmgr *ClientChanmgr) ChanRequestFromGui() chan ChanRequestFromGui {
 	return chanmgr.chanRequestFromGui
 }
 
@@ -91,8 +91,8 @@ func (chanmgr *ClientChanmgr) SendchanRequestFromGui(msg string) {
 	chanmgr.chanRequestFromGui <- ChanRequestFromGui{1, msg}
 }
 
-// GetchanRequestToGui is
-func (chanmgr *ClientChanmgr) GetchanRequestToGui() chan ChanRequestToGui {
+// ChanRequestToGui is
+func (chanmgr *ClientChanmgr) ChanRequestToGui() chan ChanRequestToGui {
 	return chanmgr.chanRequestToGui
 }
 

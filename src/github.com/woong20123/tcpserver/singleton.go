@@ -63,6 +63,6 @@ func (s *SingletonObj) GetSerialkey() uint32 {
 }
 
 // GetLoggerMgr is
-func (s *SingletonObj) GetLoggerMgr() *LoggerManager {
+func (s *SingletonObj) LoggerMgr() *LoggerManager {
 	return s.loggerm
 }

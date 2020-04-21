@@ -20,7 +20,7 @@ type readString struct {
 }
 
 func runReadLogic() {
-	readEvent := Instance().ObjMgr().ChanManager().GetchanRequestToGui()
+	readEvent := Instance().ObjMgr().ChanManager().ChanRequestToGui()
 	for {
 		select {
 		case e := <-readEvent:

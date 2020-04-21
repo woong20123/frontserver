@@ -93,8 +93,8 @@ func (eu *ExamUser) SetRoomIdx(idx uint32) {
 	eu.roomIdx = idx
 }
 
-// GetRoomIdx is return user's room index
-func (eu *ExamUser) GetRoomIdx() uint32 {
+// RoomIdx is return user's room index
+func (eu *ExamUser) RoomIdx() uint32 {
 	return eu.roomIdx
 }
 

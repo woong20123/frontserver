@@ -238,7 +238,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 
 	cobjmgr := examclientlogic.Instance().ObjMgr()
 	user := cobjmgr.User()
-	chanRequestFromGui := cobjmgr.ChanManager().GetchanRequestFromGui()
+	chanRequestFromGui := cobjmgr.ChanManager().ChanRequestFromGui()
 
 	for {
 		select {
@@ -335,7 +335,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						// room msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomMsgReq)
-						p.Write(user.GetRoomIdx(), &msg)
+						p.Write(user.RoomIdx(), &msg)
 						sendPacketChan <- p
 					}
 				}

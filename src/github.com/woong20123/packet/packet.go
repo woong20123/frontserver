@@ -35,7 +35,7 @@ type Header struct {
 type Packet struct {
 	header     Header
 	buffer     []byte
-	readPos    uint16
+	rPos       uint16
 	bAllocPool bool
 }
 
@@ -43,12 +43,12 @@ type Packet struct {
 func (p *Packet) Init() {
 	p.header.packetCommand = 0
 	p.header.packetSize = 0
-	p.readPos = 0
+	p.rPos = 0
 }
 
 // GetByte packet transform to []byte
 func (p *Packet) Byte() []byte {
-	buffer := make([]byte, PacketHeaderSize+uint32(p.getSize()))
+	buffer := make([]byte, PacketHeaderSize+uint32(p.size()))
 	binary.LittleEndian.PutUint32(buffer, p.header.serialkey)
 	binary.LittleEndian.PutUint16(buffer[4:], p.header.packetSize)
 	binary.LittleEndian.PutUint32(buffer[6:], p.header.packetCommand)
@@ -70,7 +70,7 @@ func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand ui
 
 // CopyByte write byte to packet buffer
 func (p *Packet) CopyByte(data []byte) {
-	length := copy(p.buffer[p.getSize():], data)
+	length := copy(p.buffer[p.size():], data)
 	p.addSize(uint16(length))
 }
 
@@ -82,151 +82,151 @@ func (p *Packet) Write(datas ...interface{}) {
 			switch v := data.(type) {
 			case *bool:
 				if *v {
-					p.buffer[p.getSize()] = 1
+					p.buffer[p.size()] = 1
 				} else {
-					p.buffer[p.getSize()] = 0
+					p.buffer[p.size()] = 0
 				}
 				p.addSize(typeSize)
 			case bool:
 				if v {
-					p.buffer[p.getSize()] = 1
+					p.buffer[p.size()] = 1
 				} else {
-					p.buffer[p.getSize()] = 0
+					p.buffer[p.size()] = 0
 				}
 				p.addSize(typeSize)
 			case []bool:
 				for _, x := range v {
 					if x {
-						p.buffer[p.getSize()] = 1
+						p.buffer[p.size()] = 1
 					} else {
-						p.buffer[p.getSize()] = 0
+						p.buffer[p.size()] = 0
 					}
 					p.addSize(typeSize)
 				}
 			case *int8:
-				p.buffer[p.getSize()] = byte(*v)
+				p.buffer[p.size()] = byte(*v)
 				p.addSize(typeSize)
 			case int8:
-				p.buffer[p.getSize()] = byte(v)
+				p.buffer[p.size()] = byte(v)
 				p.addSize(typeSize)
 			case []int8:
 				for _, x := range v {
-					p.buffer[p.getSize()] = byte(x)
+					p.buffer[p.size()] = byte(x)
 					p.addSize(typeSize)
 				}
 			case *uint8:
-				p.buffer[p.getSize()] = *v
+				p.buffer[p.size()] = *v
 				p.addSize(typeSize)
 			case uint8:
-				p.buffer[p.getSize()] = v
+				p.buffer[p.size()] = v
 				p.addSize(typeSize)
 			case []uint8:
 				for _, x := range v {
-					p.buffer[p.getSize()] = x
+					p.buffer[p.size()] = x
 					p.addSize(typeSize)
 				}
 			case *int16:
-				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], uint16(*v))
+				binary.LittleEndian.PutUint16(p.buffer[p.size():], uint16(*v))
 				p.addSize(typeSize)
 			case int16:
-				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], uint16(v))
+				binary.LittleEndian.PutUint16(p.buffer[p.size():], uint16(v))
 				p.addSize(typeSize)
 			case []int16:
 				for _, x := range v {
-					binary.LittleEndian.PutUint16(p.buffer[p.getSize():], uint16(x))
+					binary.LittleEndian.PutUint16(p.buffer[p.size():], uint16(x))
 					p.addSize(typeSize)
 				}
 			case *uint16:
-				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], *v)
+				binary.LittleEndian.PutUint16(p.buffer[p.size():], *v)
 				p.addSize(typeSize)
 			case uint16:
-				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], v)
+				binary.LittleEndian.PutUint16(p.buffer[p.size():], v)
 				p.addSize(typeSize)
 			case []uint16:
 				for _, x := range v {
-					binary.LittleEndian.PutUint16(p.buffer[p.getSize():], x)
+					binary.LittleEndian.PutUint16(p.buffer[p.size():], x)
 					p.addSize(typeSize)
 				}
 			case *int:
 			case *int32:
-				binary.LittleEndian.PutUint32(p.buffer[p.getSize():], uint32(*v))
+				binary.LittleEndian.PutUint32(p.buffer[p.size():], uint32(*v))
 				p.addSize(typeSize)
 			case int:
 			case int32:
-				binary.LittleEndian.PutUint32(p.buffer[p.getSize():], uint32(v))
+				binary.LittleEndian.PutUint32(p.buffer[p.size():], uint32(v))
 				p.addSize(typeSize)
 			case []int32:
 				for _, x := range v {
-					binary.LittleEndian.PutUint32(p.buffer[p.getSize():], uint32(x))
+					binary.LittleEndian.PutUint32(p.buffer[p.size():], uint32(x))
 					p.addSize(typeSize)
 				}
 			case *uint:
 			case *uint32:
-				binary.LittleEndian.PutUint32(p.buffer[p.getSize():], *v)
+				binary.LittleEndian.PutUint32(p.buffer[p.size():], *v)
 				p.addSize(typeSize)
 			case uint:
 			case uint32:
-				binary.LittleEndian.PutUint32(p.buffer[p.getSize():], v)
+				binary.LittleEndian.PutUint32(p.buffer[p.size():], v)
 				p.addSize(typeSize)
 			case []uint32:
 				for _, x := range v {
-					binary.LittleEndian.PutUint32(p.buffer[p.getSize():], x)
+					binary.LittleEndian.PutUint32(p.buffer[p.size():], x)
 					p.addSize(typeSize)
 				}
 			case *int64:
-				binary.LittleEndian.PutUint64(p.buffer[p.getSize():], uint64(*v))
+				binary.LittleEndian.PutUint64(p.buffer[p.size():], uint64(*v))
 				p.addSize(typeSize)
 			case int64:
-				binary.LittleEndian.PutUint64(p.buffer[p.getSize():], uint64(v))
+				binary.LittleEndian.PutUint64(p.buffer[p.size():], uint64(v))
 				p.addSize(typeSize)
 			case []int64:
 				for _, x := range v {
-					binary.LittleEndian.PutUint64(p.buffer[p.getSize():], uint64(x))
+					binary.LittleEndian.PutUint64(p.buffer[p.size():], uint64(x))
 					p.addSize(typeSize)
 				}
 			case *uint64:
-				binary.LittleEndian.PutUint64(p.buffer[p.getSize():], *v)
+				binary.LittleEndian.PutUint64(p.buffer[p.size():], *v)
 				p.addSize(typeSize)
 			case uint64:
-				binary.LittleEndian.PutUint64(p.buffer[p.getSize():], v)
+				binary.LittleEndian.PutUint64(p.buffer[p.size():], v)
 				p.addSize(typeSize)
 			case []uint64:
 				for _, x := range v {
-					binary.LittleEndian.PutUint64(p.buffer[p.getSize():], x)
+					binary.LittleEndian.PutUint64(p.buffer[p.size():], x)
 				}
 			case *float32:
-				binary.LittleEndian.PutUint32(p.buffer[p.getSize():], math.Float32bits(*v))
+				binary.LittleEndian.PutUint32(p.buffer[p.size():], math.Float32bits(*v))
 				p.addSize(typeSize)
 			case float32:
-				binary.LittleEndian.PutUint32(p.buffer[p.getSize():], math.Float32bits(v))
+				binary.LittleEndian.PutUint32(p.buffer[p.size():], math.Float32bits(v))
 				p.addSize(typeSize)
 			case []float32:
 				for _, x := range v {
-					binary.LittleEndian.PutUint32(p.buffer[p.getSize():], math.Float32bits(x))
+					binary.LittleEndian.PutUint32(p.buffer[p.size():], math.Float32bits(x))
 					p.addSize(typeSize)
 				}
 			case *float64:
-				binary.LittleEndian.PutUint64(p.buffer[p.getSize():], math.Float64bits(*v))
+				binary.LittleEndian.PutUint64(p.buffer[p.size():], math.Float64bits(*v))
 				p.addSize(typeSize)
 			case float64:
-				binary.LittleEndian.PutUint64(p.buffer[p.getSize():], math.Float64bits(v))
+				binary.LittleEndian.PutUint64(p.buffer[p.size():], math.Float64bits(v))
 				p.addSize(typeSize)
 			case []float64:
 				for _, x := range v {
-					binary.LittleEndian.PutUint64(p.buffer[p.getSize():], math.Float64bits(x))
+					binary.LittleEndian.PutUint64(p.buffer[p.size():], math.Float64bits(x))
 					p.addSize(typeSize)
 				}
 			case string:
 				length := uint16(len(v))
-				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], length)
+				binary.LittleEndian.PutUint16(p.buffer[p.size():], length)
 				p.addSize(2)
-				len := copy(p.buffer[p.getSize():], v)
+				len := copy(p.buffer[p.size():], v)
 				p.addSize(uint16(len))
 			case *string:
 				length := uint16(len(*v))
-				binary.LittleEndian.PutUint16(p.buffer[p.getSize():], length)
+				binary.LittleEndian.PutUint16(p.buffer[p.size():], length)
 				p.addSize(2)
-				len := copy(p.buffer[p.getSize():], *v)
+				len := copy(p.buffer[p.size():], *v)
 				p.addSize(uint16(len))
 			default:
 				log.Printf("not find type Packet Write")
@@ -243,103 +243,104 @@ func (p *Packet) Read(datas ...interface{}) {
 			typeSize := uint16(t)
 			switch data := data.(type) {
 			case *bool:
-				*data = p.buffer[p.getReadPos()] != 0
+				*data = p.buffer[p.readPos()] != 0
 				p.addReadPos(typeSize)
 			case *int8:
-				*data = int8(p.buffer[p.getReadPos()])
+				*data = int8(p.buffer[p.readPos()])
 				p.addReadPos(typeSize)
 			case *uint8:
-				*data = p.buffer[p.getReadPos()]
+				*data = p.buffer[p.readPos()]
 				p.addReadPos(typeSize)
 			case *int16:
-				*data = int16(binary.LittleEndian.Uint16(p.buffer[p.getReadPos():]))
+				*data = int16(binary.LittleEndian.Uint16(p.buffer[p.readPos():]))
 				p.addReadPos(typeSize)
 			case *uint16:
-				*data = binary.LittleEndian.Uint16(p.buffer[p.getReadPos():])
+				*data = binary.LittleEndian.Uint16(p.buffer[p.readPos():])
 				p.addReadPos(typeSize)
 			case *int32:
-				*data = int32(binary.LittleEndian.Uint32(p.buffer[p.getReadPos():]))
+				*data = int32(binary.LittleEndian.Uint32(p.buffer[p.readPos():]))
 				p.addReadPos(typeSize)
 			case *int:
-				*data = int(binary.LittleEndian.Uint32(p.buffer[p.getReadPos():]))
+				*data = int(binary.LittleEndian.Uint32(p.buffer[p.readPos():]))
 				p.addReadPos(typeSize)
 			case *uint32:
-				*data = binary.LittleEndian.Uint32(p.buffer[p.getReadPos():])
+				*data = binary.LittleEndian.Uint32(p.buffer[p.readPos():])
 				p.addReadPos(typeSize)
 			case *uint:
-				*data = uint(binary.LittleEndian.Uint32(p.buffer[p.getReadPos():]))
+				*data = uint(binary.LittleEndian.Uint32(p.buffer[p.readPos():]))
 				p.addReadPos(typeSize)
 			case *int64:
-				*data = int64(binary.LittleEndian.Uint64(p.buffer[p.getReadPos():]))
+				*data = int64(binary.LittleEndian.Uint64(p.buffer[p.readPos():]))
 				p.addReadPos(typeSize)
 			case *uint64:
-				*data = binary.LittleEndian.Uint64(p.buffer[p.getReadPos():])
+				*data = binary.LittleEndian.Uint64(p.buffer[p.readPos():])
 				p.addReadPos(typeSize)
 			case *float32:
-				*data = math.Float32frombits(binary.LittleEndian.Uint32(p.buffer[p.getReadPos():]))
+				*data = math.Float32frombits(binary.LittleEndian.Uint32(p.buffer[p.readPos():]))
 				p.addReadPos(typeSize)
 			case *float64:
-				*data = math.Float64frombits(binary.LittleEndian.Uint64(p.buffer[p.getReadPos():]))
+				*data = math.Float64frombits(binary.LittleEndian.Uint64(p.buffer[p.readPos():]))
 				p.addReadPos(typeSize)
 			case []bool:
 				for i := range data {
-					data[i] = p.buffer[p.getReadPos()] != 0
+					data[i] = p.buffer[p.readPos()] != 0
 					p.addReadPos(typeSize)
 				}
 			case []int8:
 				for i := range data {
-					data[i] = int8(p.buffer[p.getReadPos()])
+					data[i] = int8(p.buffer[p.readPos()])
 					p.addReadPos(typeSize)
 				}
 			case []uint8:
 				for i := range data {
-					data[i] = uint8(p.buffer[p.getReadPos()])
+					data[i] = uint8(p.buffer[p.readPos()])
 					p.addReadPos(typeSize)
 				}
 			case []int16:
 				for i := range data {
-					data[i] = int16(binary.LittleEndian.Uint16(p.buffer[p.getReadPos():]))
+					data[i] = int16(binary.LittleEndian.Uint16(p.buffer[p.readPos():]))
 					p.addReadPos(typeSize)
 				}
 			case []uint16:
 				for i := range data {
-					data[i] = binary.LittleEndian.Uint16(p.buffer[p.getReadPos():])
+					data[i] = binary.LittleEndian.Uint16(p.buffer[p.readPos():])
 					p.addReadPos(typeSize)
 				}
 			case []int32:
 				for i := range data {
-					data[i] = int32(binary.LittleEndian.Uint32(p.buffer[p.getReadPos():]))
+					data[i] = int32(binary.LittleEndian.Uint32(p.buffer[p.readPos():]))
 					p.addReadPos(typeSize)
 				}
 			case []uint32:
 				for i := range data {
-					data[i] = binary.LittleEndian.Uint32(p.buffer[p.getReadPos():])
+					data[i] = binary.LittleEndian.Uint32(p.buffer[p.readPos():])
 					p.addReadPos(typeSize)
 				}
 			case []int64:
 				for i := range data {
-					data[i] = int64(binary.LittleEndian.Uint64(p.buffer[p.getReadPos():]))
+					data[i] = int64(binary.LittleEndian.Uint64(p.buffer[p.readPos():]))
 					p.addReadPos(typeSize)
 				}
 			case []uint64:
 				for i := range data {
-					data[i] = binary.LittleEndian.Uint64(p.buffer[p.getReadPos():])
+					data[i] = binary.LittleEndian.Uint64(p.buffer[p.readPos():])
 					p.addReadPos(typeSize)
 				}
 			case []float32:
 				for i := range data {
-					data[i] = math.Float32frombits(binary.LittleEndian.Uint32(p.buffer[p.getReadPos():]))
+					data[i] = math.Float32frombits(binary.LittleEndian.Uint32(p.buffer[p.readPos():]))
 					p.addReadPos(typeSize)
 				}
 			case []float64:
 				for i := range data {
-					data[i] = math.Float64frombits(binary.LittleEndian.Uint64(p.buffer[p.getReadPos():]))
+					data[i] = math.Float64frombits(binary.LittleEndian.Uint64(p.buffer[p.readPos():]))
 				}
 			case *string:
-				length := binary.LittleEndian.Uint16(p.buffer[p.getReadPos():])
+				length := binary.LittleEndian.Uint16(p.buffer[p.readPos():])
 				p.addReadPos(2)
 				bs := make([]byte, length)
-				len := copy(bs, p.buffer[p.getReadPos():p.getReadPos()+length])
+				rPos := p.readPos()
+				len := copy(bs, p.buffer[rPos:rPos+length])
 				p.addReadPos(uint16(len))
 				*data = string(bs)
 			default:
@@ -415,7 +416,7 @@ func intDataSize(data interface{}) (typeSize int, TotalSize int) {
 	return
 }
 
-func (p *Packet) getSize() uint16 {
+func (p *Packet) size() uint16 {
 	return p.header.packetSize
 }
 
@@ -427,16 +428,16 @@ func (p *Packet) addSize(size uint16) {
 	p.header.packetSize += size
 }
 
-func (p *Packet) getReadPos() uint16 {
-	return p.readPos
+func (p *Packet) readPos() uint16 {
+	return p.rPos
 }
 
 func (p *Packet) setReadPos(pos uint16) {
-	p.readPos = pos
+	p.rPos = pos
 }
 
 func (p *Packet) addReadPos(pos uint16) {
-	p.readPos += pos
+	p.rPos += pos
 }
 
 // AssemblyFromBuffer is make packet from buffer

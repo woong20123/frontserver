@@ -45,7 +45,7 @@ func (s *SessionMgr) RunConnectFunc(state uint32, conn *net.TCPConn) {
 	if exist {
 		fun(conn)
 	} else {
-		Instance().GetLoggerMgr().GetLogger().Println("RunConnectFunc fail ", state)
+		Instance().LoggerMgr().Logger().Println("RunConnectFunc fail ", state)
 	}
 }
 
