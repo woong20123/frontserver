@@ -7,7 +7,7 @@ type ExamCliSingleton struct {
 
 var instance *ExamCliSingleton = nil
 
-// GetInstance is
+// Instance is
 func Instance() *ExamCliSingleton {
 	if instance == nil {
 		instance = newExamCliSingleton()

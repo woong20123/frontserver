@@ -6,7 +6,6 @@ import (
 	"example/share"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/nsf/termbox-go"
 	"github.com/woong20123/packet"
+	"github.com/woong20123/tcpclient"
 	"github.com/woong20123/tcpserver"
 )
 
@@ -21,7 +21,7 @@ const (
 	maxBufferSize = 4096
 )
 
-func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
+func handleRead(client *tcpclient.TcpClient, errRead context.CancelFunc) {
 	defer errRead()
 	recvBuf := make([]byte, maxBufferSize)
 	AssemblyBuf := make([]byte, maxBufferSize+128)
@@ -32,23 +32,7 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	// TCP의 데이터 전달이 패킷단위로 전달되지 않기 때문에 조립 작업을 합니다.
 
 	for {
-		n, err := conn.Read(recvBuf)
-		if err != nil {
-			if ne, ok := err.(net.Error); ok {
-				switch {
-				case ne.Temporary():
-					continue
-				}
-			}
-
-			log.Println("Read", err)
-			return
-		}
-		if err != nil {
-			log.Println("Write", err)
-			return
-		}
-
+		n, _ := client.Read(recvBuf)
 		if 0 < n {
 			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
 			AssemPos += uint32(copylength)
@@ -58,20 +42,26 @@ func handleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 				if onPacket == nil {
 					break
 				}
-				tcpserver.Instance().LogicManager().CallLogicFun(onPacket.Command(), conn, onPacket)
+				tcpserver.Instance().LogicManager().CallLogicFun(onPacket.Command(), client.Conn(), onPacket)
 			}
 		}
 	}
 }
 
-func handleSend(conn *net.TCPConn, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
+func handleSend(client *tcpclient.TcpClient, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
 	defer errSend()
 
 	for {
 		// 패킷이 전달되면 패킷을 서버에 전송합니다
 		p := <-sendPacketChan
-		if conn != nil {
-			conn.Write(p.Byte())
+		if client != nil && p != nil {
+			n, _ := client.Write(p.Byte())
+
+			// 패킷이 모두 전송되지 않았습니다.
+			if p.PacketSize() != uint16(n) {
+				log.Println("Packet Write Not PacketSize != WriteReturn ", p.PacketSize(), ":", n)
+			}
+
 			packet.Pool().ReleasePacket(p)
 		}
 	}
@@ -84,10 +74,8 @@ func HandleNetwork(errProc context.CancelFunc, sendPacketChan <-chan *packet.Pac
 	chanConnectSrvInfo := examclientlogic.Instance().ObjMgr().ChanManager().ChanSrvInfo()
 	srvInfo := <-chanConnectSrvInfo
 
-	var remoteaddr net.TCPAddr
-	remoteaddr.IP = net.ParseIP(srvInfo.Ip)
-	remoteaddr.Port = srvInfo.Port
-	conn, err := net.DialTCP("tcp", nil, &remoteaddr)
+	chatClient := examclientlogic.Instance().ObjMgr().ChatClient()
+	err := chatClient.Connect(srvInfo.Ip, srvInfo.Port)
 
 	if err != nil {
 		log.Println("DialTCP", err)
@@ -96,13 +84,13 @@ func HandleNetwork(errProc context.CancelFunc, sendPacketChan <-chan *packet.Pac
 
 	sendUserSceneChan(examclientlogic.UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), fmt.Sprint("서버 접속 성공 [접속정보]", srvInfo.Ip, ":", srvInfo.Port, " ")})
 
-	defer conn.Close()
+	defer chatClient.Close()
 
 	readCtx, errRead := context.WithCancel(context.Background())
 	sendCtx, errSend := context.WithCancel(context.Background())
 
-	go handleRead(conn, errRead)
-	go handleSend(conn, errSend, sendPacketChan)
+	go handleRead(chatClient, errRead)
+	go handleSend(chatClient, errSend, sendPacketChan)
 
 	select {
 	case <-readCtx.Done():
@@ -138,7 +126,7 @@ func lobbySceneCommand() {
 	readSceneSystemWrite("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
 	readSceneSystemWrite("[명령어]")
 	readSceneSystemWrite("\"/?\" : 화면 클리어 및 명령어 재출력")
-	readSceneSystemWrite("\"/RoomEnter <방이름>\" : 방 생성 요청 - 유저는 입장합니다.")
+	readSceneSystemWrite("\"/RoomCreate <방이름>\" : 방 생성 요청")
 	readSceneSystemWrite("\"/RoomEnter <방이름>\" : 방 입장 요청")
 	//readSceneSystemWrite("\"/RoomList\" : 현재 생성된 방 목록")
 	readSceneSystemWrite("\"/Close\" : 종료")

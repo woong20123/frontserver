@@ -56,9 +56,14 @@ func (p *Packet) Byte() []byte {
 	return buffer
 }
 
-// GetCommand is return packet command
+// Command is return packet command
 func (p *Packet) Command() uint32 {
 	return p.header.packetCommand
+}
+
+// PacketSize is return packet size
+func (p *Packet) PacketSize() uint16 {
+	return p.header.packetSize
 }
 
 // SetHeader Set Header Info
