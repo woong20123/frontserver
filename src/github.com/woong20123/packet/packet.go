@@ -2,6 +2,7 @@ package packet
 
 import (
 	"encoding/binary"
+	"io"
 	"log"
 	"math"
 )
@@ -79,8 +80,8 @@ func (p *Packet) CopyByte(data []byte) {
 	p.addSize(uint16(length))
 }
 
-// Write write various type to packet buffer
-func (p *Packet) Write(datas ...interface{}) {
+// WriteValues write various type to packet buffer
+func (p *Packet) WriteValues(datas ...interface{}) {
 	for _, data := range datas {
 		if t, _ := intDataSize(data); t != 0 {
 			typeSize := uint16(t)
@@ -242,7 +243,8 @@ func (p *Packet) Write(datas ...interface{}) {
 	}
 }
 
-func (p *Packet) Read(datas ...interface{}) {
+// ReadValues is
+func (p *Packet) ReadValues(datas ...interface{}) {
 	for _, data := range datas {
 		if t, _ := intDataSize(data); t != 0 {
 			typeSize := uint16(t)
@@ -355,6 +357,26 @@ func (p *Packet) Read(datas ...interface{}) {
 			log.Printf("error Packet Read")
 		}
 	}
+}
+
+// Write is write byte io.Writer
+func (p *Packet) Write(w io.Writer) (n int, err error) {
+	n, err = w.Write(p.buffer[p.size():])
+	if nil != err {
+		log.Printf("error Write")
+	}
+	p.addSize(uint16(n))
+	return
+}
+
+// Read is read byte io.Reader
+func (p *Packet) Read(r io.Reader) (n int, err error) {
+	n, err = r.Read(p.buffer[p.readPos():])
+	if nil != err {
+		log.Printf("error Read")
+	}
+	p.addReadPos(uint16(n))
+	return
 }
 
 // intDataSize returns the size of the data required to represent the data when encoded.

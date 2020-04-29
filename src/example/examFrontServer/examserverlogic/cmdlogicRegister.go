@@ -24,7 +24,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 	lm.RegistLogicfun(share.C2SPacketCommandLoginUserReq, func(conn *net.TCPConn, p *packet.Packet) {
 
 		req := share.C2SPCLoginUserReq{}
-		p.Read(&req.UserID)
+		p.ReadValues(&req.UserID)
 
 		res := share.S2CPCLoginUserRes{}
 
@@ -68,12 +68,12 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 				if res.UserSn == loop_eu.UserSn() {
 					sendp := packet.Pool().AcquirePacket()
 					sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLoginUserRes)
-					sendp.Write(res.Result, res.UserSn, &res.UserID)
+					sendp.WriteValues(res.Result, res.UserSn, &res.UserID)
 					tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
 				} else {
 					sendp := packet.Pool().AcquirePacket()
 					sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandSystemMsgSend)
-					sendp.Write(fmt.Sprint("[", res.UserID, "] 유저가 로비에 접속하였습니다."))
+					sendp.WriteValues(fmt.Sprint("[", res.UserID, "] 유저가 로비에 접속하였습니다."))
 					tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
 				}
 
@@ -86,7 +86,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 	// 로비에 전달하는 메시지 패킷 처리 작업 등록
 	lm.RegistLogicfun(share.C2SPacketCommandLobbyMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := share.C2SPCLobbySendMsgReq{}
-		p.Read(&req.Msg)
+		p.ReadValues(&req.Msg)
 		eu := Instance().ObjMgr().FindUser(conn)
 		if eu == nil {
 			return
@@ -103,7 +103,7 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 				// Send 응답 패킷
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLobbyMsgRes)
-				sendp.Write(res.Result, &res.Userid, &res.Msg)
+				sendp.WriteValues(res.Result, &res.Userid, &res.Msg)
 				tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
 				Logger().Println("[Send Room Msg] send user ", &res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
 			}
@@ -121,7 +121,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방입장 패킷 처리 작업 등록 - 방이 없으면 생성합니다.
 	lm.RegistLogicfun(share.C2SPacketCommandRoomEnterReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := share.C2SPCRoomEnterReq{}
-		p.Read(&req.RoomName)
+		p.ReadValues(&req.RoomName)
 
 		res := share.S2CPCRoomEnterRes{}
 		res.Result = share.ResultSuccess
@@ -156,14 +156,14 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				// Send 응답 패킷
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomEnterRes)
-				sendp.Write(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
+				sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
 				tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
 			})
 		} else {
 			// Send 응답 패킷
 			sendp := packet.Pool().AcquirePacket()
 			sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomEnterRes)
-			sendp.Write(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
+			sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
 			tcpserver.Instance().SendManager().SendToConn(eu.Conn(), sendp)
 		}
 	})
@@ -172,7 +172,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방 생성 패킷 처리 작업
 	lm.RegistLogicfun(share.C2SPacketCommandRoomCreateReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := share.C2SPCRoomEnterReq{}
-		p.Read(&req.RoomName)
+		p.ReadValues(&req.RoomName)
 
 		res := share.S2CPCRoomCreateRes{}
 		res.Result = share.ResultSuccess
@@ -216,7 +216,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		// Send 응답 패킷
 		sendp := packet.Pool().AcquirePacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomCreateRes)
-		sendp.Write(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
+		sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
 		tcpserver.Instance().SendManager().SendToConn(eu.Conn(), sendp)
 
 	})
@@ -249,7 +249,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				// Send 응답 패킷
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomLeaveRes)
-				sendp.Write(res.Result, res.LeaveUserSn, &res.LeaveUserid)
+				sendp.WriteValues(res.Result, res.LeaveUserSn, &res.LeaveUserid)
 				tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
 			})
 		}
@@ -257,7 +257,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		// Send 응답 패킷
 		sendp := packet.Pool().AcquirePacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomLeaveRes)
-		sendp.Write(res.Result, res.LeaveUserSn, &res.LeaveUserid)
+		sendp.WriteValues(res.Result, res.LeaveUserSn, &res.LeaveUserid)
 		tcpserver.Instance().SendManager().SendToConn(eu.Conn(), sendp)
 	})
 
@@ -265,7 +265,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방에서 패킷을 전송합니다
 	lm.RegistLogicfun(share.C2SPacketCommandRoomMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := share.C2SPCRoomSendMsgReq{}
-		p.Read(&req.RoomIdx, &req.Msg)
+		p.ReadValues(&req.RoomIdx, &req.Msg)
 		eu := Instance().ObjMgr().FindUser(conn)
 
 		// 비정상적인 유저라면 리턴합니다.
@@ -288,7 +288,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 			// 응답 패킷 전송
 			sendp := packet.Pool().AcquirePacket()
 			sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomMsgRes)
-			sendp.Write(res.Result, res.Userid, &req.Msg)
+			sendp.WriteValues(res.Result, res.Userid, &req.Msg)
 			tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
 			Logger().Println("[Send Room Msg] send user ", res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
 		})

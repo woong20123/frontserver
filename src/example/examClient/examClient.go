@@ -262,7 +262,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					// User Login 패킷 전송
 					p := packet.Pool().AcquirePacket()
 					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
-					p.Write(&userid)
+					p.WriteValues(&userid)
 					sendPacketChan <- p
 				} else {
 					readSceneErrorWrite("유저의 ID가 빈문자열입니다.")
@@ -282,7 +282,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 
 						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomEnterReq)
-						p.Write(&roomName)
+						p.WriteValues(&roomName)
 						sendPacketChan <- p
 						readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomEnterReq name = ", roomName))
 					} else if strings.Contains(msg, "/RoomCreate") {
@@ -294,7 +294,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						roomName := fileds[1]
 						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomCreateReq)
-						p.Write(&roomName)
+						p.WriteValues(&roomName)
 						sendPacketChan <- p
 						readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomCreateReq name = ", roomName))
 
@@ -315,7 +315,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						// lobby msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLobbyMsgReq)
-						p.Write(&msg)
+						p.WriteValues(&msg)
 						sendPacketChan <- p
 					}
 				}
@@ -337,7 +337,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						// room msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
 						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomMsgReq)
-						p.Write(user.RoomIdx(), &msg)
+						p.WriteValues(user.RoomIdx(), &msg)
 						sendPacketChan <- p
 					}
 				}
