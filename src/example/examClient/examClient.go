@@ -138,7 +138,8 @@ func lobbySceneCommand() {
 	readSceneSystemWrite("전체 채팅을 사용하시려면 메시지를 입력하고 enter키를 누르세요")
 	readSceneSystemWrite("[명령어]")
 	readSceneSystemWrite("\"/?\" : 화면 클리어 및 명령어 재출력")
-	readSceneSystemWrite("\"/RoomEnter <방이름>\" : 방입장요청 없으면 방을 생성합니다.")
+	readSceneSystemWrite("\"/RoomEnter <방이름>\" : 방 생성 요청 - 유저는 입장합니다.")
+	readSceneSystemWrite("\"/RoomEnter <방이름>\" : 방 입장 요청")
 	//readSceneSystemWrite("\"/RoomList\" : 현재 생성된 방 목록")
 	readSceneSystemWrite("\"/Close\" : 종료")
 	readSceneSystemWrite("-----------------------------------------------------------")
@@ -296,6 +297,19 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						p.Write(&roomName)
 						sendPacketChan <- p
 						readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomEnterReq name = ", roomName))
+					} else if strings.Contains(msg, "/RoomCreate") {
+						fileds := strings.Fields(msg)
+						if len(fileds) != 2 {
+							readSceneErrorWrite(fmt.Sprint("len(fileds) = ", len(fileds)))
+							continue
+						}
+						roomName := fileds[1]
+						p := packet.Pool().AcquirePacket()
+						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomCreateReq)
+						p.Write(&roomName)
+						sendPacketChan <- p
+						readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomCreateReq name = ", roomName))
+
 					} else if strings.Contains(msg, "/RoomList") {
 						readsceneClear()
 						lobbySceneCommand()

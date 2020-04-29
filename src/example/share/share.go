@@ -18,6 +18,8 @@ const (
 	ResultUserStateErr
 	// ResultRoomCreateFail is fail create room object
 	ResultRoomCreateFail
+	// ResultRoomAlreadyExist is room already exists.
+	ResultRoomAlreadyExist
 )
 
 const (

@@ -98,6 +98,26 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandRoomLeaveRes Packet Logic
 	// 유저의 방 퇴장 패킷 응답 처리 작업
+	lm.RegistLogicfun(share.S2CPacketCommandRoomCreateRes, func(conn *net.TCPConn, p *packet.Packet) {
+		res := share.S2CPCRoomCreateRes{}
+		p.Read(&res.Result, &res.RoomIdx, &res.RoomName, &res.EnterUserSn, &res.EnterUserid)
+		eu := Instance().ObjMgr().User()
+		if eu == nil {
+			return
+		}
+
+		switch res.Result {
+		case share.ResultSuccess:
+			eu.roomIdx = res.RoomIdx
+			eu.roomName = res.RoomName
+			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.RoomSTATE, []string{fmt.Sprint("==========================", "[ 채 팅 방 화 면 ]", "==========================")})
+		default:
+			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "=========================="), fmt.Sprint("[방생성 실패] ", res.RoomName)})
+		}
+	})
+
+	// S2CPacketCommandRoomLeaveRes Packet Logic
+	// 유저의 방 퇴장 패킷 응답 처리 작업
 	lm.RegistLogicfun(share.S2CPacketCommandRoomLeaveRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := share.S2CPCRoomLeaveRes{}
 		p.Read(&res.Result, &res.LeaveUserSn, &res.LeaveUserid)
