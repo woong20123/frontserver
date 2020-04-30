@@ -17,6 +17,11 @@ import (
 	"github.com/woong20123/tcpserver"
 )
 
+func constructConfig() {
+	examserverlogic.MakeExampleConfig()
+	examserverlogic.Instance().ConfigMgr().ReadConfig("./ExampleServerConfig.json")
+}
+
 func constructTCPSession() {
 	sessionm := tcpserver.Instance().SessionMgr()
 	examserverlogic.RegistSessionLogic(sessionm)
@@ -25,12 +30,19 @@ func constructTCPSession() {
 func constructLogic() {
 	// regist exam Logic
 	lm := tcpserver.Instance().LogicManager()
-	examserverlogic.RegistCommandLogic(lm)
+
+	switch examserverlogic.Instance().ConfigMgr().ServerConfig().ServerMode {
+	case "main":
+		examserverlogic.ChatServerModeRegistCommandLogic(lm)
+	default:
+		examserverlogic.ChatServerModeRegistCommandLogic(lm)
+	}
+
 	// set logic goroutines count
 	lm.RunLogicHandle(runtime.NumCPU())
 }
 
-func constructTCPServer(port int, chClosed chan struct{}) (wg sync.WaitGroup, cancel context.CancelFunc) {
+func constructTCPServer(chClosed chan struct{}) (wg sync.WaitGroup, cancel context.CancelFunc) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
@@ -38,6 +50,7 @@ func constructTCPServer(port int, chClosed chan struct{}) (wg sync.WaitGroup, ca
 	tcpserver.Consturct(share.ExamplePacketSerialkey, runtime.NumCPU())
 
 	// start server handler
+	port := examserverlogic.Instance().ConfigMgr().ServerConfig().ServerPort
 	address := ":" + strconv.Itoa(port)
 	go tcpserver.HandleListener(serverCtx, address, &wg, chClosed)
 	println("[Server 정보] ", address)
@@ -51,9 +64,10 @@ func main() {
 	examserverlogic.Logger().Println(fmt.Sprint("[Server Ver ", share.ExamVer, "]"))
 	println(fmt.Sprint("[Server Ver ", share.ExamVer, "]"))
 
+	constructConfig()
 	constructTCPSession()
 	constructLogic()
-	wg, shutdown := constructTCPServer(20224, chClosed)
+	wg, shutdown := constructTCPServer(chClosed)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Ignore()

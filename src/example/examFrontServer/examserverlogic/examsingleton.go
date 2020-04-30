@@ -15,6 +15,7 @@ func Logger() *log.Logger {
 type ExamSvrSingleton struct {
 	objmanager  *SvrObjMgr
 	chatroomMgr *ChatRoomMgr
+	configMgr   *ConfigManager
 }
 
 // GetObjMgr is
@@ -25,6 +26,11 @@ func (s *ExamSvrSingleton) ObjMgr() *SvrObjMgr {
 // GetChatRoomMgr is
 func (s *ExamSvrSingleton) ChatRoomMgr() *ChatRoomMgr {
 	return s.chatroomMgr
+}
+
+// ConfigMgr is
+func (s *ExamSvrSingleton) ConfigMgr() *ConfigManager {
+	return s.configMgr
 }
 
 var instance *ExamSvrSingleton = nil
@@ -44,6 +50,7 @@ func newExamSvrSingleton() *ExamSvrSingleton {
 	ess.objmanager.Initialize()
 	ess.chatroomMgr = new(ChatRoomMgr)
 	ess.chatroomMgr.Intialize()
+	ess.configMgr = newConfigMgr()
 
 	return ess
 }

@@ -16,8 +16,15 @@ func verifyUserObj(eu *ExamUser, state uint32) bool {
 	return true
 }
 
+// ChatServerModeRegistCommandLogic is regist Packet process logic from ChatServerMode
+func ChatServerModeRegistCommandLogic(lm *tcpserver.LogicManager) {
+	chatServerModeRegistCommandLogic(lm)
+	// ChatRoom 관련 패킷 로직 등록 함수
+	chatServerModeRegistChatRoomCommandLogic(lm)
+}
+
 // RegistCommandLogic is regist Packet process logic
-func RegistCommandLogic(lm *tcpserver.LogicManager) {
+func chatServerModeRegistCommandLogic(lm *tcpserver.LogicManager) {
 
 	// C2SPacketCommandLoginUserReq Packet Logic
 	// 유저의 로그인 패킷 처리 작업 등록
@@ -105,17 +112,14 @@ func RegistCommandLogic(lm *tcpserver.LogicManager) {
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLobbyMsgRes)
 				sendp.WriteValues(res.Result, &res.Userid, &res.Msg)
 				tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
-				Logger().Println("[Send Room Msg] send user ", &res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
+				//Logger().Println("[Send Room Msg] send user ", &res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
 			}
 		})
 		return
 	})
-
-	// ChatRoom 관련 패킷 로직 등록 함수
-	registChatRoomCommandLogic(lm)
 }
 
-func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
+func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// C2SPacketCommandRoomEnterReq Packet Logic =======================================================================
 	// 유저의 방입장 패킷 처리 작업 등록 - 방이 없으면 생성합니다.
@@ -290,7 +294,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 			sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomMsgRes)
 			sendp.WriteValues(res.Result, res.Userid, &req.Msg)
 			tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
-			Logger().Println("[Send Room Msg] send user ", res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
+			//Logger().Println("[Send Room Msg] send user ", res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
 		})
 
 		return

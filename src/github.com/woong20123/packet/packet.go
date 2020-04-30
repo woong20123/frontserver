@@ -67,6 +67,11 @@ func (p *Packet) PacketSize() uint16 {
 	return p.header.packetSize
 }
 
+// PacketTotalSize is return packet size + packet header size
+func (p *Packet) PacketTotalSize() uint16 {
+	return p.header.packetSize + uint16(PacketHeaderSize)
+}
+
 // SetHeader Set Header Info
 func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand uint32) {
 	p.header.serialkey = serialKey

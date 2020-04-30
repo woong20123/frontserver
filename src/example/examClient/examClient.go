@@ -21,7 +21,7 @@ const (
 	maxBufferSize = 4096
 )
 
-func handleRead(client *tcpclient.TcpClient, errRead context.CancelFunc) {
+func handleRead(client *tcpclient.TCPClient, errRead context.CancelFunc) {
 	defer errRead()
 	recvBuf := make([]byte, maxBufferSize)
 	AssemblyBuf := make([]byte, maxBufferSize+128)
@@ -48,7 +48,7 @@ func handleRead(client *tcpclient.TcpClient, errRead context.CancelFunc) {
 	}
 }
 
-func handleSend(client *tcpclient.TcpClient, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
+func handleSend(client *tcpclient.TCPClient, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
 	defer errSend()
 
 	for {
@@ -58,7 +58,7 @@ func handleSend(client *tcpclient.TcpClient, errSend context.CancelFunc, sendPac
 			n, _ := client.Write(p.Byte())
 
 			// 패킷이 모두 전송되지 않았습니다.
-			if p.PacketSize() != uint16(n) {
+			if p.PacketTotalSize() != uint16(n) {
 				log.Println("Packet Write Not PacketSize != WriteReturn ", p.PacketSize(), ":", n)
 			}
 
@@ -67,7 +67,7 @@ func handleSend(client *tcpclient.TcpClient, errSend context.CancelFunc, sendPac
 	}
 }
 
-// SocketClient is
+// HandleNetwork is
 func HandleNetwork(errProc context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
 	defer errProc()
 
@@ -240,8 +240,8 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				serverinfo := msg
 				if serverinfo == "" {
 					// 기본서버로 접속합니다.
-					cobjmgr.ChanManager().SendChanSrvInfo(baseIp, basePort)
-					readSceneSystemWrite(fmt.Sprint(baseIp, ":", basePort, "서버에 접속을 요청합니다."))
+					cobjmgr.ChanManager().SendChanSrvInfo(baseIP, basePort)
+					readSceneSystemWrite(fmt.Sprint(baseIP, ":", basePort, "서버에 접속을 요청합니다."))
 				} else {
 					infos := strings.Split(serverinfo, ":")
 					// 유저가 입력한 서버로 접속합니다.
@@ -347,7 +347,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 }
 
 const (
-	baseIp   = "127.0.0.1"
+	baseIP   = "127.0.0.1"
 	basePort = 20224
 )
 
