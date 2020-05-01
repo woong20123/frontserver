@@ -7,6 +7,23 @@ import (
 	"sync"
 )
 
+// // TcpError is
+// type TcpError struct {
+// 	Cause string
+// 	// Err is the error that occurred during the operation.
+// 	// The Error method panics if the error is nil.
+// 	Err error
+// }
+
+// func (te *TcpError) Error() string {
+// 	if e == nil {
+// 		return "<nil>"
+// 	}
+// 	s := e.Cause
+// 	s += ": " + e.Err.Error()
+// 	return s
+// }
+
 const (
 	listenerCloseMatcher = "use of closed network connection"
 	maxBufferSize        = 4096
@@ -15,7 +32,7 @@ const (
 // Consturct is
 func Consturct(serialKey uint32, SendProcessCount int) {
 	Instance().SetSerialkey(serialKey)
-	Instance().SendManager().RunSendHandle(SendProcessCount)
+	Instance().SendManager().RunSendToClientHandle(SendProcessCount)
 }
 
 // HandleRead handles packet read operations for connected sessions

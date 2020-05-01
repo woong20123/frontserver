@@ -7,6 +7,7 @@ type SingletonObj struct {
 	sendm           *SendManager
 	sessionm        *SessionMgr
 	loggerm         *LoggerManager
+	tcpclientm      *TCPClientMgr
 }
 
 var instance *SingletonObj = nil
@@ -33,6 +34,9 @@ func newSingletonObj() *SingletonObj {
 
 	so.loggerm = new(LoggerManager)
 	so.loggerm.Intialize()
+
+	so.tcpclientm = new(TCPClientMgr)
+	so.tcpclientm.Intialize()
 
 	return so
 }
@@ -65,4 +69,8 @@ func (s *SingletonObj) GetSerialkey() uint32 {
 // GetLoggerMgr is
 func (s *SingletonObj) LoggerMgr() *LoggerManager {
 	return s.loggerm
+}
+
+func (s *SingletonObj) TCPClientMgr() *TCPClientMgr {
+	return s.tcpclientm
 }

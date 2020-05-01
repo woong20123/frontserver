@@ -12,19 +12,25 @@ type TlogicFunc func(conn *net.TCPConn, p *packet.Packet)
 // LogicManager is
 type LogicManager struct {
 	LogicConatiner map[uint32]TlogicFunc
-	clientRequest  chan *Request
+	clientRequest  chan *SendToClientRequest
 }
 
-// Request is
-type Request struct {
+// SendToClientRequest is
+type SendToClientRequest struct {
 	conn *net.TCPConn
 	p    *packet.Packet
+}
+
+// SendToServerRequest is
+type SendToServerRequest struct {
+	serverIndex int
+	p           *packet.Packet
 }
 
 // Initialize is
 func (lm *LogicManager) Initialize() {
 	lm.LogicConatiner = make(map[uint32]TlogicFunc)
-	lm.clientRequest = make(chan *Request, 4096)
+	lm.clientRequest = make(chan *SendToClientRequest, 4096)
 }
 
 // RegistLogicfun regist packet processing logic
@@ -39,7 +45,7 @@ func (lm *LogicManager) UnregistLogicfun(cmd uint32) {
 
 // CallLogicFun is
 func (lm *LogicManager) CallLogicFun(cmd uint32, conn *net.TCPConn, p *packet.Packet) {
-	r := Request{conn, p}
+	r := SendToClientRequest{conn, p}
 	lm.clientRequest <- &r
 }
 
@@ -50,16 +56,16 @@ func (lm *LogicManager) RunLogicHandle(processCount int) {
 	}
 }
 
-func (lm *LogicManager) handleRequest(queue chan *Request) {
+func (lm *LogicManager) handleRequest(queue chan *SendToClientRequest) {
 	for cr := range queue {
 		lm.packetProcess(cr)
 	}
 }
 
-func (lm *LogicManager) packetProcess(cr *Request) {
+func (lm *LogicManager) packetProcess(cr *SendToClientRequest) {
 	cmd := cr.p.Command()
-	val, exist := lm.LogicConatiner[cmd]
-	if exist {
+	val, ok := lm.LogicConatiner[cmd]
+	if ok {
 		val(cr.conn, cr.p)
 		packet.Pool().ReleasePacket(cr.p)
 	} else {

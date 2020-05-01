@@ -13,7 +13,6 @@ import (
 
 	"github.com/nsf/termbox-go"
 	"github.com/woong20123/packet"
-	"github.com/woong20123/tcpclient"
 	"github.com/woong20123/tcpserver"
 )
 
@@ -21,7 +20,7 @@ const (
 	maxBufferSize = 4096
 )
 
-func handleRead(client *tcpclient.TCPClient, errRead context.CancelFunc) {
+func handleRead(client *tcpserver.TCPClient, errRead context.CancelFunc) {
 	defer errRead()
 	recvBuf := make([]byte, maxBufferSize)
 	AssemblyBuf := make([]byte, maxBufferSize+128)
@@ -48,7 +47,7 @@ func handleRead(client *tcpclient.TCPClient, errRead context.CancelFunc) {
 	}
 }
 
-func handleSend(client *tcpclient.TCPClient, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
+func handleSend(client *tcpserver.TCPClient, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
 	defer errSend()
 
 	for {

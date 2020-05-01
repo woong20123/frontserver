@@ -76,12 +76,12 @@ func chatServerModeRegistCommandLogic(lm *tcpserver.LogicManager) {
 					sendp := packet.Pool().AcquirePacket()
 					sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLoginUserRes)
 					sendp.WriteValues(res.Result, res.UserSn, &res.UserID)
-					tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
+					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
 				} else {
 					sendp := packet.Pool().AcquirePacket()
 					sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandSystemMsgSend)
 					sendp.WriteValues(fmt.Sprint("[", res.UserID, "] 유저가 로비에 접속하였습니다."))
-					tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
+					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
 				}
 
 			}
@@ -111,7 +111,7 @@ func chatServerModeRegistCommandLogic(lm *tcpserver.LogicManager) {
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandLobbyMsgRes)
 				sendp.WriteValues(res.Result, &res.Userid, &res.Msg)
-				tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
+				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
 				//Logger().Println("[Send Room Msg] send user ", &res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
 			}
 		})
@@ -161,14 +161,14 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomEnterRes)
 				sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
-				tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
+				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
 			})
 		} else {
 			// Send 응답 패킷
 			sendp := packet.Pool().AcquirePacket()
 			sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomEnterRes)
 			sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
-			tcpserver.Instance().SendManager().SendToConn(eu.Conn(), sendp)
+			tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
 		}
 	})
 
@@ -221,7 +221,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		sendp := packet.Pool().AcquirePacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomCreateRes)
 		sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserid)
-		tcpserver.Instance().SendManager().SendToConn(eu.Conn(), sendp)
+		tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
 
 	})
 
@@ -254,7 +254,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomLeaveRes)
 				sendp.WriteValues(res.Result, res.LeaveUserSn, &res.LeaveUserid)
-				tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
+				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
 			})
 		}
 
@@ -262,7 +262,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		sendp := packet.Pool().AcquirePacket()
 		sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomLeaveRes)
 		sendp.WriteValues(res.Result, res.LeaveUserSn, &res.LeaveUserid)
-		tcpserver.Instance().SendManager().SendToConn(eu.Conn(), sendp)
+		tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
 	})
 
 	// C2SPacketCommandRoomMsgReq Packet Logic
@@ -293,7 +293,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 			sendp := packet.Pool().AcquirePacket()
 			sendp.SetHeader(share.ExamplePacketSerialkey, 0, share.S2CPacketCommandRoomMsgRes)
 			sendp.WriteValues(res.Result, res.Userid, &req.Msg)
-			tcpserver.Instance().SendManager().SendToConn(loop_eu.Conn(), sendp)
+			tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
 			//Logger().Println("[Send Room Msg] send user ", res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
 		})
 

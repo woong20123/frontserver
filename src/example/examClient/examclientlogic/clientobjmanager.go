@@ -1,6 +1,6 @@
 package examclientlogic
 
-import "github.com/woong20123/tcpclient"
+import "github.com/woong20123/tcpserver"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -8,7 +8,7 @@ import "github.com/woong20123/tcpclient"
 type Objmanager struct {
 	channelmgr *ClientChanmgr
 	eu         *ExamUser
-	chatClient *tcpclient.TCPClient
+	chatClient *tcpserver.TCPClient
 }
 
 // Intialize is
@@ -16,7 +16,7 @@ func (objmgr *Objmanager) Intialize() {
 	objmgr.channelmgr = new(ClientChanmgr)
 	objmgr.channelmgr.Intialize()
 	objmgr.eu = NewExamUser()
-	objmgr.chatClient = tcpclient.NewTCPClient()
+	objmgr.chatClient = tcpserver.NewTCPClient()
 }
 
 // ChanManager is
@@ -30,7 +30,7 @@ func (objmgr *Objmanager) User() *ExamUser {
 }
 
 // ChatClient is return user info
-func (objmgr *Objmanager) ChatClient() *tcpclient.TCPClient {
+func (objmgr *Objmanager) ChatClient() *tcpserver.TCPClient {
 	return objmgr.chatClient
 }
 
