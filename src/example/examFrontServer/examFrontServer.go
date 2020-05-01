@@ -13,21 +13,36 @@ import (
 	"strconv"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/woong20123/tcpserver"
 )
 
-func construct() {
+func construct() bool {
 	bSuccess := true
 	bSuccess = bSuccess && constructConfig()
 	bSuccess = bSuccess && constructTCPSession()
 	bSuccess = bSuccess && constructLogic()
 	bSuccess = bSuccess && constructTCPClient()
+	return bSuccess
 }
 
 func constructConfig() bool {
 	examserverlogic.MakeExampleConfig()
 	examserverlogic.Instance().ConfigMgr().ReadConfig("\\ExampleServerConfig.json")
+
+	// 인자값이 있다면 우선합니다.
+	if len(os.Args) >= 3 {
+		serverPort, err := strconv.Atoi(os.Args[1])
+		if err == nil {
+			examserverlogic.Logger().Println("Args 변환 오류 ", os.Args[1])
+		}
+		serverMode := os.Args[2]
+
+		examserverlogic.Instance().ConfigMgr().ServerConfig().ServerPort = serverPort
+		examserverlogic.Instance().ConfigMgr().ServerConfig().ServerMode = serverMode
+	}
+
 	return true
 }
 
@@ -42,8 +57,8 @@ func constructLogic() bool {
 	lm := tcpserver.Instance().LogicManager()
 
 	switch examserverlogic.Instance().ConfigMgr().ServerConfig().ServerMode {
-	case "main":
-		examserverlogic.ChatServerModeRegistCommandLogic(lm)
+	case "front":
+		examserverlogic.FrontModeRegistCommandLogic(lm)
 	default:
 		examserverlogic.ChatServerModeRegistCommandLogic(lm)
 	}
@@ -53,23 +68,18 @@ func constructLogic() bool {
 	return true
 }
 
-const (
-	// TCPCliToSvrIdxChat is
-	TCPCliToSvrIdxChat uint32 = iota + 0x10
-)
-
 func constructTCPClient() bool {
 	srvConfig := examserverlogic.Instance().ConfigMgr().ServerConfig()
 	if "front" == srvConfig.ServerMode {
 		ChatserverIP := srvConfig.BackEndChatServerIP
 		ChatserverPort := srvConfig.BackEndChatServerPort
 
-		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
+		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(share.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
 		if err != nil {
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		} else {
-			tcpserver.Instance().SendManager().RunSendToServerHandle(TCPCliToSvrIdxChat)
+			tcpserver.Instance().SendManager().RunSendToServerHandle(share.TCPCliToSvrIdxChat)
 		}
 	}
 	return true
@@ -82,11 +92,12 @@ func constructTCPServer(ctxServer context.Context, cancel context.CancelFunc, ch
 	tcpserver.Consturct(share.ExamplePacketSerialkey, runtime.NumCPU())
 
 	// start server handler
-	port := examserverlogic.Instance().ConfigMgr().ServerConfig().ServerPort
+	serverConfig := examserverlogic.Instance().ConfigMgr().ServerConfig()
+	port := serverConfig.ServerPort
 	address := ":" + strconv.Itoa(port)
 	go tcpserver.HandleListener(ctxServer, address, &wg, chClosed)
-	println("[Server 정보] ", address)
-	examserverlogic.Logger().Println("[Server 정보] ", address)
+	println("[Server 정보] Port : ", port, ", Mode : ", serverConfig.ServerMode)
+	examserverlogic.Logger().Println("[Server 정보] Port : ", port, ", Mode : ", serverConfig.ServerMode)
 	return
 }
 
@@ -102,7 +113,13 @@ func main() {
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
 
-	construct()
+	bSuccess := construct()
+	if bSuccess == false {
+		println("construct fail")
+		time.Sleep(time.Second)
+		return
+	}
+
 	wg := constructTCPServer(serverCtx, shutdown, chClosed)
 
 	s := <-sigChan

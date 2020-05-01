@@ -4,7 +4,12 @@ const (
 	// ExamplePacketSerialkey is Serialkey(uint32) + PacketSize(uint16)
 	ExamplePacketSerialkey uint32 = 0x5da9c31b
 	// ExamVer is exam project version
-	ExamVer uint32 = 10
+	ExamVer uint32 = 18
+)
+
+const (
+	// TCPCliToSvrIdxChat is
+	TCPCliToSvrIdxChat uint32 = iota + 0x10
 )
 
 const (

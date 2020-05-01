@@ -9,7 +9,8 @@ import (
 	"github.com/woong20123/tcpserver"
 )
 
-func verifyUserObj(eu *ExamUser, state uint32) bool {
+// VerifyUserObj is
+func VerifyUserObj(eu *ExamUser, state uint32) bool {
 	if eu == nil || eu.State() != state {
 		return false
 	}
@@ -18,13 +19,13 @@ func verifyUserObj(eu *ExamUser, state uint32) bool {
 
 // ChatServerModeRegistCommandLogic is regist Packet process logic from ChatServerMode
 func ChatServerModeRegistCommandLogic(lm *tcpserver.LogicManager) {
-	chatServerModeRegistCommandLogic(lm)
+	chatServerModeRegistUserCommandLogic(lm)
 	// ChatRoom 관련 패킷 로직 등록 함수
 	chatServerModeRegistChatRoomCommandLogic(lm)
 }
 
 // RegistCommandLogic is regist Packet process logic
-func chatServerModeRegistCommandLogic(lm *tcpserver.LogicManager) {
+func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 
 	// C2SPacketCommandLoginUserReq Packet Logic
 	// 유저의 로그인 패킷 처리 작업 등록
@@ -132,7 +133,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 		eu := Instance().ObjMgr().FindUser(conn)
 		// 유저의 상태가 정상적인지 확인합니다.
-		if false == verifyUserObj(eu, UserStateEnum.LobbySTATE) {
+		if false == VerifyUserObj(eu, UserStateEnum.LobbySTATE) {
 			res.Result = share.ResultUserStateErr
 		}
 
@@ -183,7 +184,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 		eu := Instance().ObjMgr().FindUser(conn)
 		// 유저의 상태가 정상적인지 확인합니다.
-		if false == verifyUserObj(eu, UserStateEnum.LobbySTATE) {
+		if false == VerifyUserObj(eu, UserStateEnum.LobbySTATE) {
 			res.Result = share.ResultUserStateErr
 		}
 
@@ -234,7 +235,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 		// 유저의 상태가 정상적인지 확인합니다.
 		eu := Instance().ObjMgr().FindUser(conn)
-		if false == verifyUserObj(eu, UserStateEnum.RoomSTATE) {
+		if false == VerifyUserObj(eu, UserStateEnum.RoomSTATE) {
 			res.Result = share.ResultUserStateErr
 		}
 
@@ -274,7 +275,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 		// 비정상적인 유저라면 리턴합니다.
 
-		if false == verifyUserObj(eu, UserStateEnum.RoomSTATE) {
+		if false == VerifyUserObj(eu, UserStateEnum.RoomSTATE) {
 			return
 		}
 
