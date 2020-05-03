@@ -17,4 +17,5 @@ _debug_bin
 *.a
 *.log
 bin/*.json
+bin/*.bat
 src/example/examFrontServer/__debug_bin

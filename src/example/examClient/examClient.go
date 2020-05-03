@@ -32,7 +32,12 @@ func handleRead(client *tcpserver.TCPClient, errRead context.CancelFunc) {
 	// TCP의 데이터 전달이 패킷단위로 전달되지 않기 때문에 조립 작업을 합니다.
 
 	for {
-		n, _ := client.Read(recvBuf)
+		n, err := client.Read(recvBuf)
+
+		if err != nil {
+			return
+		}
+
 		if 0 < n {
 			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
 			AssemPos += uint32(copylength)
@@ -55,7 +60,11 @@ func handleSend(client *tcpserver.TCPClient, errSend context.CancelFunc, sendPac
 		// 패킷이 전달되면 패킷을 서버에 전송합니다
 		p := <-sendPacketChan
 		if client != nil && p != nil {
-			n, _ := client.Write(p.MakeByte())
+			n, err := client.Write(p.MakeByte())
+
+			if err != nil {
+				return
+			}
 
 			// 패킷이 모두 전송되지 않았습니다.
 			if p.PacketTotalSize() != uint16(n) {
