@@ -29,7 +29,7 @@ func (sm *SendManager) RunSendToClientHandle(processCount int) {
 	for i := 0; i < processCount; i++ {
 		go handleRequestProcess(sm.SendtoClientRequest, func(cr *SendToClientRequest) {
 			if cr != nil && cr.conn != nil {
-				_, err := cr.conn.Write(cr.p.Byte())
+				_, err := cr.conn.Write(cr.p.MakeByte())
 				if err != nil {
 					Instance().LoggerMgr().Logger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
 				}
@@ -63,7 +63,7 @@ func (sm *SendManager) RunSendToServerHandle(Serveridx uint32) {
 
 		for cr := range sm.SendtoServerRequest {
 			if cr != nil && tcpclient.Conn() != nil {
-				_, err := tcpclient.Write(cr.p.Byte())
+				_, err := tcpclient.Write(cr.p.MakeByte())
 				if err != nil {
 					Instance().LoggerMgr().Logger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
 				}

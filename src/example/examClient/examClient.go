@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"example/examClient/examclientlogic"
-	"example/share"
+	"example/examchatserverPacket"
 	"fmt"
 	"log"
 	"os"
@@ -14,6 +14,7 @@ import (
 	"github.com/nsf/termbox-go"
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -37,7 +38,7 @@ func handleRead(client *tcpserver.TCPClient, errRead context.CancelFunc) {
 			AssemPos += uint32(copylength)
 
 			for {
-				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, share.ExamplePacketSerialkey)
+				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, examchatserverPacket.ExamplePacketSerialkey)
 				if onPacket == nil {
 					break
 				}
@@ -54,7 +55,7 @@ func handleSend(client *tcpserver.TCPClient, errSend context.CancelFunc, sendPac
 		// 패킷이 전달되면 패킷을 서버에 전송합니다
 		p := <-sendPacketChan
 		if client != nil && p != nil {
-			n, _ := client.Write(p.Byte())
+			n, _ := client.Write(p.MakeByte())
 
 			// 패킷이 모두 전송되지 않았습니다.
 			if p.PacketTotalSize() != uint16(n) {
@@ -260,9 +261,17 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				if userid != "" {
 					// User Login 패킷 전송
 					p := packet.Pool().AcquirePacket()
-					p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLoginUserReq)
-					p.WriteValues(&userid)
-					sendPacketChan <- p
+					p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandLoginUserReq)
+					req := examchatserverPacket.C2SPCLoginUserReq{}
+					req.UserID = userid
+					b, err := proto.Marshal(&req)
+					p.CopyByte(b)
+					if err == nil {
+						sendPacketChan <- p
+					} else {
+						readSceneErrorWrite("유저의 ID가 비정상적입니다.")
+					}
+
 				} else {
 					readSceneErrorWrite("유저의 ID가 빈문자열입니다.")
 				}
@@ -280,7 +289,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						roomName := fileds[1]
 
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomEnterReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomEnterReq)
 						p.WriteValues(&roomName)
 						sendPacketChan <- p
 						readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomEnterReq name = ", roomName))
@@ -292,7 +301,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						}
 						roomName := fileds[1]
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomCreateReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomCreateReq)
 						p.WriteValues(&roomName)
 						sendPacketChan <- p
 						readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomCreateReq name = ", roomName))
@@ -313,7 +322,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if msg != "" {
 						// lobby msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandLobbyMsgReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandLobbyMsgReq)
 						p.WriteValues(&msg)
 						sendPacketChan <- p
 					}
@@ -323,7 +332,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if strings.Contains(msg, "/RoomLeave") {
 						// global msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomLeaveReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomLeaveReq)
 						sendPacketChan <- p
 					} else if strings.Contains(msg, "/?") {
 						readsceneClear()
@@ -335,7 +344,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if msg != "" {
 						// room msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(share.ExamplePacketSerialkey, 0, share.C2SPacketCommandRoomMsgReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomMsgReq)
 						p.WriteValues(user.RoomIdx(), &msg)
 						sendPacketChan <- p
 					}

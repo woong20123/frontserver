@@ -4,7 +4,7 @@ package main
 import (
 	"context"
 	"example/examFrontServer/examserverlogic"
-	"example/share"
+	"example/examchatserverPacket"
 	"fmt"
 	"log"
 	"os"
@@ -74,12 +74,12 @@ func constructTCPClient() bool {
 		ChatserverIP := srvConfig.BackEndChatServerIP
 		ChatserverPort := srvConfig.BackEndChatServerPort
 
-		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(share.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
+		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(examchatserverPacket.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
 		if err != nil {
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		} else {
-			tcpserver.Instance().SendManager().RunSendToServerHandle(share.TCPCliToSvrIdxChat)
+			tcpserver.Instance().SendManager().RunSendToServerHandle(examchatserverPacket.TCPCliToSvrIdxChat)
 		}
 	}
 	return true
@@ -89,7 +89,7 @@ func constructTCPServer(ctxServer context.Context, cancel context.CancelFunc, ch
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// server consturct
-	tcpserver.Consturct(share.ExamplePacketSerialkey, runtime.NumCPU())
+	tcpserver.Consturct(examchatserverPacket.ExamplePacketSerialkey, runtime.NumCPU())
 
 	// start server handler
 	serverConfig := examserverlogic.Instance().ConfigMgr().ServerConfig()
@@ -108,8 +108,8 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT)
 
 	chClosed := make(chan struct{})
-	examserverlogic.Logger().Println(fmt.Sprint("[Server Ver ", share.ExamVer, "]"))
-	println(fmt.Sprint("[Server Ver ", share.ExamVer, "]"))
+	examserverlogic.Logger().Println(fmt.Sprint("[Server Ver ", examchatserverPacket.ExamVer, "]"))
+	println(fmt.Sprint("[Server Ver ", examchatserverPacket.ExamVer, "]"))
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
 

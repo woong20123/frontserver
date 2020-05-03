@@ -47,13 +47,18 @@ func (p *Packet) Init() {
 	p.rPos = 0
 }
 
+// PacketBuffer
+func (p *Packet) PacketBuffer() []byte {
+	return p.buffer[:p.header.packetSize]
+}
+
 // GetByte packet transform to []byte
-func (p *Packet) Byte() []byte {
+func (p *Packet) MakeByte() []byte {
 	buffer := make([]byte, PacketHeaderSize+uint32(p.size()))
 	binary.LittleEndian.PutUint32(buffer, p.header.serialkey)
 	binary.LittleEndian.PutUint16(buffer[4:], p.header.packetSize)
 	binary.LittleEndian.PutUint32(buffer[6:], p.header.packetCommand)
-	copy(buffer[10:], p.buffer[:p.header.packetSize])
+	copy(buffer[10:], p.PacketBuffer())
 	return buffer
 }
 

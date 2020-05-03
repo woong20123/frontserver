@@ -1,4 +1,4 @@
-package share
+package examchatserverPacket
 
 const (
 	// ExamplePacketSerialkey is Serialkey(uint32) + PacketSize(uint16)
@@ -28,11 +28,24 @@ const (
 )
 
 const (
-	packetCommandStart uint32 = iota + 0x100
+	packetSystemCommandStart uint32 = iota + 0x00
+	// F2SPacketCmdSysServerRegistReq is
+	F2SPacketCmdSysServerRegistReq
+	// S2FPacketCmdSysServerRegistRes is
+	S2FPacketCmdSysServerRegistRes
+)
+
+const (
+	packetLogicCommandStart uint32 = iota + 0x2000
 	// C2SPacketCommandLoginUserReq is
 	C2SPacketCommandLoginUserReq
 	// S2CPacketCommandLoginUserRes is
 	S2CPacketCommandLoginUserRes
+
+	// C2SPacketCommandLogOutUserReq is
+	C2SPacketCommandLogOutUserReq
+	// S2CPacketCommandLogOutUserRes is
+	S2CPacketCommandLogOutUserRes
 
 	// C2SPacketCommandLobbyMsgReq is
 	C2SPacketCommandLobbyMsgReq
@@ -62,18 +75,6 @@ const (
 	// S2CPacketCommandSystemMsgSend is
 	S2CPacketCommandSystemMsgSend
 )
-
-// C2SPCLoginUserReq is  C2SPacketCommandLoginUserReq packet struct
-type C2SPCLoginUserReq struct {
-	UserID string
-}
-
-// S2CPCLoginUserRes is  S2CPacketCommandLoginUserRes packet struct
-type S2CPCLoginUserRes struct {
-	Result uint32
-	UserSn uint32
-	UserID string
-}
 
 // C2SPCLobbySendMsgReq is  C2SPacketCommandLoginUserReq packet struct
 type C2SPCLobbySendMsgReq struct {
