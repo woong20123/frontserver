@@ -81,7 +81,7 @@ func constructTCPClient() bool {
 		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(examchatserverPacket.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
 		if err != nil {
 			println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
-			examserverlogic.Logger().println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
+			examserverlogic.Logger().Println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		} else {
