@@ -1,4 +1,5 @@
-set FILE_PATH=%~dp0
-echo %FILE_PATH%
+:: 현재 경로 지정
+set CURRENT_PATH=%~dp0
 
-protoc -I%FILE_PATH% --go_out=%FILE_PATH% %FILE_PATH%LogicPacket.proto
+:: proto 파일 컴파일 
+protoc -I%CURRENT_PATH% --go_out=%CURRENT_PATH% %CURRENT_PATH%LogicPacket.proto

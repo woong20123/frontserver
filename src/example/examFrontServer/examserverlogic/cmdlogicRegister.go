@@ -32,7 +32,12 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 로그인 패킷 처리 작업 등록
 	lm.RegistLogicfun(examchatserverPacket.C2SPacketCommandLoginUserReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := examchatserverPacket.C2SPCLoginUserReq{}
-		proto.Unmarshal(p.PacketBuffer(), &req)
+		err := proto.Unmarshal(p.PacketBuffer(), &req)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
+
 		res := examchatserverPacket.S2CPCLoginUserRes{}
 
 		res.Result = examchatserverPacket.ResultSuccess

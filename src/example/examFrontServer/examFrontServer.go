@@ -30,18 +30,22 @@ func construct() bool {
 func constructConfig() bool {
 	examserverlogic.MakeExampleConfig()
 	examserverlogic.Instance().ConfigMgr().ReadConfig("\\ExampleServerConfig.json")
+	serverConfig := examserverlogic.Instance().ConfigMgr().ServerConfig()
 
 	// 인자값이 있다면 우선합니다.
 	if len(os.Args) >= 3 {
 		serverPort, err := strconv.Atoi(os.Args[1])
-		if err == nil {
+		if err != nil {
 			examserverlogic.Logger().Println("Args 변환 오류 ", os.Args[1])
 		}
 		serverMode := os.Args[2]
 
-		examserverlogic.Instance().ConfigMgr().ServerConfig().ServerPort = serverPort
-		examserverlogic.Instance().ConfigMgr().ServerConfig().ServerMode = serverMode
+		serverConfig.ServerPort = serverPort
+		serverConfig.ServerMode = serverMode
 	}
+
+	println("[Server 정보] Port : ", serverConfig.ServerPort, ", Mode : ", serverConfig.ServerMode)
+	examserverlogic.Logger().Println("[Server 정보] Port : ", serverConfig.ServerPort, ", Mode : ", serverConfig.ServerMode)
 
 	return true
 }
@@ -76,6 +80,8 @@ func constructTCPClient() bool {
 
 		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(examchatserverPacket.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
 		if err != nil {
+			println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
+			examserverlogic.Logger().println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		} else {
@@ -96,8 +102,6 @@ func constructTCPServer(ctxServer context.Context, cancel context.CancelFunc, ch
 	port := serverConfig.ServerPort
 	address := ":" + strconv.Itoa(port)
 	go tcpserver.HandleListener(ctxServer, address, &wg, chClosed)
-	println("[Server 정보] Port : ", port, ", Mode : ", serverConfig.ServerMode)
-	examserverlogic.Logger().Println("[Server 정보] Port : ", port, ", Mode : ", serverConfig.ServerMode)
 	return
 }
 
