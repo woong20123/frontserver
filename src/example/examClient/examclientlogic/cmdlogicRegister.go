@@ -6,7 +6,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/nsf/termbox-go"
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
@@ -20,9 +19,10 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandLoginUserRes, func(conn *net.TCPConn, p *packet.Packet) {
 
 		res := examchatserverPacket.S2CPCLoginUserRes{}
-		err := proto.Unmarshal(p.PacketBuffer(), &res)
+		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 
 		switch res.Result {
@@ -46,7 +46,11 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 	// 로비에 전달하는 메시지 응답 패킷 처리 작업 등록
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandLobbyMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCLobbySendMsgRes{}
-		p.ReadValues(&res.Result, &res.UserID, &res.Msg)
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		var sb strings.Builder
 		sb.WriteString(res.UserID)
@@ -58,7 +62,11 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandSystemMsgSend, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCSystemMsgSend{}
-		p.ReadValues(&res.Msg)
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		Instance().ObjMgr().ChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, res.Msg, termbox.ColorGreen)
 		return
 	})

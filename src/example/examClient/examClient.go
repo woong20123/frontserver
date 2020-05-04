@@ -14,7 +14,6 @@ import (
 	"github.com/nsf/termbox-go"
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -273,12 +272,12 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandLoginUserReq)
 					req := examchatserverPacket.C2SPCLoginUserReq{}
 					req.UserID = userid
-					b, err := proto.Marshal(&req)
-					p.CopyByte(b)
+					err := p.MarshalFromProto(&req)
 					if err == nil {
 						sendPacketChan <- p
 					} else {
 						readSceneErrorWrite("유저의 ID가 비정상적입니다.")
+						packet.Pool().ReleasePacket(p)
 					}
 
 				} else {
@@ -332,8 +331,14 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						// lobby msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
 						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandLobbyMsgReq)
-						p.WriteValues(&msg)
-						sendPacketChan <- p
+						req := examchatserverPacket.C2SPCLobbySendMsgReq{}
+						req.Msg = msg
+						err := p.MarshalFromProto(&req)
+						if err == nil {
+							sendPacketChan <- p
+						} else {
+							packet.Pool().ReleasePacket(p)
+						}
 					}
 				}
 			case examclientlogic.UserStateEnum.RoomSTATE:
