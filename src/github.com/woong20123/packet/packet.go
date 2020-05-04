@@ -5,6 +5,8 @@ import (
 	"io"
 	"log"
 	"math"
+
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -88,6 +90,19 @@ func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand ui
 func (p *Packet) CopyByte(data []byte) {
 	length := copy(p.buffer[p.size():], data)
 	p.addSize(uint16(length))
+}
+
+// MarshalFromProto is
+func (p *Packet) MarshalFromProto(message proto.Message) error {
+	b, err := proto.Marshal(message)
+	p.CopyByte(b)
+	return err
+}
+
+// UnMarshalFromProto is
+func (p *Packet) UnMarshalFromProto(message proto.Message) error {
+	err := proto.Unmarshal(p.PacketBuffer(), message)
+	return err
 }
 
 // WriteValues write various type to packet buffer
