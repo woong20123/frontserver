@@ -11,3 +11,61 @@ message S2CPCLoginUserRes {
   uint32  UserSn = 2;
   string  UserID = 3;
 }
+
+message C2SPCLobbySendMsgReq {
+  string Msg = 1;
+}
+
+message S2CPCLobbySendMsgRes{
+  uint32 Result = 1;
+  string UserID = 2;
+  string Msg = 3;
+}
+
+message C2SPCRoomCreateReq{
+  string RoomName = 1;
+}
+
+message S2CPCRoomCreateRes{
+  uint32 Result = 1;
+  uint32 RoomIdx = 2;
+  string RoomName = 3;
+  uint32 EnterUserSn = 4;
+  string EnterUserID = 5;
+}
+
+message C2SPCRoomEnterReq {
+  string RoomName = 1;
+}
+
+message S2CPCRoomEnterRes {
+  uint32 Result = 1;
+  uint32 RoomIdx = 2;
+  string RoomName = 3;
+  uint32 EnterUserSn = 4;
+  string EnterUserID = 5;
+}
+
+message C2SPCRoomLeaveReq {
+}
+
+message S2CPCRoomLeaveRes {
+  uint32 Result = 1;
+  uint32 LeaveUserSn = 2;
+  string LeaveUserID = 3;
+}
+
+message C2SPCRoomSendMsgReq{
+  uint32 RoomIdx = 1;
+  string Msg = 2;
+}
+
+message S2CPCRoomSendMsgRes{
+  uint32 Result = 1;
+  string Userid = 2;
+  string Msg = 3;
+}
+
+message S2CPCSystemMsgSend {
+  string Msg = 1;
+}
