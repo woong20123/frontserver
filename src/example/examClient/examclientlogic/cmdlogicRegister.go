@@ -6,7 +6,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/nsf/termbox-go"
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
@@ -20,9 +19,10 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandLoginUserRes, func(conn *net.TCPConn, p *packet.Packet) {
 
 		res := examchatserverPacket.S2CPCLoginUserRes{}
-		err := proto.Unmarshal(p.PacketBuffer(), &res)
+		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 
 		switch res.Result {
@@ -46,7 +46,11 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 	// 로비에 전달하는 메시지 응답 패킷 처리 작업 등록
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandLobbyMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCLobbySendMsgRes{}
-		p.ReadValues(&res.Result, &res.UserID, &res.Msg)
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		var sb strings.Builder
 		sb.WriteString(res.UserID)
@@ -58,7 +62,11 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandSystemMsgSend, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCSystemMsgSend{}
-		p.ReadValues(&res.Msg)
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		Instance().ObjMgr().ChanManager().SendchanRequestToGui(ToGUIEnum.TYPEMsgPrint, res.Msg, termbox.ColorGreen)
 		return
 	})
@@ -74,7 +82,11 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방입장 패킷 응답 처리 로직
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomEnterRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomEnterRes{}
-		p.ReadValues(&res.Result, &res.RoomIdx, &res.RoomName, &res.EnterUserSn, &res.EnterUserID)
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			return
+		}
+
 		eu := Instance().ObjMgr().User()
 		if eu == nil {
 			return
@@ -104,7 +116,11 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방 퇴장 패킷 응답 처리 작업
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomCreateRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomCreateRes{}
-		p.ReadValues(&res.Result, &res.RoomIdx, &res.RoomName, &res.EnterUserSn, &res.EnterUserID)
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			return
+		}
+
 		eu := Instance().ObjMgr().User()
 		if eu == nil {
 			return
@@ -124,7 +140,10 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방 퇴장 패킷 응답 처리 작업
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomLeaveRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomLeaveRes{}
-		p.ReadValues(&res.Result, &res.LeaveUserSn, &res.LeaveUserID)
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			return
+		}
 
 		eu := Instance().ObjMgr().User()
 		if eu == nil {
@@ -154,8 +173,10 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방입장 패킷 응답 처리 로직
 	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomSendMsgRes{}
-		p.ReadValues(&res.Result, &res.Userid, &res.Msg)
-
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			return
+		}
 		// 전달 받은 메시지를 출력합니다.
 		var sb strings.Builder
 		sb.WriteString(res.Userid)

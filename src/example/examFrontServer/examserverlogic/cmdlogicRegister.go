@@ -2,12 +2,10 @@ package examserverlogic
 
 import (
 	"example/examchatserverPacket"
-	"fmt"
 	"net"
 
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
-	"google.golang.org/protobuf/proto"
 )
 
 // VerifyUserObj is
@@ -32,7 +30,7 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 로그인 패킷 처리 작업 등록
 	lm.RegistLogicfun(examchatserverPacket.C2SPacketCommandLoginUserReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := examchatserverPacket.C2SPCLoginUserReq{}
-		err := proto.Unmarshal(p.PacketBuffer(), &req)
+		err := p.UnMarshalFromProto(&req)
 		if err != nil {
 			Logger().Println(err)
 			return
@@ -80,18 +78,26 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 				if res.UserSn == loop_eu.UserSn() {
 					sendp := packet.Pool().AcquirePacket()
 					sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandLoginUserRes)
-					b, err := proto.Marshal(&res)
-					if err != nil {
+					err := sendp.MarshalFromProto(&res)
+					if err == nil {
+						tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+					} else {
 						Logger().Println(err)
+						packet.Pool().ReleasePacket(sendp)
 					}
-					sendp.CopyByte(b)
-					//sendp.CopyByte(res.Result, res.UserSn, &res.UserID)
-					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
 				} else {
 					sendp := packet.Pool().AcquirePacket()
 					sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandSystemMsgSend)
-					sendp.WriteValues(fmt.Sprint("[", res.UserID, "] 유저가 로비에 접속하였습니다."))
-					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+					sendReq := examchatserverPacket.S2CPCSystemMsgSend{}
+					sendReq.Msg = "[" + res.UserID + "] 유저가 로비에 접속하였습니다."
+					err := sendp.MarshalFromProto(&sendReq)
+					if err == nil {
+						tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+					} else {
+						Logger().Println(err)
+						packet.Pool().ReleasePacket(sendp)
+					}
+
 				}
 
 			}
@@ -103,7 +109,12 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 	// 로비에 전달하는 메시지 패킷 처리 작업 등록
 	lm.RegistLogicfun(examchatserverPacket.C2SPacketCommandLobbyMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := examchatserverPacket.C2SPCLobbySendMsgReq{}
-		p.ReadValues(&req.Msg)
+		err := p.UnMarshalFromProto(&req)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
+
 		eu := Instance().ObjMgr().FindUser(conn)
 		if eu == nil {
 			return
@@ -120,9 +131,13 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 				// Send 응답 패킷
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandLobbyMsgRes)
-				sendp.WriteValues(res.Result, &res.UserID, &res.Msg)
-				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
-				//Logger().Println("[Send Room Msg] send user ", &res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
+				err := sendp.MarshalFromProto(&res)
+				if err == nil {
+					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+				} else {
+					Logger().Println(err)
+					packet.Pool().ReleasePacket(sendp)
+				}
 			}
 		})
 		return
@@ -135,7 +150,11 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방입장 패킷 처리 작업 등록 - 방이 없으면 생성합니다.
 	lm.RegistLogicfun(examchatserverPacket.C2SPacketCommandRoomEnterReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := examchatserverPacket.C2SPCRoomEnterReq{}
-		p.ReadValues(&req.RoomName)
+		err := p.UnMarshalFromProto(&req)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
 
 		res := examchatserverPacket.S2CPCRoomEnterRes{}
 		res.Result = examchatserverPacket.ResultSuccess
@@ -170,15 +189,23 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				// Send 응답 패킷
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandRoomEnterRes)
-				sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserID)
-				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+				err = sendp.MarshalFromProto(&res)
+				if err == nil {
+					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+				} else {
+					packet.Pool().ReleasePacket(sendp)
+				}
 			})
 		} else {
 			// Send 응답 패킷
 			sendp := packet.Pool().AcquirePacket()
 			sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandRoomEnterRes)
-			sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserID)
-			tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
+			err = sendp.MarshalFromProto(&res)
+			if err == nil {
+				tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
+			} else {
+				packet.Pool().ReleasePacket(sendp)
+			}
 		}
 	})
 
@@ -186,7 +213,11 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// 유저의 방 생성 패킷 처리 작업
 	lm.RegistLogicfun(examchatserverPacket.C2SPacketCommandRoomCreateReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := examchatserverPacket.C2SPCRoomEnterReq{}
-		p.ReadValues(&req.RoomName)
+		err := p.UnMarshalFromProto(&req)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
 
 		res := examchatserverPacket.S2CPCRoomCreateRes{}
 		res.Result = examchatserverPacket.ResultSuccess
@@ -230,8 +261,12 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		// Send 응답 패킷
 		sendp := packet.Pool().AcquirePacket()
 		sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandRoomCreateRes)
-		sendp.WriteValues(res.Result, res.RoomIdx, &res.RoomName, res.EnterUserSn, &res.EnterUserID)
-		tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
+		err = sendp.MarshalFromProto(&res)
+		if err == nil {
+			tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
+		} else {
+			packet.Pool().ReleasePacket(sendp)
+		}
 
 	})
 
@@ -263,23 +298,34 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 				// Send 응답 패킷
 				sendp := packet.Pool().AcquirePacket()
 				sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandRoomLeaveRes)
-				sendp.WriteValues(res.Result, res.LeaveUserSn, &res.LeaveUserID)
-				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+				err := sendp.MarshalFromProto(&res)
+				if err == nil {
+					Logger().Println(err)
+					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+				}
 			})
 		}
 
 		// Send 응답 패킷
 		sendp := packet.Pool().AcquirePacket()
 		sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandRoomLeaveRes)
-		sendp.WriteValues(res.Result, res.LeaveUserSn, &res.LeaveUserID)
-		tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
+		err := sendp.MarshalFromProto(&res)
+		if err == nil {
+			Logger().Println(err)
+			tcpserver.Instance().SendManager().SendToClientConn(eu.Conn(), sendp)
+		}
 	})
 
 	// C2SPacketCommandRoomMsgReq Packet Logic
 	// 유저의 방에서 패킷을 전송합니다
 	lm.RegistLogicfun(examchatserverPacket.C2SPacketCommandRoomMsgReq, func(conn *net.TCPConn, p *packet.Packet) {
 		req := examchatserverPacket.C2SPCRoomSendMsgReq{}
-		p.ReadValues(&req.RoomIdx, &req.Msg)
+		err := p.UnMarshalFromProto(&req)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
+
 		eu := Instance().ObjMgr().FindUser(conn)
 
 		// 비정상적인 유저라면 리턴합니다.
@@ -295,6 +341,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		res := examchatserverPacket.S2CPCRoomSendMsgRes{}
 		res.Result = examchatserverPacket.ResultSuccess
 		res.Userid = eu.UserID()
+		res.Msg = req.Msg
 
 		// 방안에 있는 유저들에게 메시지를 보냅니다.
 		Instance().ChatRoomMgr().ForEachFunc(eu.roomIdx, func(loop_eu *ExamUser) {
@@ -302,8 +349,13 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 			// 응답 패킷 전송
 			sendp := packet.Pool().AcquirePacket()
 			sendp.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.S2CPacketCommandRoomMsgRes)
-			sendp.WriteValues(res.Result, res.Userid, &req.Msg)
-			tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+			err := sendp.MarshalFromProto(&res)
+			if err == nil {
+				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+			} else {
+				packet.Pool().ReleasePacket(sendp)
+			}
+
 			//Logger().Println("[Send Room Msg] send user ", res.Userid, " recv user ", loop_eu.UserID(), " :  ", req.Msg)
 		})
 

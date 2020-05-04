@@ -6,13 +6,28 @@
     "externalConsole": true,
     "configurations": [
         {
-            "name": "Launch",
+            "name": "Serverlaunch",
             "type": "go",
             "request": "launch",
-            "mode": "auto",
-            "program": "${fileDirname}",
+            "mode": "exec",
+            "program": "${workspaceFolder}/bin/examFrontServer.exe",
             "env": {},
             "args": []
+        },
+        {
+            "name": "Clientlaunch",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "${workspaceFolder}/bin/examClient.exe",
+            "env": {},
+            "args": []
+        },
+        {
+            "name": "ProcessAttach",
+            "type": "go",
+            "request": "attach",
+            "processId": 29224
         }
     ]
 }
