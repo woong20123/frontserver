@@ -135,6 +135,634 @@ func (x *S2CPCLoginUserRes) GetUserID() string {
 	return ""
 }
 
+type C2SPCLobbySendMsgReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Msg string `protobuf:"bytes,1,opt,name=Msg,proto3" json:"Msg,omitempty"`
+}
+
+func (x *C2SPCLobbySendMsgReq) Reset() {
+	*x = C2SPCLobbySendMsgReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SPCLobbySendMsgReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SPCLobbySendMsgReq) ProtoMessage() {}
+
+func (x *C2SPCLobbySendMsgReq) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SPCLobbySendMsgReq.ProtoReflect.Descriptor instead.
+func (*C2SPCLobbySendMsgReq) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *C2SPCLobbySendMsgReq) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type S2CPCLobbySendMsgRes struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result uint32 `protobuf:"varint,1,opt,name=Result,proto3" json:"Result,omitempty"`
+	UserID string `protobuf:"bytes,2,opt,name=UserID,proto3" json:"UserID,omitempty"`
+	Msg    string `protobuf:"bytes,3,opt,name=Msg,proto3" json:"Msg,omitempty"`
+}
+
+func (x *S2CPCLobbySendMsgRes) Reset() {
+	*x = S2CPCLobbySendMsgRes{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CPCLobbySendMsgRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CPCLobbySendMsgRes) ProtoMessage() {}
+
+func (x *S2CPCLobbySendMsgRes) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CPCLobbySendMsgRes.ProtoReflect.Descriptor instead.
+func (*S2CPCLobbySendMsgRes) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *S2CPCLobbySendMsgRes) GetResult() uint32 {
+	if x != nil {
+		return x.Result
+	}
+	return 0
+}
+
+func (x *S2CPCLobbySendMsgRes) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+func (x *S2CPCLobbySendMsgRes) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type C2SPCRoomCreateReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoomName string `protobuf:"bytes,1,opt,name=RoomName,proto3" json:"RoomName,omitempty"`
+}
+
+func (x *C2SPCRoomCreateReq) Reset() {
+	*x = C2SPCRoomCreateReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SPCRoomCreateReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SPCRoomCreateReq) ProtoMessage() {}
+
+func (x *C2SPCRoomCreateReq) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SPCRoomCreateReq.ProtoReflect.Descriptor instead.
+func (*C2SPCRoomCreateReq) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *C2SPCRoomCreateReq) GetRoomName() string {
+	if x != nil {
+		return x.RoomName
+	}
+	return ""
+}
+
+type S2CPCRoomCreateRes struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result      uint32 `protobuf:"varint,1,opt,name=Result,proto3" json:"Result,omitempty"`
+	RoomIdx     uint32 `protobuf:"varint,2,opt,name=RoomIdx,proto3" json:"RoomIdx,omitempty"`
+	RoomName    string `protobuf:"bytes,3,opt,name=RoomName,proto3" json:"RoomName,omitempty"`
+	EnterUserSn uint32 `protobuf:"varint,4,opt,name=EnterUserSn,proto3" json:"EnterUserSn,omitempty"`
+	EnterUserID string `protobuf:"bytes,5,opt,name=EnterUserID,proto3" json:"EnterUserID,omitempty"`
+}
+
+func (x *S2CPCRoomCreateRes) Reset() {
+	*x = S2CPCRoomCreateRes{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CPCRoomCreateRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CPCRoomCreateRes) ProtoMessage() {}
+
+func (x *S2CPCRoomCreateRes) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CPCRoomCreateRes.ProtoReflect.Descriptor instead.
+func (*S2CPCRoomCreateRes) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *S2CPCRoomCreateRes) GetResult() uint32 {
+	if x != nil {
+		return x.Result
+	}
+	return 0
+}
+
+func (x *S2CPCRoomCreateRes) GetRoomIdx() uint32 {
+	if x != nil {
+		return x.RoomIdx
+	}
+	return 0
+}
+
+func (x *S2CPCRoomCreateRes) GetRoomName() string {
+	if x != nil {
+		return x.RoomName
+	}
+	return ""
+}
+
+func (x *S2CPCRoomCreateRes) GetEnterUserSn() uint32 {
+	if x != nil {
+		return x.EnterUserSn
+	}
+	return 0
+}
+
+func (x *S2CPCRoomCreateRes) GetEnterUserID() string {
+	if x != nil {
+		return x.EnterUserID
+	}
+	return ""
+}
+
+type C2SPCRoomEnterReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoomName string `protobuf:"bytes,1,opt,name=RoomName,proto3" json:"RoomName,omitempty"`
+}
+
+func (x *C2SPCRoomEnterReq) Reset() {
+	*x = C2SPCRoomEnterReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SPCRoomEnterReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SPCRoomEnterReq) ProtoMessage() {}
+
+func (x *C2SPCRoomEnterReq) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SPCRoomEnterReq.ProtoReflect.Descriptor instead.
+func (*C2SPCRoomEnterReq) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *C2SPCRoomEnterReq) GetRoomName() string {
+	if x != nil {
+		return x.RoomName
+	}
+	return ""
+}
+
+type S2CPCRoomEnterRes struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result      uint32 `protobuf:"varint,1,opt,name=Result,proto3" json:"Result,omitempty"`
+	RoomIdx     uint32 `protobuf:"varint,2,opt,name=RoomIdx,proto3" json:"RoomIdx,omitempty"`
+	RoomName    string `protobuf:"bytes,3,opt,name=RoomName,proto3" json:"RoomName,omitempty"`
+	EnterUserSn uint32 `protobuf:"varint,4,opt,name=EnterUserSn,proto3" json:"EnterUserSn,omitempty"`
+	EnterUserID string `protobuf:"bytes,5,opt,name=EnterUserID,proto3" json:"EnterUserID,omitempty"`
+}
+
+func (x *S2CPCRoomEnterRes) Reset() {
+	*x = S2CPCRoomEnterRes{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CPCRoomEnterRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CPCRoomEnterRes) ProtoMessage() {}
+
+func (x *S2CPCRoomEnterRes) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CPCRoomEnterRes.ProtoReflect.Descriptor instead.
+func (*S2CPCRoomEnterRes) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *S2CPCRoomEnterRes) GetResult() uint32 {
+	if x != nil {
+		return x.Result
+	}
+	return 0
+}
+
+func (x *S2CPCRoomEnterRes) GetRoomIdx() uint32 {
+	if x != nil {
+		return x.RoomIdx
+	}
+	return 0
+}
+
+func (x *S2CPCRoomEnterRes) GetRoomName() string {
+	if x != nil {
+		return x.RoomName
+	}
+	return ""
+}
+
+func (x *S2CPCRoomEnterRes) GetEnterUserSn() uint32 {
+	if x != nil {
+		return x.EnterUserSn
+	}
+	return 0
+}
+
+func (x *S2CPCRoomEnterRes) GetEnterUserID() string {
+	if x != nil {
+		return x.EnterUserID
+	}
+	return ""
+}
+
+type C2SPCRoomLeaveReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *C2SPCRoomLeaveReq) Reset() {
+	*x = C2SPCRoomLeaveReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SPCRoomLeaveReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SPCRoomLeaveReq) ProtoMessage() {}
+
+func (x *C2SPCRoomLeaveReq) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SPCRoomLeaveReq.ProtoReflect.Descriptor instead.
+func (*C2SPCRoomLeaveReq) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{8}
+}
+
+type S2CPCRoomLeaveRes struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result      uint32 `protobuf:"varint,1,opt,name=Result,proto3" json:"Result,omitempty"`
+	LeaveUserSn uint32 `protobuf:"varint,2,opt,name=LeaveUserSn,proto3" json:"LeaveUserSn,omitempty"`
+	LeaveUserID string `protobuf:"bytes,3,opt,name=LeaveUserID,proto3" json:"LeaveUserID,omitempty"`
+}
+
+func (x *S2CPCRoomLeaveRes) Reset() {
+	*x = S2CPCRoomLeaveRes{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CPCRoomLeaveRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CPCRoomLeaveRes) ProtoMessage() {}
+
+func (x *S2CPCRoomLeaveRes) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CPCRoomLeaveRes.ProtoReflect.Descriptor instead.
+func (*S2CPCRoomLeaveRes) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *S2CPCRoomLeaveRes) GetResult() uint32 {
+	if x != nil {
+		return x.Result
+	}
+	return 0
+}
+
+func (x *S2CPCRoomLeaveRes) GetLeaveUserSn() uint32 {
+	if x != nil {
+		return x.LeaveUserSn
+	}
+	return 0
+}
+
+func (x *S2CPCRoomLeaveRes) GetLeaveUserID() string {
+	if x != nil {
+		return x.LeaveUserID
+	}
+	return ""
+}
+
+type C2SPCRoomSendMsgReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoomIdx uint32 `protobuf:"varint,1,opt,name=RoomIdx,proto3" json:"RoomIdx,omitempty"`
+	Msg     string `protobuf:"bytes,2,opt,name=Msg,proto3" json:"Msg,omitempty"`
+}
+
+func (x *C2SPCRoomSendMsgReq) Reset() {
+	*x = C2SPCRoomSendMsgReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *C2SPCRoomSendMsgReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*C2SPCRoomSendMsgReq) ProtoMessage() {}
+
+func (x *C2SPCRoomSendMsgReq) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use C2SPCRoomSendMsgReq.ProtoReflect.Descriptor instead.
+func (*C2SPCRoomSendMsgReq) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *C2SPCRoomSendMsgReq) GetRoomIdx() uint32 {
+	if x != nil {
+		return x.RoomIdx
+	}
+	return 0
+}
+
+func (x *C2SPCRoomSendMsgReq) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type S2CPCRoomSendMsgRes struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Result uint32 `protobuf:"varint,1,opt,name=Result,proto3" json:"Result,omitempty"`
+	Userid string `protobuf:"bytes,2,opt,name=Userid,proto3" json:"Userid,omitempty"`
+	Msg    string `protobuf:"bytes,3,opt,name=Msg,proto3" json:"Msg,omitempty"`
+}
+
+func (x *S2CPCRoomSendMsgRes) Reset() {
+	*x = S2CPCRoomSendMsgRes{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CPCRoomSendMsgRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CPCRoomSendMsgRes) ProtoMessage() {}
+
+func (x *S2CPCRoomSendMsgRes) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CPCRoomSendMsgRes.ProtoReflect.Descriptor instead.
+func (*S2CPCRoomSendMsgRes) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *S2CPCRoomSendMsgRes) GetResult() uint32 {
+	if x != nil {
+		return x.Result
+	}
+	return 0
+}
+
+func (x *S2CPCRoomSendMsgRes) GetUserid() string {
+	if x != nil {
+		return x.Userid
+	}
+	return ""
+}
+
+func (x *S2CPCRoomSendMsgRes) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type S2CPCSystemMsgSend struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Msg string `protobuf:"bytes,1,opt,name=Msg,proto3" json:"Msg,omitempty"`
+}
+
+func (x *S2CPCSystemMsgSend) Reset() {
+	*x = S2CPCSystemMsgSend{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_LogicPacket_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *S2CPCSystemMsgSend) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*S2CPCSystemMsgSend) ProtoMessage() {}
+
+func (x *S2CPCSystemMsgSend) ProtoReflect() protoreflect.Message {
+	mi := &file_LogicPacket_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use S2CPCSystemMsgSend.ProtoReflect.Descriptor instead.
+func (*S2CPCSystemMsgSend) Descriptor() ([]byte, []int) {
+	return file_LogicPacket_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *S2CPCSystemMsgSend) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
 var File_LogicPacket_proto protoreflect.FileDescriptor
 
 var file_LogicPacket_proto_rawDesc = []byte{
@@ -149,9 +777,65 @@ var file_LogicPacket_proto_rawDesc = []byte{
 	0x75, 0x6c, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x55, 0x73, 0x65, 0x72, 0x53, 0x6e, 0x18, 0x02, 0x20,
 	0x01, 0x28, 0x0d, 0x52, 0x06, 0x55, 0x73, 0x65, 0x72, 0x53, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x55,
 	0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x55, 0x73, 0x65,
-	0x72, 0x49, 0x44, 0x42, 0x18, 0x5a, 0x16, 0x2e, 0x3b, 0x65, 0x78, 0x61, 0x6d, 0x63, 0x68, 0x61,
-	0x74, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x50, 0x61, 0x63, 0x6b, 0x65, 0x74, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x49, 0x44, 0x22, 0x28, 0x0a, 0x14, 0x43, 0x32, 0x53, 0x50, 0x43, 0x4c, 0x6f, 0x62, 0x62,
+	0x79, 0x53, 0x65, 0x6e, 0x64, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x71, 0x12, 0x10, 0x0a, 0x03, 0x4d,
+	0x73, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x4d, 0x73, 0x67, 0x22, 0x58, 0x0a,
+	0x14, 0x53, 0x32, 0x43, 0x50, 0x43, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x53, 0x65, 0x6e, 0x64, 0x4d,
+	0x73, 0x67, 0x52, 0x65, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x16, 0x0a,
+	0x06, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x55,
+	0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x10, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x03, 0x4d, 0x73, 0x67, 0x22, 0x30, 0x0a, 0x12, 0x43, 0x32, 0x53, 0x50, 0x43,
+	0x52, 0x6f, 0x6f, 0x6d, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x12, 0x1a, 0x0a,
+	0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0xa6, 0x01, 0x0a, 0x12, 0x53, 0x32,
+	0x43, 0x50, 0x43, 0x52, 0x6f, 0x6f, 0x6d, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73,
+	0x12, 0x16, 0x0a, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d,
+	0x52, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x52, 0x6f, 0x6f, 0x6d,
+	0x49, 0x64, 0x78, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x07, 0x52, 0x6f, 0x6f, 0x6d, 0x49,
+	0x64, 0x78, 0x12, 0x1a, 0x0a, 0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x20,
+	0x0a, 0x0b, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x53, 0x6e, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x0d, 0x52, 0x0b, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x53, 0x6e,
+	0x12, 0x20, 0x0a, 0x0b, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18,
+	0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72,
+	0x49, 0x44, 0x22, 0x2f, 0x0a, 0x11, 0x43, 0x32, 0x53, 0x50, 0x43, 0x52, 0x6f, 0x6f, 0x6d, 0x45,
+	0x6e, 0x74, 0x65, 0x72, 0x52, 0x65, 0x71, 0x12, 0x1a, 0x0a, 0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x4e,
+	0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x4e,
+	0x61, 0x6d, 0x65, 0x22, 0xa5, 0x01, 0x0a, 0x11, 0x53, 0x32, 0x43, 0x50, 0x43, 0x52, 0x6f, 0x6f,
+	0x6d, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x52, 0x65, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x65, 0x73,
+	0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c,
+	0x74, 0x12, 0x18, 0x0a, 0x07, 0x52, 0x6f, 0x6f, 0x6d, 0x49, 0x64, 0x78, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0d, 0x52, 0x07, 0x52, 0x6f, 0x6f, 0x6d, 0x49, 0x64, 0x78, 0x12, 0x1a, 0x0a, 0x08, 0x52,
+	0x6f, 0x6f, 0x6d, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x52,
+	0x6f, 0x6f, 0x6d, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x45, 0x6e, 0x74, 0x65, 0x72,
+	0x55, 0x73, 0x65, 0x72, 0x53, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0b, 0x45, 0x6e,
+	0x74, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x53, 0x6e, 0x12, 0x20, 0x0a, 0x0b, 0x45, 0x6e, 0x74,
+	0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b,
+	0x45, 0x6e, 0x74, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x13, 0x0a, 0x11, 0x43,
+	0x32, 0x53, 0x50, 0x43, 0x52, 0x6f, 0x6f, 0x6d, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x52, 0x65, 0x71,
+	0x22, 0x6f, 0x0a, 0x11, 0x53, 0x32, 0x43, 0x50, 0x43, 0x52, 0x6f, 0x6f, 0x6d, 0x4c, 0x65, 0x61,
+	0x76, 0x65, 0x52, 0x65, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x20, 0x0a,
+	0x0b, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x53, 0x6e, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0d, 0x52, 0x0b, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x53, 0x6e, 0x12,
+	0x20, 0x0a, 0x0b, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x49,
+	0x44, 0x22, 0x41, 0x0a, 0x13, 0x43, 0x32, 0x53, 0x50, 0x43, 0x52, 0x6f, 0x6f, 0x6d, 0x53, 0x65,
+	0x6e, 0x64, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x52, 0x6f, 0x6f, 0x6d,
+	0x49, 0x64, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x07, 0x52, 0x6f, 0x6f, 0x6d, 0x49,
+	0x64, 0x78, 0x12, 0x10, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x03, 0x4d, 0x73, 0x67, 0x22, 0x57, 0x0a, 0x13, 0x53, 0x32, 0x43, 0x50, 0x43, 0x52, 0x6f, 0x6f,
+	0x6d, 0x53, 0x65, 0x6e, 0x64, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x52,
+	0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x52, 0x65, 0x73,
+	0x75, 0x6c, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x55, 0x73, 0x65, 0x72, 0x69, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x55, 0x73, 0x65, 0x72, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x4d,
+	0x73, 0x67, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x4d, 0x73, 0x67, 0x22, 0x26, 0x0a,
+	0x12, 0x53, 0x32, 0x43, 0x50, 0x43, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x4d, 0x73, 0x67, 0x53,
+	0x65, 0x6e, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x03, 0x4d, 0x73, 0x67, 0x42, 0x18, 0x5a, 0x16, 0x2e, 0x3b, 0x65, 0x78, 0x61, 0x6d, 0x63,
+	0x68, 0x61, 0x74, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x50, 0x61, 0x63, 0x6b, 0x65, 0x74, 0x62,
+	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -166,10 +850,21 @@ func file_LogicPacket_proto_rawDescGZIP() []byte {
 	return file_LogicPacket_proto_rawDescData
 }
 
-var file_LogicPacket_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_LogicPacket_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_LogicPacket_proto_goTypes = []interface{}{
-	(*C2SPCLoginUserReq)(nil), // 0: examchatserverPacket.C2SPCLoginUserReq
-	(*S2CPCLoginUserRes)(nil), // 1: examchatserverPacket.S2CPCLoginUserRes
+	(*C2SPCLoginUserReq)(nil),    // 0: examchatserverPacket.C2SPCLoginUserReq
+	(*S2CPCLoginUserRes)(nil),    // 1: examchatserverPacket.S2CPCLoginUserRes
+	(*C2SPCLobbySendMsgReq)(nil), // 2: examchatserverPacket.C2SPCLobbySendMsgReq
+	(*S2CPCLobbySendMsgRes)(nil), // 3: examchatserverPacket.S2CPCLobbySendMsgRes
+	(*C2SPCRoomCreateReq)(nil),   // 4: examchatserverPacket.C2SPCRoomCreateReq
+	(*S2CPCRoomCreateRes)(nil),   // 5: examchatserverPacket.S2CPCRoomCreateRes
+	(*C2SPCRoomEnterReq)(nil),    // 6: examchatserverPacket.C2SPCRoomEnterReq
+	(*S2CPCRoomEnterRes)(nil),    // 7: examchatserverPacket.S2CPCRoomEnterRes
+	(*C2SPCRoomLeaveReq)(nil),    // 8: examchatserverPacket.C2SPCRoomLeaveReq
+	(*S2CPCRoomLeaveRes)(nil),    // 9: examchatserverPacket.S2CPCRoomLeaveRes
+	(*C2SPCRoomSendMsgReq)(nil),  // 10: examchatserverPacket.C2SPCRoomSendMsgReq
+	(*S2CPCRoomSendMsgRes)(nil),  // 11: examchatserverPacket.S2CPCRoomSendMsgRes
+	(*S2CPCSystemMsgSend)(nil),   // 12: examchatserverPacket.S2CPCSystemMsgSend
 }
 var file_LogicPacket_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -209,6 +904,138 @@ func file_LogicPacket_proto_init() {
 				return nil
 			}
 		}
+		file_LogicPacket_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SPCLobbySendMsgReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CPCLobbySendMsgRes); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SPCRoomCreateReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CPCRoomCreateRes); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SPCRoomEnterReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CPCRoomEnterRes); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SPCRoomLeaveReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CPCRoomLeaveRes); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*C2SPCRoomSendMsgReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CPCRoomSendMsgRes); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_LogicPacket_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*S2CPCSystemMsgSend); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -216,7 +1043,7 @@ func file_LogicPacket_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_LogicPacket_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
