@@ -16,7 +16,7 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandLoginUserRes에 대한 처리 작업을 등록합니다.
 	// 유저의 로그인 패킷 응답 처리 작업 등록
-	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandLoginUserRes, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CLoginUserRes), func(conn *net.TCPConn, p *packet.Packet) {
 
 		res := examchatserverPacket.S2CPCLoginUserRes{}
 		err := p.UnMarshalFromProto(&res)
@@ -44,7 +44,7 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandLobbyMsgRes 대한 처리 작업을 등록합니다.
 	// 로비에 전달하는 메시지 응답 패킷 처리 작업 등록
-	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandLobbyMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CLobbyMsgRes), func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCLobbySendMsgRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
@@ -60,7 +60,7 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 		return
 	})
 
-	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandSystemMsgSend, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CSystemMsgSend), func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCSystemMsgSend{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
@@ -80,7 +80,7 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// S2CPacketCommandRoomEnterRes Packet Logic
 	// 유저의 방입장 패킷 응답 처리 로직
-	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomEnterRes, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomEnterRes), func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomEnterRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
@@ -114,7 +114,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandRoomLeaveRes Packet Logic
 	// 유저의 방 퇴장 패킷 응답 처리 작업
-	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomCreateRes, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomCreateRes), func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomCreateRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
@@ -138,7 +138,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandRoomLeaveRes Packet Logic
 	// 유저의 방 퇴장 패킷 응답 처리 작업
-	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomLeaveRes, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomLeaveRes), func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomLeaveRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
@@ -171,7 +171,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandRoomMsgRes Packet Logic
 	// 유저의 방입장 패킷 응답 처리 로직
-	lm.RegistLogicfun(examchatserverPacket.S2CPacketCommandRoomMsgRes, func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomMsgRes), func(conn *net.TCPConn, p *packet.Packet) {
 		res := examchatserverPacket.S2CPCRoomSendMsgRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {

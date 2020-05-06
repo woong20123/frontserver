@@ -2,28 +2,28 @@ syntax = "proto3";
 package examchatserverPacket;
 option go_package = ".;examchatserverPacket";
 
-enum PacketCmd {
+enum Cmd {
 	packetCommandStart = 0;
-	F2CSPacketCmdSysServerRegistReq = 1;
-	C2FPacketCmdSysServerRegistRes = 2;
+	F2CSServerRegistReq = 1;
+	CS2FServerRegistRes = 2;
 
-	packetLogicCommandStart = 10000;
-	C2SPacketCommandLoginUserReq = 10001;
-	S2CPacketCommandLoginUserRes = 10002;
-	C2SPacketCommandLogOutUserReq = 10003;
-	S2CPacketCommandLogOutUserRes = 10004;
+	LogicCmdStart = 10000;
+	C2SLoginUserReq = 10001;
+	S2CLoginUserRes = 10002;
+	C2SLogOutUserReq = 10003;
+	S2CLogOutUserRes = 10004;
 
-	C2SPacketCommandLobbyMsgReq = 10005;
-	S2CPacketCommandLobbyMsgRes = 10006;
+	C2SLobbyMsgReq = 10005;
+	S2CLobbyMsgRes = 10006;
 
-	C2SPacketCommandRoomCreateReq = 10007;
-	S2CPacketCommandRoomCreateRes = 10008;
-	C2SPacketCommandRoomEnterReq = 10009;
-	S2CPacketCommandRoomEnterRes = 10010;
-	C2SPacketCommandRoomLeaveReq = 10011;
-	S2CPacketCommandRoomLeaveRes = 10012;
-	C2SPacketCommandRoomMsgReq = 10013;
-	S2CPacketCommandRoomMsgRes = 10014;
+	C2SRoomCreateReq = 10007;
+	S2CRoomCreateRes = 10008;
+	C2SRoomEnterReq = 10009;
+	S2CRoomEnterRes = 10010;
+	C2SRoomLeaveReq = 10011;
+	S2CRoomLeaveRes = 10012;
+	C2SRoomMsgReq = 10013;
+	S2CRoomMsgRes = 10014;
 
-	S2CPacketCommandSystemMsgSend = 10015;
+	S2CSystemMsgSend = 10015;
 }

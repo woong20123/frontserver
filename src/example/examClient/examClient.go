@@ -270,7 +270,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				if userid != "" {
 					// User Login 패킷 전송
 					p := packet.Pool().AcquirePacket()
-					p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandLoginUserReq)
+					p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SLoginUserReq))
 					req := examchatserverPacket.C2SPCLoginUserReq{}
 					req.UserID = userid
 					err := p.MarshalFromProto(&req)
@@ -298,13 +298,13 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						roomName := fileds[1]
 
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomEnterReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomEnterReq))
 						req := examchatserverPacket.C2SPCRoomEnterReq{}
 						req.RoomName = roomName
 						err := p.MarshalFromProto(&req)
 						if err == nil {
 							sendPacketChan <- p
-							readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomEnterReq name = ", roomName))
+							readSceneErrorWrite(fmt.Sprint("Send Packet Cmd_C2SRoomEnterReq name = ", roomName))
 						} else {
 							packet.Pool().ReleasePacket(p)
 						}
@@ -317,13 +317,13 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						}
 						roomName := fileds[1]
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomCreateReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomCreateReq))
 						req := examchatserverPacket.C2SPCRoomEnterReq{}
 						req.RoomName = roomName
 						err := p.MarshalFromProto(&req)
 						if err == nil {
 							sendPacketChan <- p
-							readSceneErrorWrite(fmt.Sprint("Send Packet C2SPacketCommandRoomCreateReq name = ", roomName))
+							readSceneErrorWrite(fmt.Sprint("Send Packet Cmd_C2SRoomCreateReq name = ", roomName))
 						} else {
 							packet.Pool().ReleasePacket(p)
 						}
@@ -344,7 +344,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if msg != "" {
 						// lobby msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandLobbyMsgReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SLobbyMsgReq))
 						req := examchatserverPacket.C2SPCLobbySendMsgReq{}
 						req.Msg = msg
 						err := p.MarshalFromProto(&req)
@@ -360,7 +360,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if strings.Contains(msg, "/RoomLeave") {
 						// global msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomLeaveReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomLeaveReq))
 						sendPacketChan <- p
 					} else if strings.Contains(msg, "/?") {
 						readsceneClear()
@@ -372,7 +372,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if msg != "" {
 						// room msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, examchatserverPacket.C2SPacketCommandRoomMsgReq)
+						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomMsgReq))
 						req := examchatserverPacket.C2SPCRoomSendMsgReq{}
 						req.RoomIdx = user.RoomIdx()
 						req.Msg = msg

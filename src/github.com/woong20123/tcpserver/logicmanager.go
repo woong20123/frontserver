@@ -11,7 +11,7 @@ type TlogicFunc func(conn *net.TCPConn, p *packet.Packet)
 
 // LogicManager is
 type LogicManager struct {
-	LogicConatiner map[uint32]TlogicFunc
+	LogicConatiner map[int32]TlogicFunc
 	clientRequest  chan *SendToClientRequest
 }
 
@@ -29,22 +29,22 @@ type SendToServerRequest struct {
 
 // Initialize is
 func (lm *LogicManager) Initialize() {
-	lm.LogicConatiner = make(map[uint32]TlogicFunc)
+	lm.LogicConatiner = make(map[int32]TlogicFunc)
 	lm.clientRequest = make(chan *SendToClientRequest, 4096)
 }
 
 // RegistLogicfun regist packet processing logic
-func (lm *LogicManager) RegistLogicfun(cmd uint32, fun TlogicFunc) {
+func (lm *LogicManager) RegistLogicfun(cmd int32, fun TlogicFunc) {
 	lm.LogicConatiner[cmd] = fun
 }
 
 // UnregistLogicfun unregist packet processing logic
-func (lm *LogicManager) UnregistLogicfun(cmd uint32) {
+func (lm *LogicManager) UnregistLogicfun(cmd int32) {
 	delete(lm.LogicConatiner, cmd)
 }
 
 // CallLogicFun is
-func (lm *LogicManager) CallLogicFun(cmd uint32, conn *net.TCPConn, p *packet.Packet) {
+func (lm *LogicManager) CallLogicFun(cmd int32, conn *net.TCPConn, p *packet.Packet) {
 	r := SendToClientRequest{conn, p}
 	lm.clientRequest <- &r
 }

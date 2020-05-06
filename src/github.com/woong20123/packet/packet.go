@@ -31,7 +31,7 @@ func HeaderChack(buffer []byte, serialkey uint32) bool {
 type Header struct {
 	serialkey     uint32
 	packetSize    uint16
-	packetCommand uint32
+	packetCommand int32
 }
 
 // Packet is
@@ -59,13 +59,13 @@ func (p *Packet) MakeByte() []byte {
 	buffer := make([]byte, PacketHeaderSize+uint32(p.size()))
 	binary.LittleEndian.PutUint32(buffer, p.header.serialkey)
 	binary.LittleEndian.PutUint16(buffer[4:], p.header.packetSize)
-	binary.LittleEndian.PutUint32(buffer[6:], p.header.packetCommand)
+	binary.LittleEndian.PutUint32(buffer[6:], uint32(p.header.packetCommand))
 	copy(buffer[10:], p.PacketBuffer())
 	return buffer
 }
 
 // Command is return packet command
-func (p *Packet) Command() uint32 {
+func (p *Packet) Command() int32 {
 	return p.header.packetCommand
 }
 
@@ -80,7 +80,7 @@ func (p *Packet) PacketTotalSize() uint16 {
 }
 
 // SetHeader Set Header Info
-func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand uint32) {
+func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand int32) {
 	p.header.serialkey = serialKey
 	p.header.packetSize = packetsize
 	p.header.packetCommand = packetcommand
@@ -529,7 +529,7 @@ func AssemblyFromBuffer(buffer []byte, bufferpos uint32, serialkey uint32) (resu
 	if true == headerFind {
 		serialKey := uint32(binary.LittleEndian.Uint32(buffer))
 		packetSize := uint32(binary.LittleEndian.Uint16(buffer[4:]))
-		packetCommand := uint32(binary.LittleEndian.Uint16(buffer[6:]))
+		packetCommand := int32(binary.LittleEndian.Uint32(buffer[6:]))
 		totalPacketSize := packetSize + PacketHeaderSize
 
 		// 패킷을 만들 수 있을 만큼 패킷을 전달 받았다면 패킷을 만들고
