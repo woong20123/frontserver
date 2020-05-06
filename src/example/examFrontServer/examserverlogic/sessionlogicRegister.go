@@ -1,7 +1,7 @@
 package examserverlogic
 
 import (
-	"example/examchatserverPacket"
+	"example/examshare"
 	"net"
 
 	"github.com/woong20123/packet"
@@ -36,7 +36,7 @@ func RegistSessionLogic(sessionm *tcpserver.SessionMgr) {
 		var onPacket *packet.Packet = nil
 		// 남은 버퍼에서 패킷을 조립할 수 있을 수도 있기 때문에 재호출
 		for {
-			pos, onPacket = packet.AssemblyFromBuffer(buffer, pos, examchatserverPacket.ExamplePacketSerialkey)
+			pos, onPacket = packet.AssemblyFromBuffer(buffer, pos, uint32(examshare.Etc_ExamplePacketSerialkey))
 			if onPacket == nil {
 				break
 			}

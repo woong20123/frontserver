@@ -16,6 +16,15 @@ const (
 	MaxPacketSize uint16 = 0x1000
 )
 
+var defaultSerialKey uint32 = 0
+var isDefaultSerialKey bool = false
+
+// RegistSerialKey is
+func RegistSerialKey(key uint32) {
+	defaultSerialKey = key
+	isDefaultSerialKey = true
+}
+
 // HeaderChack check if the packet header normal
 func HeaderChack(buffer []byte, serialkey uint32) bool {
 	if serialkey == binary.LittleEndian.Uint32(buffer) {
@@ -82,6 +91,13 @@ func (p *Packet) PacketTotalSize() uint16 {
 // SetHeader Set Header Info
 func (p *Packet) SetHeader(serialKey uint32, packetsize uint16, packetcommand int32) {
 	p.header.serialkey = serialKey
+	p.header.packetSize = packetsize
+	p.header.packetCommand = packetcommand
+}
+
+// SetHeaderByDefaultKey is
+func (p *Packet) SetHeaderByDefaultKey(packetsize uint16, packetcommand int32) {
+	p.header.serialkey = defaultSerialKey
 	p.header.packetSize = packetsize
 	p.header.packetCommand = packetcommand
 }

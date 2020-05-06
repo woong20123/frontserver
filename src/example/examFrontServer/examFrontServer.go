@@ -4,7 +4,7 @@ package main
 import (
 	"context"
 	"example/examFrontServer/examserverlogic"
-	"example/examchatserverPacket"
+	"example/examshare"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
 )
 
@@ -78,14 +79,14 @@ func constructTCPClient() bool {
 		ChatserverIP := srvConfig.BackEndChatServerIP
 		ChatserverPort := srvConfig.BackEndChatServerPort
 
-		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(examchatserverPacket.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
+		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(examshare.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
 		if err != nil {
 			println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		} else {
-			tcpserver.Instance().SendManager().RunSendToServerHandle(examchatserverPacket.TCPCliToSvrIdxChat)
+			tcpserver.Instance().SendManager().RunSendToServerHandle(examshare.TCPCliToSvrIdxChat)
 		}
 	}
 	return true
@@ -95,7 +96,8 @@ func constructTCPServer(ctxServer context.Context, cancel context.CancelFunc, ch
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// server consturct
-	tcpserver.Consturct(examchatserverPacket.ExamplePacketSerialkey, runtime.NumCPU())
+	packet.RegistSerialKey(uint32(examshare.Etc_ExamplePacketSerialkey))
+	tcpserver.Consturct(uint32(examshare.Etc_ExamplePacketSerialkey), runtime.NumCPU())
 
 	// start server handler
 	serverConfig := examserverlogic.Instance().ConfigMgr().ServerConfig()
@@ -112,8 +114,8 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT)
 
 	chClosed := make(chan struct{})
-	examserverlogic.Logger().Println(fmt.Sprint("[Server Ver ", examchatserverPacket.ExamVer, "]"))
-	println(fmt.Sprint("[Server Ver ", examchatserverPacket.ExamVer, "]"))
+	examserverlogic.Logger().Println(fmt.Sprint("[Server build Ver ", uint32(examshare.Etc_BuildVer), "]"))
+	println(fmt.Sprint("[Server build Ver ", uint32(examshare.Etc_BuildVer), "]"))
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
 

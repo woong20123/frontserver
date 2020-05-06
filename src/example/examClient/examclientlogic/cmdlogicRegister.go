@@ -1,7 +1,7 @@
 package examclientlogic
 
 import (
-	"example/examchatserverPacket"
+	"example/examshare"
 	"fmt"
 	"net"
 	"strings"
@@ -16,24 +16,24 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandLoginUserRes에 대한 처리 작업을 등록합니다.
 	// 유저의 로그인 패킷 응답 처리 작업 등록
-	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CLoginUserRes), func(conn *net.TCPConn, p *packet.Packet) {
+	lm.RegistLogicfun(int32(examshare.Cmd_S2CLoginUserRes), func(conn *net.TCPConn, p *packet.Packet) {
 
-		res := examchatserverPacket.S2CPCLoginUserRes{}
+		res := examshare.CS2C_LoginUserRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		switch res.Result {
-		case examchatserverPacket.ResultSuccess:
+		switch examshare.ErrCode(res.Result) {
+		case examshare.ErrCode_ResultSuccess:
 			eu := Instance().ObjMgr().User()
 			if eu != nil {
 				eu.SetID(res.UserID)
 				eu.SetSn(res.UserSn)
 				Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.LobbySTATE, []string{fmt.Sprint("==========================", "[ 로 비 화 면 ]", "==========================")})
 			}
-		case examchatserverPacket.ResultExistUserID:
+		case examshare.ErrCode_ResultExistUserID:
 			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), fmt.Sprint("[Login 실패] ", res.UserID, "  유저가 이미 존재합니다.")})
 		default:
 			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.ConnectedSTATE, []string{fmt.Sprint("==========================", "[ 접 속 화 면 ]", "=========================="), "[Login 실패]"})
@@ -44,8 +44,8 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandLobbyMsgRes 대한 처리 작업을 등록합니다.
 	// 로비에 전달하는 메시지 응답 패킷 처리 작업 등록
-	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CLobbyMsgRes), func(conn *net.TCPConn, p *packet.Packet) {
-		res := examchatserverPacket.S2CPCLobbySendMsgRes{}
+	lm.RegistLogicfun(int32(examshare.Cmd_S2CLobbyMsgRes), func(conn *net.TCPConn, p *packet.Packet) {
+		res := examshare.CS2C_LobbySendMsgRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			fmt.Println(err)
@@ -60,8 +60,8 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 		return
 	})
 
-	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CSystemMsgSend), func(conn *net.TCPConn, p *packet.Packet) {
-		res := examchatserverPacket.S2CPCSystemMsgSend{}
+	lm.RegistLogicfun(int32(examshare.Cmd_CS2CSystemMsgSend), func(conn *net.TCPConn, p *packet.Packet) {
+		res := examshare.CS2C_SystemMsgSend{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			fmt.Println(err)
@@ -80,8 +80,8 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 	// S2CPacketCommandRoomEnterRes Packet Logic
 	// 유저의 방입장 패킷 응답 처리 로직
-	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomEnterRes), func(conn *net.TCPConn, p *packet.Packet) {
-		res := examchatserverPacket.S2CPCRoomEnterRes{}
+	lm.RegistLogicfun(int32(examshare.Cmd_S2CRoomEnterRes), func(conn *net.TCPConn, p *packet.Packet) {
+		res := examshare.CS2C_RoomEnterRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			return
@@ -93,7 +93,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		}
 
 		switch res.Result {
-		case examchatserverPacket.ResultSuccess:
+		case examshare.ErrCode_ResultSuccess:
 			// 자기 자신이면 씬전환 작업을 진행합니다. 다른 유저면 입장 메시지 출력합니다.
 			if res.EnterUserSn == eu.Sn() {
 				eu.roomIdx = res.RoomIdx
@@ -114,8 +114,8 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandRoomLeaveRes Packet Logic
 	// 유저의 방 퇴장 패킷 응답 처리 작업
-	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomCreateRes), func(conn *net.TCPConn, p *packet.Packet) {
-		res := examchatserverPacket.S2CPCRoomCreateRes{}
+	lm.RegistLogicfun(int32(examshare.Cmd_S2CRoomCreateRes), func(conn *net.TCPConn, p *packet.Packet) {
+		res := examshare.CS2C_RoomCreateRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			return
@@ -127,7 +127,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		}
 
 		switch res.Result {
-		case examchatserverPacket.ResultSuccess:
+		case examshare.ErrCode_ResultSuccess:
 			eu.roomIdx = res.RoomIdx
 			eu.roomName = res.RoomName
 			Instance().ObjMgr().ChanManager().SendChanUserState(UserStateEnum.RoomSTATE, []string{fmt.Sprint("==========================", "[ 채 팅 방 화 면 ]", "==========================")})
@@ -138,8 +138,8 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandRoomLeaveRes Packet Logic
 	// 유저의 방 퇴장 패킷 응답 처리 작업
-	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomLeaveRes), func(conn *net.TCPConn, p *packet.Packet) {
-		res := examchatserverPacket.S2CPCRoomLeaveRes{}
+	lm.RegistLogicfun(int32(examshare.Cmd_S2CRoomLeaveRes), func(conn *net.TCPConn, p *packet.Packet) {
+		res := examshare.CS2C_RoomLeaveRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			return
@@ -151,7 +151,7 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 		}
 
 		switch res.Result {
-		case examchatserverPacket.ResultSuccess:
+		case examshare.ErrCode_ResultSuccess:
 			// 자기 자신이면 씬전환 작업을 진행합니다. 다른 유저면 입장 메시지 출력합니다.
 			if res.LeaveUserSn == eu.Sn() {
 				eu.roomIdx = 0
@@ -171,8 +171,8 @@ func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
 
 	// S2CPacketCommandRoomMsgRes Packet Logic
 	// 유저의 방입장 패킷 응답 처리 로직
-	lm.RegistLogicfun(int32(examchatserverPacket.Cmd_S2CRoomMsgRes), func(conn *net.TCPConn, p *packet.Packet) {
-		res := examchatserverPacket.S2CPCRoomSendMsgRes{}
+	lm.RegistLogicfun(int32(examshare.Cmd_S2CRoomMsgRes), func(conn *net.TCPConn, p *packet.Packet) {
+		res := examshare.CS2C_RoomSendMsgRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			return

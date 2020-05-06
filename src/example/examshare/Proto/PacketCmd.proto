@@ -1,11 +1,12 @@
 syntax = "proto3";
-package examchatserverPacket;
-option go_package = ".;examchatserverPacket";
+package examshare;
+option go_package = ".;examshare";
 
 enum Cmd {
 	packetCommandStart = 0;
 	F2CSServerRegistReq = 1;
 	CS2FServerRegistRes = 2;
+	CS2CSystemMsgSend = 3;
 
 	LogicCmdStart = 10000;
 	C2SLoginUserReq = 10001;
@@ -25,5 +26,5 @@ enum Cmd {
 	C2SRoomMsgReq = 10013;
 	S2CRoomMsgRes = 10014;
 
-	S2CSystemMsgSend = 10015;
+	
 }

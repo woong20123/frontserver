@@ -1,0 +1,30 @@
+syntax = "proto3";
+package examshare;
+option go_package = ".;examshare";
+
+enum ErrCode {
+	ResultSuccess = 0;
+	ResultFail = 100;
+	ResultExistUserID = 101;
+	ResultUserStateErr = 102;
+	ResultRoomCreateFail = 103;
+	ResultRoomAlreadyExist = 104;
+}
+
+enum SrvMode{
+    SrvModeZero = 0;
+    FrontSrvMode = 1;
+    ChatSrcMode = 2;
+}
+
+enum SrvModeByIndex {
+    SrvModeByIndexZero = 0;
+    FrontServerStartIdx = 1;
+    ChatServerStartIdx = 1000;
+}
+
+enum Etc {
+    EtcZero = 0;
+    BuildVer = 18;
+	ExamplePacketSerialkey = 0x5da9c31b;
+}

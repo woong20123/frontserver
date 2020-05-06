@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"example/examClient/examclientlogic"
-	"example/examchatserverPacket"
+	"example/examshare"
 	"fmt"
 	"log"
 	"os"
@@ -42,7 +42,7 @@ func handleRead(client *tcpserver.TCPClient, errRead context.CancelFunc) {
 			AssemPos += uint32(copylength)
 
 			for {
-				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, examchatserverPacket.ExamplePacketSerialkey)
+				AssemPos, onPacket = packet.AssemblyFromBuffer(AssemblyBuf, AssemPos, uint32(examshare.Etc_ExamplePacketSerialkey))
 				if onPacket == nil {
 					break
 				}
@@ -270,8 +270,8 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 				if userid != "" {
 					// User Login 패킷 전송
 					p := packet.Pool().AcquirePacket()
-					p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SLoginUserReq))
-					req := examchatserverPacket.C2SPCLoginUserReq{}
+					p.SetHeader(uint32(examshare.Etc_ExamplePacketSerialkey), 0, int32(examshare.Cmd_C2SLoginUserReq))
+					req := examshare.C2CS_LoginUserReq{}
 					req.UserID = userid
 					err := p.MarshalFromProto(&req)
 					if err == nil {
@@ -298,8 +298,8 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						roomName := fileds[1]
 
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomEnterReq))
-						req := examchatserverPacket.C2SPCRoomEnterReq{}
+						p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_C2SRoomEnterReq))
+						req := examshare.C2CS_RoomEnterReq{}
 						req.RoomName = roomName
 						err := p.MarshalFromProto(&req)
 						if err == nil {
@@ -317,8 +317,8 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						}
 						roomName := fileds[1]
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomCreateReq))
-						req := examchatserverPacket.C2SPCRoomEnterReq{}
+						p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_C2SRoomCreateReq))
+						req := examshare.C2CS_RoomEnterReq{}
 						req.RoomName = roomName
 						err := p.MarshalFromProto(&req)
 						if err == nil {
@@ -344,8 +344,8 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if msg != "" {
 						// lobby msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SLobbyMsgReq))
-						req := examchatserverPacket.C2SPCLobbySendMsgReq{}
+						p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_C2SLobbyMsgReq))
+						req := examshare.C2CS_LobbySendMsgReq{}
 						req.Msg = msg
 						err := p.MarshalFromProto(&req)
 						if err == nil {
@@ -360,7 +360,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if strings.Contains(msg, "/RoomLeave") {
 						// global msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomLeaveReq))
+						p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_C2SRoomLeaveReq))
 						sendPacketChan <- p
 					} else if strings.Contains(msg, "/?") {
 						readsceneClear()
@@ -372,8 +372,8 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 					if msg != "" {
 						// room msg 패킷 전송
 						p := packet.Pool().AcquirePacket()
-						p.SetHeader(examchatserverPacket.ExamplePacketSerialkey, 0, int32(examchatserverPacket.Cmd_C2SRoomMsgReq))
-						req := examchatserverPacket.C2SPCRoomSendMsgReq{}
+						p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_C2SRoomMsgReq))
+						req := examshare.C2CS_RoomSendMsgReq{}
 						req.RoomIdx = user.RoomIdx()
 						req.Msg = msg
 						err := p.MarshalFromProto(&req)
@@ -396,6 +396,8 @@ func main() {
 	GuiInitchan := make(chan int)
 	go examclientlogic.RunGui(GuiInitchan)
 	<-GuiInitchan
+
+	packet.RegistSerialKey(uint32(examshare.Etc_ExamplePacketSerialkey))
 
 	ProcCtx, shutdown := context.WithCancel(context.Background())
 	chanSendPacket := make(chan *packet.Packet, 1024)
