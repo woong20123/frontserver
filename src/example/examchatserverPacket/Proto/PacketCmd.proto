@@ -1,0 +1,29 @@
+syntax = "proto3";
+package examchatserverPacket;
+option go_package = ".;examchatserverPacket";
+
+enum PacketCmd {
+	packetCommandStart = 0;
+	F2CSPacketCmdSysServerRegistReq = 1;
+	C2FPacketCmdSysServerRegistRes = 2;
+
+	packetLogicCommandStart = 10000;
+	C2SPacketCommandLoginUserReq = 10001;
+	S2CPacketCommandLoginUserRes = 10002;
+	C2SPacketCommandLogOutUserReq = 10003;
+	S2CPacketCommandLogOutUserRes = 10004;
+
+	C2SPacketCommandLobbyMsgReq = 10005;
+	S2CPacketCommandLobbyMsgRes = 10006;
+
+	C2SPacketCommandRoomCreateReq = 10007;
+	S2CPacketCommandRoomCreateRes = 10008;
+	C2SPacketCommandRoomEnterReq = 10009;
+	S2CPacketCommandRoomEnterRes = 10010;
+	C2SPacketCommandRoomLeaveReq = 10011;
+	S2CPacketCommandRoomLeaveRes = 10012;
+	C2SPacketCommandRoomMsgReq = 10013;
+	S2CPacketCommandRoomMsgRes = 10014;
+
+	S2CPacketCommandSystemMsgSend = 10015;
+}
