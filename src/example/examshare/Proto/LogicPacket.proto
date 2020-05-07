@@ -4,14 +4,15 @@ option go_package = ".;examshare";
 
 import "Common.proto";
 
-message C2CS_ServerRegistReq{
-  uint32 serverMode = 1;
+message F2CS_ServerRegistReq{
+  SrvMode serverMode = 1;
   string ip = 2;
   int32 port = 3;
 }
 
-message CS2C_ServerRegistRes{
-  uint32 serverIndex = 1;
+message CS2F_ServerRegistRes{
+  ErrCode  Result = 1;
+  uint32 serverIndex = 2;
 }
 
 

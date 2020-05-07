@@ -25,6 +25,6 @@ enum SrvModeByIndex {
 
 enum Etc {
     EtcZero = 0;
-    BuildVer = 18;
+    BuildVer = 19;
 	ExamplePacketSerialkey = 0x5da9c31b;
 }

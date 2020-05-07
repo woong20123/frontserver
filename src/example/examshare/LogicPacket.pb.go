@@ -25,18 +25,18 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type C2CS_ServerRegistReq struct {
+type F2CS_ServerRegistReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ServerMode uint32 `protobuf:"varint,1,opt,name=serverMode,proto3" json:"serverMode,omitempty"`
-	Ip         string `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
-	Port       int32  `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
+	ServerMode SrvMode `protobuf:"varint,1,opt,name=serverMode,proto3,enum=examshare.SrvMode" json:"serverMode,omitempty"`
+	Ip         string  `protobuf:"bytes,2,opt,name=ip,proto3" json:"ip,omitempty"`
+	Port       int32   `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
 }
 
-func (x *C2CS_ServerRegistReq) Reset() {
-	*x = C2CS_ServerRegistReq{}
+func (x *F2CS_ServerRegistReq) Reset() {
+	*x = F2CS_ServerRegistReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_LogicPacket_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -44,13 +44,13 @@ func (x *C2CS_ServerRegistReq) Reset() {
 	}
 }
 
-func (x *C2CS_ServerRegistReq) String() string {
+func (x *F2CS_ServerRegistReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*C2CS_ServerRegistReq) ProtoMessage() {}
+func (*F2CS_ServerRegistReq) ProtoMessage() {}
 
-func (x *C2CS_ServerRegistReq) ProtoReflect() protoreflect.Message {
+func (x *F2CS_ServerRegistReq) ProtoReflect() protoreflect.Message {
 	mi := &file_LogicPacket_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -62,42 +62,43 @@ func (x *C2CS_ServerRegistReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use C2CS_ServerRegistReq.ProtoReflect.Descriptor instead.
-func (*C2CS_ServerRegistReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use F2CS_ServerRegistReq.ProtoReflect.Descriptor instead.
+func (*F2CS_ServerRegistReq) Descriptor() ([]byte, []int) {
 	return file_LogicPacket_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *C2CS_ServerRegistReq) GetServerMode() uint32 {
+func (x *F2CS_ServerRegistReq) GetServerMode() SrvMode {
 	if x != nil {
 		return x.ServerMode
 	}
-	return 0
+	return SrvMode_SrvModeZero
 }
 
-func (x *C2CS_ServerRegistReq) GetIp() string {
+func (x *F2CS_ServerRegistReq) GetIp() string {
 	if x != nil {
 		return x.Ip
 	}
 	return ""
 }
 
-func (x *C2CS_ServerRegistReq) GetPort() int32 {
+func (x *F2CS_ServerRegistReq) GetPort() int32 {
 	if x != nil {
 		return x.Port
 	}
 	return 0
 }
 
-type CS2C_ServerRegistRes struct {
+type CS2F_ServerRegistRes struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ServerIndex uint32 `protobuf:"varint,1,opt,name=serverIndex,proto3" json:"serverIndex,omitempty"`
+	Result      ErrCode `protobuf:"varint,1,opt,name=Result,proto3,enum=examshare.ErrCode" json:"Result,omitempty"`
+	ServerIndex uint32  `protobuf:"varint,2,opt,name=serverIndex,proto3" json:"serverIndex,omitempty"`
 }
 
-func (x *CS2C_ServerRegistRes) Reset() {
-	*x = CS2C_ServerRegistRes{}
+func (x *CS2F_ServerRegistRes) Reset() {
+	*x = CS2F_ServerRegistRes{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_LogicPacket_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -105,13 +106,13 @@ func (x *CS2C_ServerRegistRes) Reset() {
 	}
 }
 
-func (x *CS2C_ServerRegistRes) String() string {
+func (x *CS2F_ServerRegistRes) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CS2C_ServerRegistRes) ProtoMessage() {}
+func (*CS2F_ServerRegistRes) ProtoMessage() {}
 
-func (x *CS2C_ServerRegistRes) ProtoReflect() protoreflect.Message {
+func (x *CS2F_ServerRegistRes) ProtoReflect() protoreflect.Message {
 	mi := &file_LogicPacket_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -123,12 +124,19 @@ func (x *CS2C_ServerRegistRes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CS2C_ServerRegistRes.ProtoReflect.Descriptor instead.
-func (*CS2C_ServerRegistRes) Descriptor() ([]byte, []int) {
+// Deprecated: Use CS2F_ServerRegistRes.ProtoReflect.Descriptor instead.
+func (*CS2F_ServerRegistRes) Descriptor() ([]byte, []int) {
 	return file_LogicPacket_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CS2C_ServerRegistRes) GetServerIndex() uint32 {
+func (x *CS2F_ServerRegistRes) GetResult() ErrCode {
+	if x != nil {
+		return x.Result
+	}
+	return ErrCode_ResultSuccess
+}
+
+func (x *CS2F_ServerRegistRes) GetServerIndex() uint32 {
 	if x != nil {
 		return x.ServerIndex
 	}
@@ -878,16 +886,20 @@ var File_LogicPacket_proto protoreflect.FileDescriptor
 var file_LogicPacket_proto_rawDesc = []byte{
 	0x0a, 0x11, 0x4c, 0x6f, 0x67, 0x69, 0x63, 0x50, 0x61, 0x63, 0x6b, 0x65, 0x74, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x12, 0x09, 0x65, 0x78, 0x61, 0x6d, 0x73, 0x68, 0x61, 0x72, 0x65, 0x1a, 0x0c,
-	0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x5a, 0x0a, 0x14,
-	0x43, 0x32, 0x43, 0x53, 0x5f, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x67, 0x69, 0x73,
-	0x74, 0x52, 0x65, 0x71, 0x12, 0x1e, 0x0a, 0x0a, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4d, 0x6f,
-	0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0a, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72,
-	0x4d, 0x6f, 0x64, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x02, 0x69, 0x70, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x05, 0x52, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x22, 0x38, 0x0a, 0x14, 0x43, 0x53, 0x32, 0x43,
-	0x5f, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73,
+	0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x6e, 0x0a, 0x14,
+	0x46, 0x32, 0x43, 0x53, 0x5f, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x67, 0x69, 0x73,
+	0x74, 0x52, 0x65, 0x71, 0x12, 0x32, 0x0a, 0x0a, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4d, 0x6f,
+	0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x73,
+	0x68, 0x61, 0x72, 0x65, 0x2e, 0x53, 0x72, 0x76, 0x4d, 0x6f, 0x64, 0x65, 0x52, 0x0a, 0x73, 0x65,
+	0x72, 0x76, 0x65, 0x72, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x22, 0x64, 0x0a, 0x14,
+	0x43, 0x53, 0x32, 0x46, 0x5f, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x67, 0x69, 0x73,
+	0x74, 0x52, 0x65, 0x73, 0x12, 0x2a, 0x0a, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x73, 0x68, 0x61, 0x72, 0x65,
+	0x2e, 0x45, 0x72, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x06, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74,
 	0x12, 0x20, 0x0a, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x49, 0x6e, 0x64,
+	0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x49, 0x6e, 0x64,
 	0x65, 0x78, 0x22, 0x26, 0x0a, 0x12, 0x43, 0x53, 0x32, 0x43, 0x5f, 0x53, 0x79, 0x73, 0x74, 0x65,
 	0x6d, 0x4d, 0x73, 0x67, 0x53, 0x65, 0x6e, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x4d, 0x73, 0x67, 0x22, 0x2b, 0x0a, 0x11, 0x43, 0x32,
@@ -978,8 +990,8 @@ func file_LogicPacket_proto_rawDescGZIP() []byte {
 
 var file_LogicPacket_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_LogicPacket_proto_goTypes = []interface{}{
-	(*C2CS_ServerRegistReq)(nil), // 0: examshare.C2CS_ServerRegistReq
-	(*CS2C_ServerRegistRes)(nil), // 1: examshare.CS2C_ServerRegistRes
+	(*F2CS_ServerRegistReq)(nil), // 0: examshare.F2CS_ServerRegistReq
+	(*CS2F_ServerRegistRes)(nil), // 1: examshare.CS2F_ServerRegistRes
 	(*CS2C_SystemMsgSend)(nil),   // 2: examshare.CS2C_SystemMsgSend
 	(*C2CS_LoginUserReq)(nil),    // 3: examshare.C2CS_LoginUserReq
 	(*CS2C_LoginUserRes)(nil),    // 4: examshare.CS2C_LoginUserRes
@@ -993,20 +1005,23 @@ var file_LogicPacket_proto_goTypes = []interface{}{
 	(*CS2C_RoomLeaveRes)(nil),    // 12: examshare.CS2C_RoomLeaveRes
 	(*C2CS_RoomSendMsgReq)(nil),  // 13: examshare.C2CS_RoomSendMsgReq
 	(*CS2C_RoomSendMsgRes)(nil),  // 14: examshare.CS2C_RoomSendMsgRes
-	(ErrCode)(0),                 // 15: examshare.ErrCode
+	(SrvMode)(0),                 // 15: examshare.SrvMode
+	(ErrCode)(0),                 // 16: examshare.ErrCode
 }
 var file_LogicPacket_proto_depIdxs = []int32{
-	15, // 0: examshare.CS2C_LoginUserRes.Result:type_name -> examshare.ErrCode
-	15, // 1: examshare.CS2C_LobbySendMsgRes.Result:type_name -> examshare.ErrCode
-	15, // 2: examshare.CS2C_RoomCreateRes.Result:type_name -> examshare.ErrCode
-	15, // 3: examshare.CS2C_RoomEnterRes.Result:type_name -> examshare.ErrCode
-	15, // 4: examshare.CS2C_RoomLeaveRes.Result:type_name -> examshare.ErrCode
-	15, // 5: examshare.CS2C_RoomSendMsgRes.Result:type_name -> examshare.ErrCode
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	15, // 0: examshare.F2CS_ServerRegistReq.serverMode:type_name -> examshare.SrvMode
+	16, // 1: examshare.CS2F_ServerRegistRes.Result:type_name -> examshare.ErrCode
+	16, // 2: examshare.CS2C_LoginUserRes.Result:type_name -> examshare.ErrCode
+	16, // 3: examshare.CS2C_LobbySendMsgRes.Result:type_name -> examshare.ErrCode
+	16, // 4: examshare.CS2C_RoomCreateRes.Result:type_name -> examshare.ErrCode
+	16, // 5: examshare.CS2C_RoomEnterRes.Result:type_name -> examshare.ErrCode
+	16, // 6: examshare.CS2C_RoomLeaveRes.Result:type_name -> examshare.ErrCode
+	16, // 7: examshare.CS2C_RoomSendMsgRes.Result:type_name -> examshare.ErrCode
+	8,  // [8:8] is the sub-list for method output_type
+	8,  // [8:8] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_LogicPacket_proto_init() }
@@ -1017,7 +1032,7 @@ func file_LogicPacket_proto_init() {
 	file_Common_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_LogicPacket_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*C2CS_ServerRegistReq); i {
+			switch v := v.(*F2CS_ServerRegistReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1029,7 +1044,7 @@ func file_LogicPacket_proto_init() {
 			}
 		}
 		file_LogicPacket_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CS2C_ServerRegistRes); i {
+			switch v := v.(*CS2F_ServerRegistRes); i {
 			case 0:
 				return &v.state
 			case 1:

@@ -87,6 +87,19 @@ func constructTCPClient() bool {
 			return false
 		} else {
 			tcpserver.Instance().SendManager().RunSendToServerHandle(examshare.TCPCliToSvrIdxChat)
+
+			p := packet.Pool().AcquirePacket()
+			p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_F2CSServerRegistReq))
+			req := examshare.F2CS_ServerRegistReq{}
+			req.Ip = srvConfig.ServerIP
+			req.Port = int32(srvConfig.ServerPort)
+			req.ServerMode = examshare.SrvMode_FrontSrvMode
+			err := p.MarshalFromProto(&req)
+			if err == nil {
+				tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, p)
+			} else {
+				packet.Pool().ReleasePacket(p)
+			}
 		}
 	}
 	return true
