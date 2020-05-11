@@ -52,8 +52,14 @@ func constructConfig() bool {
 }
 
 func constructTCPSession() bool {
-	sessionm := tcpserver.Instance().SessionMgr()
-	examserverlogic.RegistSessionLogic(sessionm)
+	// client 세션에 대한 처리 로직 등록하는 곳
+	clientsessionhandler := tcpserver.Instance().ClientSessionHandler()
+	examserverlogic.RegistClientSessionLogic(clientsessionhandler)
+
+	// server proxy 세션에 대한 처리 로직 등록하는 곳
+	serverproxysessionhandler := tcpserver.Instance().ServerProxySessionHandler()
+	examserverlogic.RegistServerProxySessionLogic(serverproxysessionhandler)
+
 	return true
 }
 
@@ -88,6 +94,7 @@ func constructTCPClient() bool {
 		} else {
 			tcpserver.Instance().SendManager().RunSendToServerHandle(examshare.TCPCliToSvrIdxChat)
 
+			// 서버 등록 패킷 전송
 			p := packet.Pool().AcquirePacket()
 			p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_F2CSServerRegistReq))
 			req := examshare.F2CS_ServerRegistReq{}

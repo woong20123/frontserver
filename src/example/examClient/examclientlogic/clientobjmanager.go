@@ -8,7 +8,7 @@ import "github.com/woong20123/tcpserver"
 type Objmanager struct {
 	channelmgr *ClientChanmgr
 	eu         *ExamUser
-	chatClient *tcpserver.TCPClient
+	chatClient *tcpserver.TCPClientSession
 }
 
 // Intialize is
@@ -16,7 +16,7 @@ func (objmgr *Objmanager) Intialize() {
 	objmgr.channelmgr = new(ClientChanmgr)
 	objmgr.channelmgr.Intialize()
 	objmgr.eu = NewExamUser()
-	objmgr.chatClient = tcpserver.NewTCPClient()
+	objmgr.chatClient = tcpserver.NewTCPClientSession()
 }
 
 // ChanManager is
@@ -30,7 +30,7 @@ func (objmgr *Objmanager) User() *ExamUser {
 }
 
 // ChatClient is return user info
-func (objmgr *Objmanager) ChatClient() *tcpserver.TCPClient {
+func (objmgr *Objmanager) ChatClient() *tcpserver.TCPClientSession {
 	return objmgr.chatClient
 }
 
