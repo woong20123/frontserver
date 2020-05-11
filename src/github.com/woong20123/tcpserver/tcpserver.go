@@ -7,22 +7,14 @@ import (
 	"sync"
 )
 
-// // TcpError is
-// type TcpError struct {
-// 	Cause string
-// 	// Err is the error that occurred during the operation.
-// 	// The Error method panics if the error is nil.
-// 	Err error
-// }
+// TcpError is
+type TCPError struct {
+	Cause string
+}
 
-// func (te *TcpError) Error() string {
-// 	if e == nil {
-// 		return "<nil>"
-// 	}
-// 	s := e.Cause
-// 	s += ": " + e.Err.Error()
-// 	return s
-// }
+func (te *TCPError) Error() string {
+	return te.Cause
+}
 
 const (
 	listenerCloseMatcher = "use of closed network connection"
@@ -37,7 +29,7 @@ func Consturct(serialKey uint32, SendProcessCount int) {
 
 // HandleRead handles packet read operations for connected sessions
 // kor : HandleRead 연결된 세션에 대한 패킷 Read 작업을 처리합니다.
-func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
+func HandleRead(s Session, errRead context.CancelFunc) {
 	defer errRead()
 
 	// sessesion을 통해서 전달받기 위한 버퍼 생성
@@ -49,11 +41,11 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 	var AssemPos uint32 = 0
 
 	for {
-		if conn == nil {
+		if s.Conn() == nil {
 			Instance().LoggerMgr().Logger().Println("conn == nil")
 			return
 		}
-		n, err := conn.Read(recvBuf)
+		n, err := s.Conn().Read(recvBuf)
 		if err != nil {
 			if ne, ok := err.(net.Error); ok {
 				switch {
@@ -70,23 +62,23 @@ func HandleRead(conn *net.TCPConn, errRead context.CancelFunc) {
 			copylength := copy(AssemblyBuf[AssemPos:], recvBuf[:n])
 			AssemPos += uint32(copylength)
 
-			AssemPos = Instance().SessionMgr().RunRecvFunc(conn, AssemblyBuf, AssemPos)
+			AssemPos = Instance().ClientSessionHandler().RunRecvFunc(s, AssemblyBuf, AssemPos)
 		}
 	}
 }
 
 // HandleConnection register job for connected session
 // kor : HandleConnection은 연결된 세션에 대한 작업을 등록합니다.
-func HandleConnection(serverCtx context.Context, conn *net.TCPConn, wg *sync.WaitGroup) {
+func HandleConnection(serverCtx context.Context, s Session, wg *sync.WaitGroup) {
 	defer func() {
-		Instance().SessionMgr().RunConnectFunc(SessionStateEnum.OnClosed, conn)
-		conn.Close()
+		Instance().ClientSessionHandler().RunConnectFunc(SessionStateEnum.OnClosed, s)
+		s.Conn().Close()
 		wg.Done()
 	}()
 
 	readCtx, errRead := context.WithCancel(context.Background())
 
-	go HandleRead(conn, errRead)
+	go HandleRead(s, errRead)
 
 	select {
 	case <-readCtx.Done():
@@ -143,8 +135,12 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 			Instance().LoggerMgr().Logger().Println("AcceptTcp", err)
 			return
 		}
-		Instance().SessionMgr().RunConnectFunc(SessionStateEnum.OnConnected, conn)
+
+		tss := NewTCPServerSession()
+		tss.SetConn(conn)
+
+		Instance().ClientSessionHandler().RunConnectFunc(SessionStateEnum.OnConnected, tss)
 		wg.Add(1)
-		go HandleConnection(ctxServer, conn, wg)
+		go HandleConnection(ctxServer, tss, wg)
 	}
 }

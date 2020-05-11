@@ -20,7 +20,7 @@ const (
 	maxBufferSize = 4096
 )
 
-func handleRead(client *tcpserver.TCPClient, errRead context.CancelFunc) {
+func handleRead(client *tcpserver.TCPClientSession, errRead context.CancelFunc) {
 	defer errRead()
 	recvBuf := make([]byte, maxBufferSize)
 	AssemblyBuf := make([]byte, maxBufferSize+128)
@@ -52,7 +52,7 @@ func handleRead(client *tcpserver.TCPClient, errRead context.CancelFunc) {
 	}
 }
 
-func handleSend(client *tcpserver.TCPClient, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
+func handleSend(client *tcpserver.TCPClientSession, errSend context.CancelFunc, sendPacketChan <-chan *packet.Packet) {
 	defer errSend()
 
 	for {

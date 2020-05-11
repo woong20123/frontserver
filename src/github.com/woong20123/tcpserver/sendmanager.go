@@ -46,15 +46,15 @@ func handleRequestProcess(queue chan *SendToClientRequest, process func(cr *Send
 }
 
 // SendToServerConn is
-func (sm *SendManager) SendToServerConn(index uint32, p *packet.Packet) {
+func (sm *SendManager) SendToServerConn(index int, p *packet.Packet) {
 	r := SendToServerRequest{index, p}
 	sm.SendtoServerRequest <- &r
 }
 
 // RunSendToServerHandle is
-func (sm *SendManager) RunSendToServerHandle(Serveridx uint32) {
+func (sm *SendManager) RunSendToServerHandle(Serveridx int) {
 	go func() {
-		tcpclient, err := Instance().TCPClientMgr().TCPClient(Serveridx)
+		tcpclient, err := Instance().TCPClientMgr().TCPClientSession(Serveridx)
 
 		// 서버에 연결한 세션을 가져 오지 못했다.?
 		if err != nil {
