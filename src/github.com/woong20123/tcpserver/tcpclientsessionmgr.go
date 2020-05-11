@@ -4,26 +4,30 @@ import "errors"
 
 // TCPClientSessionMgr is
 type TCPClientSessionMgr struct {
-	TCPClientConatiner map[uint32]TCPClientSession
+	TCPClientConatiner map[int]TCPClientSession
 }
 
 // Intialize is
 func (mgr *TCPClientSessionMgr) Intialize() {
-	mgr.TCPClientConatiner = make(map[uint32]TCPClientSession)
+	mgr.TCPClientConatiner = make(map[int]TCPClientSession)
 }
 
-// AddTCPClient is
-func (mgr *TCPClientSessionMgr) AddTCPClient(index uint32, ip string, port int) (err error) {
-	Client := NewTCPClientSession()
-	err = Client.Connect(ip, port)
-	if err == nil {
-		mgr.TCPClientConatiner[index] = *Client
+// AddTCPClientSession is
+func (mgr *TCPClientSessionMgr) AddTCPClientSession(tcpclient *TCPClientSession) (err error) {
+	index := tcpclient.Index()
+	existSession, _ := mgr.TCPClientSession(index)
+	if existSession != nil {
+		err = errors.New("Exist TCPClientSession")
+		return
 	}
+
+	mgr.TCPClientConatiner[index] = *tcpclient
 	return
 }
 
-// TCPClient is
-func (mgr *TCPClientSessionMgr) TCPClient(index uint32) (tcpclient *TCPClientSession, err error) {
+// TCPClientSession is
+func (mgr *TCPClientSessionMgr) TCPClientSession(index int) (tcpclient *TCPClientSession, err error) {
+	tcpclient = nil
 	val, ok := mgr.TCPClientConatiner[index]
 	if ok {
 		tcpclient = &val

@@ -23,7 +23,7 @@ type SendToClientRequest struct {
 
 // SendToServerRequest is
 type SendToServerRequest struct {
-	serverIndex uint32
+	serverIndex int
 	p           *packet.Packet
 }
 

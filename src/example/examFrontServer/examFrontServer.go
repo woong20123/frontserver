@@ -24,7 +24,7 @@ func construct() bool {
 	bSuccess = bSuccess && constructConfig()
 	bSuccess = bSuccess && constructTCPSession()
 	bSuccess = bSuccess && constructLogic()
-	bSuccess = bSuccess && constructTCPClient()
+	bSuccess = bSuccess && constructFrontMode()
 	return bSuccess
 }
 
@@ -79,34 +79,47 @@ func constructLogic() bool {
 	return true
 }
 
-func constructTCPClient() bool {
+func constructFrontMode() bool {
 	srvConfig := examserverlogic.Instance().ConfigMgr().ServerConfig()
+
+	// front 모드인 경우에는 상위 서버로의 연결 작업을 진행합니다.
 	if "front" == srvConfig.ServerMode {
+
+		// Chat Server Proxy 생성 및 연결  작업
 		ChatserverIP := srvConfig.BackEndChatServerIP
 		ChatserverPort := srvConfig.BackEndChatServerPort
 
-		err := tcpserver.Instance().TCPClientMgr().AddTCPClient(examshare.TCPCliToSvrIdxChat, ChatserverIP, ChatserverPort)
+		ChatSeverProxy := tcpserver.NewTCPClientSession()
+		ChatSeverProxy.SetIndex(examshare.TCPCliToSvrIdxChat)
+		err := ChatSeverProxy.Connect(ChatserverIP, ChatserverPort)
 		if err != nil {
 			println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println(err.Error())
 			return false
-		} else {
-			tcpserver.Instance().SendManager().RunSendToServerHandle(examshare.TCPCliToSvrIdxChat)
+		}
+		tcpserver.Instance().ServerProxySessionHandler().RunConnectFunc(tcpserver.SessionStateEnum.OnConnected, ChatSeverProxy)
+		err = tcpserver.Instance().TCPClientMgr().AddTCPClientSession(ChatSeverProxy)
 
-			// 서버 등록 패킷 전송
-			p := packet.Pool().AcquirePacket()
-			p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_F2CSServerRegistReq))
-			req := examshare.F2CS_ServerRegistReq{}
-			req.Ip = srvConfig.ServerIP
-			req.Port = int32(srvConfig.ServerPort)
-			req.ServerMode = examshare.SrvMode_FrontSrvMode
-			err := p.MarshalFromProto(&req)
-			if err == nil {
-				tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, p)
-			} else {
-				packet.Pool().ReleasePacket(p)
-			}
+		if err != nil {
+			println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
+			examserverlogic.Logger().Println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
+			examserverlogic.Logger().Println(err.Error())
+			return false
+		}
+
+		// 서버 등록 패킷 전송
+		p := packet.Pool().AcquirePacket()
+		p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_F2CSServerRegistReq))
+		req := examshare.F2CS_ServerRegistReq{}
+		req.Ip = srvConfig.ServerIP
+		req.Port = int32(srvConfig.ServerPort)
+		req.ServerMode = examshare.SrvMode_FrontSrvMode
+		err = p.MarshalFromProto(&req)
+		if err == nil {
+			tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, p)
+		} else {
+			packet.Pool().ReleasePacket(p)
 		}
 	}
 	return true

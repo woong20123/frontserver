@@ -1,6 +1,7 @@
 package tcpserver
 
 import (
+	"errors"
 	"log"
 	"net"
 )
@@ -52,16 +53,10 @@ func (tc *TCPServerSession) SetIndex(idx int) {
 	tc.idx = idx
 }
 
-func (tc *TCPServerSession) connect(addr net.TCPAddr) error {
-	var err error
-	err = &TCPError{"Server Session Not Connect"}
-	return err
-}
-
 // Connect is TcpClient connet to target server
 func (tc *TCPServerSession) Connect(ip string, port int) error {
 	var err error
-	err = &TCPError{Cause: "Server Session Not Connect"}
+	err = errors.New("Server Session Not Connect")
 	return err
 }
 

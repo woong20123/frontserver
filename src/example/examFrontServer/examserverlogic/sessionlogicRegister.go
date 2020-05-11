@@ -7,7 +7,7 @@ import (
 	"github.com/woong20123/tcpserver"
 )
 
-// RegistClientSessionLogic는 Client에서 접속하는 세션에 대한 처리 로직 등록합니다.
+// RegistClientSessionLogic 은 Client에서 접속하는 세션에 대한 처리 로직 등록합니다.
 func RegistClientSessionLogic(csessionhanlder *tcpserver.SessionHandler) {
 
 	// 세션 연결시 ExamServer에서 해야 할 작업 등
@@ -46,11 +46,19 @@ func RegistClientSessionLogic(csessionhanlder *tcpserver.SessionHandler) {
 
 }
 
-// RegistServerProxySessionLogic 는 ServerProxy 세션에 대한 처리 로직 등록합니다.
+// RegistServerProxySessionLogic 은 ServerProxy 세션에 대한 처리 로직 등록합니다.
 func RegistServerProxySessionLogic(spsessionhanlder *tcpserver.SessionHandler) {
 
 	// 세션 연결시 ExamServer에서 해야 할 작업 등록
 	spsessionhanlder.RegistConnectFunc(tcpserver.SessionStateEnum.OnConnected, func(s tcpserver.Session) {
+		// ServerProxy Session Read goroutine start
+		tcpserver.Instance().SendManager().RunSendToServerHandle(s.Index())
+
+		// ServerProxy Session Read goroutine start
+		session, err := tcpserver.Instance().TCPClientMgr().TCPClientSession(s.Index())
+		if err == nil {
+			go session.HandleRead()
+		}
 	})
 
 	// 세션 종료시 ExamServer에서 해야 할 작업 등록

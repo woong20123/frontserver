@@ -54,7 +54,6 @@ func (tc *TCPClientSession) Connect(ip string, port int) error {
 	err := tc.connect(remoteaddr)
 
 	if err == nil {
-		Instance().ServerProxySessionHandler().RunConnectFunc(SessionStateEnum.OnConnected, tc)
 	}
 
 	return err
