@@ -11,7 +11,7 @@ enum ErrCode {
 	ResultRoomAlreadyExist = 104;
 }
 
-enum SrvMode{
+enum SrvType{
     SrvModeZero = 0;
     FrontSrvMode = 1;
     ChatSrcMode = 2;

@@ -47,8 +47,8 @@ func handleRequestProcess(queue chan *SendToClientRequest, process func(cr *Send
 
 // SendToServerConn is
 func (sm *SendManager) SendToServerConn(index int, p *packet.Packet) {
-	r := SendToServerRequest{index, p}
-	sm.SendtoServerRequest <- &r
+	// r := SendToServerRequest{index, p}
+	// sm.SendtoServerRequest <- &r
 }
 
 // RunSendToServerHandle is

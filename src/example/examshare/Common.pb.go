@@ -83,52 +83,52 @@ func (ErrCode) EnumDescriptor() ([]byte, []int) {
 	return file_Common_proto_rawDescGZIP(), []int{0}
 }
 
-type SrvMode int32
+type SrvType int32
 
 const (
-	SrvMode_SrvModeZero  SrvMode = 0
-	SrvMode_FrontSrvMode SrvMode = 1
-	SrvMode_ChatSrcMode  SrvMode = 2
+	SrvType_SrvModeZero  SrvType = 0
+	SrvType_FrontSrvMode SrvType = 1
+	SrvType_ChatSrcMode  SrvType = 2
 )
 
-// Enum value maps for SrvMode.
+// Enum value maps for SrvType.
 var (
-	SrvMode_name = map[int32]string{
+	SrvType_name = map[int32]string{
 		0: "SrvModeZero",
 		1: "FrontSrvMode",
 		2: "ChatSrcMode",
 	}
-	SrvMode_value = map[string]int32{
+	SrvType_value = map[string]int32{
 		"SrvModeZero":  0,
 		"FrontSrvMode": 1,
 		"ChatSrcMode":  2,
 	}
 )
 
-func (x SrvMode) Enum() *SrvMode {
-	p := new(SrvMode)
+func (x SrvType) Enum() *SrvType {
+	p := new(SrvType)
 	*p = x
 	return p
 }
 
-func (x SrvMode) String() string {
+func (x SrvType) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (SrvMode) Descriptor() protoreflect.EnumDescriptor {
+func (SrvType) Descriptor() protoreflect.EnumDescriptor {
 	return file_Common_proto_enumTypes[1].Descriptor()
 }
 
-func (SrvMode) Type() protoreflect.EnumType {
+func (SrvType) Type() protoreflect.EnumType {
 	return &file_Common_proto_enumTypes[1]
 }
 
-func (x SrvMode) Number() protoreflect.EnumNumber {
+func (x SrvType) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use SrvMode.Descriptor instead.
-func (SrvMode) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use SrvType.Descriptor instead.
+func (SrvType) EnumDescriptor() ([]byte, []int) {
 	return file_Common_proto_rawDescGZIP(), []int{1}
 }
 
@@ -244,7 +244,7 @@ var file_Common_proto_rawDesc = []byte{
 	0x74, 0x52, 0x6f, 0x6f, 0x6d, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x46, 0x61, 0x69, 0x6c, 0x10,
 	0x67, 0x12, 0x1a, 0x0a, 0x16, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x52, 0x6f, 0x6f, 0x6d, 0x41,
 	0x6c, 0x72, 0x65, 0x61, 0x64, 0x79, 0x45, 0x78, 0x69, 0x73, 0x74, 0x10, 0x68, 0x2a, 0x3d, 0x0a,
-	0x07, 0x53, 0x72, 0x76, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x0f, 0x0a, 0x0b, 0x53, 0x72, 0x76, 0x4d,
+	0x07, 0x53, 0x72, 0x76, 0x54, 0x79, 0x70, 0x65, 0x12, 0x0f, 0x0a, 0x0b, 0x53, 0x72, 0x76, 0x4d,
 	0x6f, 0x64, 0x65, 0x5a, 0x65, 0x72, 0x6f, 0x10, 0x00, 0x12, 0x10, 0x0a, 0x0c, 0x46, 0x72, 0x6f,
 	0x6e, 0x74, 0x53, 0x72, 0x76, 0x4d, 0x6f, 0x64, 0x65, 0x10, 0x01, 0x12, 0x0f, 0x0a, 0x0b, 0x43,
 	0x68, 0x61, 0x74, 0x53, 0x72, 0x63, 0x4d, 0x6f, 0x64, 0x65, 0x10, 0x02, 0x2a, 0x5a, 0x0a, 0x0e,
@@ -277,7 +277,7 @@ func file_Common_proto_rawDescGZIP() []byte {
 var file_Common_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_Common_proto_goTypes = []interface{}{
 	(ErrCode)(0),        // 0: examshare.ErrCode
-	(SrvMode)(0),        // 1: examshare.SrvMode
+	(SrvType)(0),        // 1: examshare.SrvType
 	(SrvModeByIndex)(0), // 2: examshare.SrvModeByIndex
 	(Etc)(0),            // 3: examshare.Etc
 }

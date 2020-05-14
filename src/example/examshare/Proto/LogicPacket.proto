@@ -5,14 +5,14 @@ option go_package = ".;examshare";
 import "Common.proto";
 
 message F2CS_ServerRegistReq{
-  SrvMode serverMode = 1;
+  SrvType servertype = 1;
   string ip = 2;
   int32 port = 3;
 }
 
 message CS2F_ServerRegistRes{
-  ErrCode  Result = 1;
-  uint32 serverIndex = 2;
+  ErrCode Result = 1;
+  uint32 IssueServerIndex = 2;
 }
 
 
@@ -20,8 +20,13 @@ message CS2C_SystemMsgSend {
   string Msg = 1;
 }
 
+message chatIssueIdx{
+  uint32 IssueServerIndex = 1;
+}
+
 message C2CS_LoginUserReq {
-  string UserID = 1;
+  chatIssueIdx cidx = 1;
+  string UserID = 2;
 }
 
 message CS2C_LoginUserRes {
@@ -30,8 +35,19 @@ message CS2C_LoginUserRes {
   string  UserID = 3;
 }
 
+message C2CS_LogOutUserReq {
+  chatIssueIdx cidx = 1;
+  string UserID = 2;
+  uint32 UserSn = 3;
+}
+
+message CS2C_LogOutUserRes {
+  ErrCode  Result = 1;
+}
+
 message C2CS_LobbySendMsgReq {
   string Msg = 1;
+  uint32 UserSn = 2;
 }
 
 message CS2C_LobbySendMsgRes{
@@ -42,6 +58,7 @@ message CS2C_LobbySendMsgRes{
 
 message C2CS_RoomCreateReq{
   string RoomName = 1;
+  uint32 UserSn = 2;
 }
 
 message CS2C_RoomCreateRes{
@@ -54,6 +71,7 @@ message CS2C_RoomCreateRes{
 
 message C2CS_RoomEnterReq {
   string RoomName = 1;
+  uint32 UserSn = 2;
 }
 
 message CS2C_RoomEnterRes {
@@ -65,6 +83,7 @@ message CS2C_RoomEnterRes {
 }
 
 message C2CS_RoomLeaveReq {
+  uint32 UserSn = 1;
 }
 
 message CS2C_RoomLeaveRes {
@@ -76,6 +95,7 @@ message CS2C_RoomLeaveRes {
 message C2CS_RoomSendMsgReq{
   uint32 RoomIdx = 1;
   string Msg = 2;
+  uint32 UserSn = 3;
 }
 
 message CS2C_RoomSendMsgRes{

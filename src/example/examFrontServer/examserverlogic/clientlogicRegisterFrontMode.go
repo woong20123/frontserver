@@ -9,13 +9,13 @@ import (
 )
 
 // FrontModeRegistCommandLogic is regist Packet process logic from ChatServerMode
-func FrontModeRegistCommandLogic(lm *tcpserver.LogicManager) {
+func FrontModeRegistCommandLogic(lm *tcpserver.ClientLogicManager) {
 	frontModeRegistUserCommandLogic(lm)
 	// ChatRoom 관련 패킷 로직 등록 함수
 	frontModeRegistChatRoomCommandLogic(lm)
 }
 
-func frontModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
+func frontModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 	// C2SPacketCommandLoginUserReq Packet Logic
 	// 유저의 로그인 패킷 처리 작업 등록
 	lm.RegistLogicfun(int32(examshare.Cmd_C2SLoginUserReq), func(conn *net.TCPConn, p *packet.Packet) {
@@ -31,7 +31,7 @@ func frontModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 	})
 }
 
-func frontModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
+func frontModeRegistChatRoomCommandLogic(lm *tcpserver.ClientLogicManager) {
 
 	// C2SPacketCommandRoomEnterReq Packet Logic =======================================================================
 	// 유저의 방입장 패킷 처리 작업 등록 - 방이 없으면 생성합니다.

@@ -12,7 +12,7 @@ import (
 )
 
 // ContructLogicManager is register a logic for the command
-func ContructLogicManager(lm *tcpserver.LogicManager) {
+func ContructLogicManager(lm *tcpserver.ClientLogicManager) {
 
 	// S2CPacketCommandLoginUserRes에 대한 처리 작업을 등록합니다.
 	// 유저의 로그인 패킷 응답 처리 작업 등록
@@ -74,10 +74,10 @@ func ContructLogicManager(lm *tcpserver.LogicManager) {
 	// ChatRoom 관련 패킷 로직 등록 함수
 	registChatRoomCommandLogic(lm)
 
-	lm.RunLogicHandle(1)
+	lm.RunLogicHandler(1)
 }
 
-func registChatRoomCommandLogic(lm *tcpserver.LogicManager) {
+func registChatRoomCommandLogic(lm *tcpserver.ClientLogicManager) {
 	// S2CPacketCommandRoomEnterRes Packet Logic
 	// 유저의 방입장 패킷 응답 처리 로직
 	lm.RegistLogicfun(int32(examshare.Cmd_S2CRoomEnterRes), func(conn *net.TCPConn, p *packet.Packet) {

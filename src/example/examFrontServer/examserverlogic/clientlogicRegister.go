@@ -17,14 +17,14 @@ func VerifyUserObj(eu *ExamUser, state uint32) bool {
 }
 
 // ChatServerModeRegistCommandLogic is regist Packet process logic from ChatServerMode
-func ChatServerModeRegistCommandLogic(lm *tcpserver.LogicManager) {
+func ChatServerModeRegistCommandLogic(lm *tcpserver.ClientLogicManager) {
 	chatServerModeRegistUserCommandLogic(lm)
 	// ChatRoom 관련 패킷 로직 등록 함수
 	chatServerModeRegistChatRoomCommandLogic(lm)
 }
 
 // RegistCommandLogic is regist Packet process logic
-func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
+func chatServerModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 
 	// C2SPacketCommandLoginUserReq Packet Logic
 	// 유저의 로그인 패킷 처리 작업 등록
@@ -144,7 +144,7 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.LogicManager) {
 	})
 }
 
-func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.LogicManager) {
+func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.ClientLogicManager) {
 
 	// C2SPacketCommandRoomEnterReq Packet Logic =======================================================================
 	// 유저의 방입장 패킷 처리 작업 등록 - 방이 없으면 생성합니다.

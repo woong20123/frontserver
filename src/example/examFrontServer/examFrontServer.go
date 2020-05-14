@@ -70,12 +70,15 @@ func constructLogic() bool {
 	switch examserverlogic.Instance().ConfigMgr().ServerConfig().ServerMode {
 	case "front":
 		examserverlogic.FrontModeRegistCommandLogic(lm)
+		slm := tcpserver.Instance().ServerLogicManager()
+		examserverlogic.RegistServerLogic(slm)
+		slm.RunLogicHandler(1)
 	default:
 		examserverlogic.ChatServerModeRegistCommandLogic(lm)
 	}
 
 	// set logic goroutines count
-	lm.RunLogicHandle(runtime.NumCPU())
+	lm.RunLogicHandler(1)
 	return true
 }
 
@@ -114,7 +117,7 @@ func constructFrontMode() bool {
 		req := examshare.F2CS_ServerRegistReq{}
 		req.Ip = srvConfig.ServerIP
 		req.Port = int32(srvConfig.ServerPort)
-		req.ServerMode = examshare.SrvMode_FrontSrvMode
+		req.Servertype = examshare.SrvType_FrontSrvMode
 		err = p.MarshalFromProto(&req)
 		if err == nil {
 			tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, p)

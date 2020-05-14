@@ -3,7 +3,8 @@ package tcpserver
 // SingletonObj is
 type SingletonObj struct {
 	packetSerialkey           uint32
-	logicm                    *LogicManager
+	logicm                    *ClientLogicManager
+	serverlogicm              *ServerLogicManager
 	sendm                     *SendManager
 	clientSessionHanlder      *SessionHandler
 	serverProxySessionHanlder *SessionHandler
@@ -24,8 +25,11 @@ func Instance() *SingletonObj {
 func newSingletonObj() *SingletonObj {
 	so := new(SingletonObj)
 
-	so.logicm = new(LogicManager)
+	so.logicm = new(ClientLogicManager)
 	so.logicm.Initialize()
+
+	so.serverlogicm = new(ServerLogicManager)
+	so.serverlogicm.Initialize()
 
 	so.sendm = new(SendManager)
 	so.sendm.Initialize()
@@ -46,8 +50,13 @@ func newSingletonObj() *SingletonObj {
 }
 
 // LogicManager is return SingletonObj
-func (s *SingletonObj) LogicManager() *LogicManager {
+func (s *SingletonObj) LogicManager() *ClientLogicManager {
 	return s.logicm
+}
+
+// ServerLogicManager is
+func (s *SingletonObj) ServerLogicManager() *ServerLogicManager {
+	return s.serverlogicm
 }
 
 // SendManager is return SendManager
