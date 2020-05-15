@@ -12,7 +12,8 @@ import (
 )
 
 // ContructLogicManager is register a logic for the command
-func ContructLogicManager(lm *tcpserver.ClientLogicManager) {
+func ContructLogicManager() {
+	lm := tcpserver.Instance().ClientLogicManager()
 
 	// S2CPacketCommandLoginUserRes에 대한 처리 작업을 등록합니다.
 	// 유저의 로그인 패킷 응답 처리 작업 등록

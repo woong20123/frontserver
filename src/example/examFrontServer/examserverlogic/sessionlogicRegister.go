@@ -39,7 +39,7 @@ func RegistClientSessionLogic(csessionhanlder *tcpserver.SessionHandler) {
 			if onPacket == nil {
 				break
 			}
-			tcpserver.Instance().LogicManager().CallLogicFun(onPacket.Command(), s.Conn(), onPacket)
+			tcpserver.Instance().ClientLogicManager().CallLogicFun(onPacket.Command(), s.Conn(), onPacket)
 		}
 		return pos
 	})
@@ -52,12 +52,14 @@ func RegistServerProxySessionLogic(spsessionhanlder *tcpserver.SessionHandler) {
 	// 세션 연결시 ExamServer에서 해야 할 작업 등록
 	spsessionhanlder.RegistConnectFunc(tcpserver.SessionStateEnum.OnConnected, func(s tcpserver.Session) {
 		// ServerProxy Session Read goroutine start
+		// ServerProxy Session Read goroutine start
+		err := tcpserver.Instance().TCPClientMgr().AddTCPClientSession(s)
 		tcpserver.Instance().SendManager().RunSendToServerHandle(s.Index())
 
-		// ServerProxy Session Read goroutine start
-		session, err := tcpserver.Instance().TCPClientMgr().TCPClientSession(s.Index())
 		if err == nil {
 			go session.HandleRead()
+		} else {
+			Logger().Println(err.Error())
 		}
 	})
 
@@ -74,7 +76,7 @@ func RegistServerProxySessionLogic(spsessionhanlder *tcpserver.SessionHandler) {
 			if onPacket == nil {
 				break
 			}
-			tcpserver.Instance().LogicManager().CallLogicFun(onPacket.Command(), s.Conn(), onPacket)
+			tcpserver.Instance().ServerLogicManager().CallLogicFun(s.Index(), s.Conn(), onPacket)
 		}
 		return pos
 	})

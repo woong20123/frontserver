@@ -65,7 +65,7 @@ func constructTCPSession() bool {
 
 func constructLogic() bool {
 	// regist exam Logic
-	lm := tcpserver.Instance().LogicManager()
+	lm := tcpserver.Instance().ClientLogicManager()
 
 	switch examserverlogic.Instance().ConfigMgr().ServerConfig().ServerMode {
 	case "front":
@@ -96,8 +96,8 @@ func constructFrontMode() bool {
 		ChatSeverProxy.SetIndex(examshare.TCPCliToSvrIdxChat)
 		err := ChatSeverProxy.Connect(ChatserverIP, ChatserverPort)
 		if err != nil {
-			println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
-			examserverlogic.Logger().Println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
+			println("[ChatServer] Connect fail ", ChatserverIP, ":", ChatserverPort)
+			examserverlogic.Logger().Println("[ChatServer] Connect fail ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		}
@@ -105,11 +105,13 @@ func constructFrontMode() bool {
 		err = tcpserver.Instance().TCPClientMgr().AddTCPClientSession(ChatSeverProxy)
 
 		if err != nil {
-			println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
-			examserverlogic.Logger().Println("Not Connect to BackEndChatServer ", ChatserverIP, ":", ChatserverPort)
+			println("[ChatServer] Connect fail ", ChatserverIP, ":", ChatserverPort)
+			examserverlogic.Logger().Println("[ChatServer] Connect fail ", ChatserverIP, ":", ChatserverPort)
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		}
+
+		println("[ChatServer] Connect success ", ChatserverIP, ":", ChatserverPort)
 
 		// 서버 등록 패킷 전송
 		p := packet.Pool().AcquirePacket()

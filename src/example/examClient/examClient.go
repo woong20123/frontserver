@@ -46,7 +46,7 @@ func handleRead(client *tcpserver.TCPClientSession, errRead context.CancelFunc) 
 				if onPacket == nil {
 					break
 				}
-				tcpserver.Instance().LogicManager().CallLogicFun(onPacket.Command(), client.Conn(), onPacket)
+				tcpserver.Instance().ClientLogicManager().CallLogicFun(onPacket.Command(), client.Conn(), onPacket)
 			}
 		}
 	}
@@ -403,8 +403,7 @@ func main() {
 	chanSendPacket := make(chan *packet.Packet, 1024)
 
 	// set LogicManager
-	lm := tcpserver.Instance().LogicManager()
-	examclientlogic.ContructLogicManager(lm)
+	examclientlogic.ContructLogicManager()
 
 	go HandleNetwork(shutdown, chanSendPacket)
 	go handleScene(shutdown, chanSendPacket)

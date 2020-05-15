@@ -49,8 +49,8 @@ func newSingletonObj() *SingletonObj {
 	return so
 }
 
-// LogicManager is return SingletonObj
-func (s *SingletonObj) LogicManager() *ClientLogicManager {
+// ClientLogicManager is return SingletonObj
+func (s *SingletonObj) ClientLogicManager() *ClientLogicManager {
 	return s.logicm
 }
 
