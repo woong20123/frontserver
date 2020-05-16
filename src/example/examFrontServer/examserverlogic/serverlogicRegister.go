@@ -2,7 +2,6 @@ package examserverlogic
 
 import (
 	"example/examshare"
-	"net"
 
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
@@ -17,7 +16,7 @@ func RegistServerLogic(slm *tcpserver.ServerLogicManager) {
 func RegistSystemServerLogic(slm *tcpserver.ServerLogicManager) {
 	// C2SPacketCommandLoginUserReq Packet Logic
 	// 유저의 로그인 패킷 처리 작업 등록
-	slm.RegistLogicfun(int32(examshare.Cmd_CS2FServerRegistRes), func(conn *net.TCPConn, p *packet.Packet) {
+	slm.RegistLogicfun(int32(examshare.Cmd_CS2FServerRegistRes), func(s tcpserver.Session, p *packet.Packet) {
 		res := examshare.CS2F_ServerRegistRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
@@ -35,27 +34,48 @@ func RegistSystemServerLogic(slm *tcpserver.ServerLogicManager) {
 		}
 	})
 
-	slm.RegistLogicfun(int32(examshare.Cmd_S2CLoginUserRes), func(conn *net.TCPConn, p *packet.Packet) {
+	slm.RegistLogicfun(int32(examshare.Cmd_S2CLoginUserRes), func(s tcpserver.Session, p *packet.Packet) {
 		res := examshare.CS2C_LoginUserRes{}
 		err := p.UnMarshalFromProto(&res)
 		if err != nil {
 			Logger().Println(err)
 			return
 		}
-		CommonLogicS2CLoginUserRes(&res, conn, p)
 
-		return
+		clientSession := Instance().ObjMgr().FindSession(res.IssuedSessionSn)
+		if clientSession != nil {
+			CommonLogicS2CLoginUserRes(&res, clientSession, p)
+		} else {
+			Logger().Println("Not find IssueSession Sn = ", res.IssuedSessionSn)
+		}
+
 	})
+
+	slm.RegistLogicfun(int32(examshare.Cmd_S2CLogOutUserRes), func(s tcpserver.Session, p *packet.Packet) {
+		res := examshare.CS2C_LogOutUserRes{}
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
+
+		if res.Result == examshare.ErrCode_ResultSuccess {
+			if true == Instance().ObjMgr().DelUser(res.UserSn) {
+				Logger().Println("[", res.UserID, "] 유저가 접속종료하였습니다.")
+			}
+		}
+	})
+
 }
 
 // CommonLogicS2CLoginUserRes is
-func CommonLogicS2CLoginUserRes(res *examshare.CS2C_LoginUserRes, conn *net.TCPConn, p *packet.Packet) {
+func CommonLogicS2CLoginUserRes(res *examshare.CS2C_LoginUserRes, s tcpserver.Session, p *packet.Packet) {
 	if res.Result == examshare.ErrCode_ResultSuccess {
 		// user를 셋팅힙니다.
 		eu := NewExamUser()
 		eu.SetUserSn(res.UserSn)
 		eu.SetUserID(&res.UserID)
-		eu.SetConn(conn)
+		eu.SetSession(s)
 		eu.SetState(UserStateEnum.LobbySTATE)
 		Instance().ObjMgr().AddUser(res.UserSn, eu)
 		// 접속한 유저의 ID 등록
@@ -72,7 +92,7 @@ func CommonLogicS2CLoginUserRes(res *examshare.CS2C_LoginUserRes, conn *net.TCPC
 				sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_S2CLoginUserRes))
 				err := sendp.MarshalFromProto(res)
 				if err == nil {
-					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Session(), sendp)
 				} else {
 					Logger().Println(err)
 					packet.Pool().ReleasePacket(sendp)
@@ -84,7 +104,7 @@ func CommonLogicS2CLoginUserRes(res *examshare.CS2C_LoginUserRes, conn *net.TCPC
 				sendReq.Msg = "[" + res.UserID + "] 유저가 로비에 접속하였습니다."
 				err := sendp.MarshalFromProto(&sendReq)
 				if err == nil {
-					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
+					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Session(), sendp)
 				} else {
 					Logger().Println(err)
 					packet.Pool().ReleasePacket(sendp)

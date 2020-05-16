@@ -1,13 +1,11 @@
 package tcpserver
 
 import (
-	"net"
-
 	"github.com/woong20123/packet"
 )
 
 // TlogicFunc is trans request struct
-type TlogicFunc func(conn *net.TCPConn, p *packet.Packet)
+type TlogicFunc func(s Session, p *packet.Packet)
 
 // LogicManager is
 type ClientLogicManager struct {
@@ -17,8 +15,8 @@ type ClientLogicManager struct {
 
 // SendToClientRequest is
 type SendToClientRequest struct {
-	conn *net.TCPConn
-	p    *packet.Packet
+	s Session
+	p *packet.Packet
 }
 
 // Initialize is
@@ -38,8 +36,8 @@ func (lm *ClientLogicManager) UnregistLogicfun(cmd int32) {
 }
 
 // CallLogicFun is
-func (lm *ClientLogicManager) CallLogicFun(cmd int32, conn *net.TCPConn, p *packet.Packet) {
-	r := SendToClientRequest{conn, p}
+func (lm *ClientLogicManager) CallLogicFun(cmd int32, s Session, p *packet.Packet) {
+	r := SendToClientRequest{s, p}
 	lm.clientRequest <- &r
 }
 
@@ -60,7 +58,7 @@ func (lm *ClientLogicManager) packetProcess(cr *SendToClientRequest) {
 	cmd := cr.p.Command()
 	val, ok := lm.LogicConatiner[cmd]
 	if ok {
-		val(cr.conn, cr.p)
+		val(cr.s, cr.p)
 		packet.Pool().ReleasePacket(cr.p)
 	} else {
 		Instance().LoggerMgr().Logger().Println("call fail ", cmd)
@@ -78,7 +76,7 @@ type ServerLogicManager struct {
 // SendToServerRequest is
 type SendToServerRequest struct {
 	serverIndex int
-	conn        *net.TCPConn
+	s           Session
 	p           *packet.Packet
 }
 
@@ -99,8 +97,8 @@ func (lm *ServerLogicManager) UnregistLogicfun(cmd int32) {
 }
 
 // CallLogicFun is
-func (lm *ServerLogicManager) CallLogicFun(serverindex int, conn *net.TCPConn, p *packet.Packet) {
-	r := SendToServerRequest{serverindex, conn, p}
+func (lm *ServerLogicManager) CallLogicFun(serverindex int, s Session, p *packet.Packet) {
+	r := SendToServerRequest{serverindex, s, p}
 	lm.serverRequest <- &r
 }
 
@@ -121,7 +119,7 @@ func (lm *ServerLogicManager) packetProcess(cr *SendToServerRequest) {
 	cmd := cr.p.Command()
 	val, ok := lm.LogicConatiner[cmd]
 	if ok {
-		val(cr.conn, cr.p)
+		val(cr.s, cr.p)
 		packet.Pool().ReleasePacket(cr.p)
 	} else {
 		Instance().LoggerMgr().Logger().Println("call fail ", cmd)

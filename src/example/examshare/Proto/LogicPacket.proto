@@ -27,12 +27,14 @@ message chatIssueIdx{
 message C2CS_LoginUserReq {
   chatIssueIdx cidx = 1;
   string UserID = 2;
+  uint64 IssuedSessionSn = 3;
 }
 
 message CS2C_LoginUserRes {
   ErrCode  Result = 1;
   uint32  UserSn = 2;
   string  UserID = 3;
+  uint64 IssuedSessionSn = 4;
 }
 
 message C2CS_LogOutUserReq {
@@ -43,6 +45,8 @@ message C2CS_LogOutUserReq {
 
 message CS2C_LogOutUserRes {
   ErrCode  Result = 1;
+  string UserID = 2;
+  uint32 UserSn = 3;
 }
 
 message C2CS_LobbySendMsgReq {

@@ -15,6 +15,15 @@
             "args": []
         },
         {
+            "name": "Serverlaunch param",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "${workspaceFolder}/bin/examFrontServer.exe",
+            "env": {},
+            "args": ["20244", "main"]
+        },
+        {
             "name": "Clientlaunch",
             "type": "go",
             "request": "launch",

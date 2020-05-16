@@ -46,7 +46,7 @@ func handleRead(client *tcpserver.TCPClientSession, errRead context.CancelFunc) 
 				if onPacket == nil {
 					break
 				}
-				tcpserver.Instance().ClientLogicManager().CallLogicFun(onPacket.Command(), client.Conn(), onPacket)
+				tcpserver.Instance().ClientLogicManager().CallLogicFun(onPacket.Command(), client, onPacket)
 			}
 		}
 	}

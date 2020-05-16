@@ -136,7 +136,7 @@ func HandleListener(ctxServer context.Context, address string, wg *sync.WaitGrou
 			return
 		}
 
-		tss := NewTCPServerSession()
+		tss := NewTCPClientSession()
 		tss.SetConn(conn)
 
 		Instance().ClientSessionHandler().RunConnectFunc(SessionStateEnum.OnConnected, tss)

@@ -1,8 +1,6 @@
 package tcpserver
 
 import (
-	"net"
-
 	"github.com/woong20123/packet"
 )
 
@@ -19,8 +17,8 @@ func (sm *SendManager) Initialize() {
 }
 
 // SendToClientConn is
-func (sm *SendManager) SendToClientConn(conn *net.TCPConn, p *packet.Packet) {
-	r := SendToClientRequest{conn, p}
+func (sm *SendManager) SendToClientConn(s Session, p *packet.Packet) {
+	r := SendToClientRequest{s, p}
 	sm.SendtoClientRequest <- &r
 }
 
@@ -28,12 +26,16 @@ func (sm *SendManager) SendToClientConn(conn *net.TCPConn, p *packet.Packet) {
 func (sm *SendManager) RunSendToClientHandle(processCount int) {
 	for i := 0; i < processCount; i++ {
 		go handleRequestProcess(sm.SendtoClientRequest, func(cr *SendToClientRequest) {
-			if cr != nil && cr.conn != nil {
-				_, err := cr.conn.Write(cr.p.MakeByte())
-				if err != nil {
-					Instance().LoggerMgr().Logger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
+			if cr != nil && cr.s != nil {
+				tcpclisession := cr.s.(*TCPClientSession)
+				if nil != tcpclisession && tcpclisession.Conn() != nil {
+					_, err := tcpclisession.Conn().Write(cr.p.MakeByte())
+					if err != nil {
+						Instance().LoggerMgr().Logger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
+					}
+					packet.Pool().ReleasePacket(cr.p)
 				}
-				packet.Pool().ReleasePacket(cr.p)
+
 			}
 		})
 	}
@@ -49,7 +51,7 @@ func handleRequestProcess(queue chan *SendToClientRequest, process func(cr *Send
 func (sm *SendManager) SendToServerConn(index int, p *packet.Packet) {
 	session, err := Instance().TCPServerMgr().TCPServerSession(index)
 	if err == nil {
-		r := SendToServerRequest{index, session.Conn(), p}
+		r := SendToServerRequest{index, session, p}
 		sm.SendtoServerRequest <- &r
 	}
 }

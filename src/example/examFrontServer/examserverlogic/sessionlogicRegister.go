@@ -12,22 +12,25 @@ func RegistClientSessionLogic(csessionhanlder *tcpserver.SessionHandler) {
 
 	// 세션 연결시 ExamServer에서 해야 할 작업 등
 	csessionhanlder.RegistConnectFunc(tcpserver.SessionStateEnum.OnConnected, func(s tcpserver.Session) {
-		eu := NewExamUser()
-		eu.SetConn(s.Conn())
-		eu.SetState(UserStateEnum.ConnectedSTATE)
-		//Instance().ObjMgr().AddUser(s.Conn(), eu)
+		IssuedSn := Instance().ObjMgr().IssueSessionSn()
+		Instance().ObjMgr().AddSession(IssuedSn, s)
+
+		tcpclisession := s.(*tcpserver.TCPClientSession)
+		if nil != tcpclisession {
+			tcpclisession.SetSessionSn(IssuedSn)
+		}
 	})
 
 	// 세션 종료시 ExamServer에서 해야 할 작업 등록
 	csessionhanlder.RegistConnectFunc(tcpserver.SessionStateEnum.OnClosed, func(s tcpserver.Session) {
 		eu := Instance().ObjMgr().FindUserByConn(s.Conn())
 		if eu != nil {
-			eu.SetConn(nil)
+			Instance().ObjMgr().DelUserByConn(s.Conn())
+			eu.SetSession(nil)
 			userID := eu.UserID()
 			Instance().ObjMgr().DelUserString(&userID)
 			Logger().Println("[", userID, "] 유저가 종료 하였습니다.")
 		}
-		Instance().ObjMgr().DelUserByConn(s.Conn())
 	})
 
 	// 세션으로 데이터가 들어오면 해야 할 작업 등록
@@ -39,7 +42,7 @@ func RegistClientSessionLogic(csessionhanlder *tcpserver.SessionHandler) {
 			if onPacket == nil {
 				break
 			}
-			tcpserver.Instance().ClientLogicManager().CallLogicFun(onPacket.Command(), s.Conn(), onPacket)
+			tcpserver.Instance().ClientLogicManager().CallLogicFun(onPacket.Command(), s, onPacket)
 		}
 		return pos
 	})
@@ -80,7 +83,7 @@ func RegistServerProxySessionLogic(spsessionhanlder *tcpserver.SessionHandler) {
 			if onPacket == nil {
 				break
 			}
-			tcpserver.Instance().ServerLogicManager().CallLogicFun(s.Index(), s.Conn(), onPacket)
+			tcpserver.Instance().ServerLogicManager().CallLogicFun(s.Index(), s, onPacket)
 		}
 		return pos
 	})

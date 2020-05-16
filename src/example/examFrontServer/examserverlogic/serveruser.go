@@ -1,6 +1,8 @@
 package examserverlogic
 
-import "net"
+import (
+	"github.com/woong20123/tcpserver"
+)
 
 // UStatelogicFunc is
 type UStatelogicFunc func()
@@ -23,7 +25,7 @@ var UserStateEnum = &statelist{
 // ExamUser = User object connected to the server
 type ExamUser struct {
 	sn           uint32
-	conn         *net.TCPConn
+	session      tcpserver.Session
 	id           string
 	state        uint32
 	roomIdx      uint32
@@ -36,19 +38,19 @@ func NewExamUser() *ExamUser {
 	eu.state = UserStateEnum.NoneSTATE
 	eu.roomIdx = 0
 	eu.onSteteLogic = make(map[int]UStatelogicFunc)
-	eu.conn = nil
+	eu.session = nil
 	eu.sn = 0
 	return &eu
 }
 
-// SetConn is set connection obj
-func (eu *ExamUser) SetConn(conn *net.TCPConn) {
-	eu.conn = conn
+// SetSession is set session obj
+func (eu *ExamUser) SetSession(session tcpserver.Session) {
+	eu.session = session
 }
 
-// GetConn is set connection obj
-func (eu *ExamUser) Conn() *net.TCPConn {
-	return eu.conn
+// Session is set session obj
+func (eu *ExamUser) Session() tcpserver.Session {
+	return eu.session
 }
 
 // SetState is set user's state

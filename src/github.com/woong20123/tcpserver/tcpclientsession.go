@@ -7,8 +7,9 @@ import (
 
 // TCPClientSession is
 type TCPClientSession struct {
-	conn *net.TCPConn
-	idx  int
+	conn      *net.TCPConn
+	idx       int
+	sessionSn uint64
 }
 
 // NewTCPClientSession is make TCPClient
@@ -38,6 +39,16 @@ func (tc *TCPClientSession) Index() int {
 // SetIndex is
 func (tc *TCPClientSession) SetIndex(idx int) {
 	tc.idx = idx
+}
+
+// SessionSn is
+func (tc *TCPClientSession) SessionSn() uint64 {
+	return tc.sessionSn
+}
+
+// SetSessionSn is
+func (tc *TCPClientSession) SetSessionSn(Sn uint64) {
+	tc.sessionSn = Sn
 }
 
 func (tc *TCPClientSession) connect(addr net.TCPAddr) error {
