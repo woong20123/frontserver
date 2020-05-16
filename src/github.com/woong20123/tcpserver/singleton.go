@@ -10,6 +10,7 @@ type SingletonObj struct {
 	serverProxySessionHanlder *SessionHandler
 	loggerm                   *LoggerManager
 	tcpclientm                *TCPClientSessionMgr
+	tcpserverm                *TCPServerSessionMgr
 }
 
 var instance *SingletonObj = nil
@@ -45,6 +46,9 @@ func newSingletonObj() *SingletonObj {
 
 	so.tcpclientm = new(TCPClientSessionMgr)
 	so.tcpclientm.Intialize()
+
+	so.tcpserverm = new(TCPServerSessionMgr)
+	so.tcpserverm.Intialize()
 
 	return so
 }
@@ -91,4 +95,8 @@ func (s *SingletonObj) LoggerMgr() *LoggerManager {
 
 func (s *SingletonObj) TCPClientMgr() *TCPClientSessionMgr {
 	return s.tcpclientm
+}
+
+func (s *SingletonObj) TCPServerMgr() *TCPServerSessionMgr {
+	return s.tcpserverm
 }

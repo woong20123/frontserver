@@ -1,7 +1,6 @@
 package tcpserver
 
 import (
-	"errors"
 	"log"
 	"net"
 )
@@ -53,10 +52,22 @@ func (tc *TCPServerSession) SetIndex(idx int) {
 	tc.idx = idx
 }
 
+func (tc *TCPServerSession) connect(addr net.TCPAddr) error {
+	var err error
+	tc.conn, err = net.DialTCP("tcp", nil, &addr)
+	return err
+}
+
 // Connect is TcpClient connet to target server
 func (tc *TCPServerSession) Connect(ip string, port int) error {
-	var err error
-	err = errors.New("Server Session Not Connect")
+	var remoteaddr net.TCPAddr
+	remoteaddr.IP = net.ParseIP(ip)
+	remoteaddr.Port = port
+	err := tc.connect(remoteaddr)
+
+	if err == nil {
+	}
+
 	return err
 }
 

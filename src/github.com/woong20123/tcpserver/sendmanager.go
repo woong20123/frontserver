@@ -47,23 +47,27 @@ func handleRequestProcess(queue chan *SendToClientRequest, process func(cr *Send
 
 // SendToServerConn is
 func (sm *SendManager) SendToServerConn(index int, p *packet.Packet) {
-	// r := SendToServerRequest{index, p}
-	// sm.SendtoServerRequest <- &r
+	session, err := Instance().TCPServerMgr().TCPServerSession(index)
+	if err == nil {
+		r := SendToServerRequest{index, session.Conn(), p}
+		sm.SendtoServerRequest <- &r
+	}
 }
 
 // RunSendToServerHandle is
 func (sm *SendManager) RunSendToServerHandle(Serveridx int) {
 	go func() {
-		tcpclient, err := Instance().TCPClientMgr().TCPClientSession(Serveridx)
+		tcpserversession, err := Instance().TCPServerMgr().TCPServerSession(Serveridx)
 
 		// 서버에 연결한 세션을 가져 오지 못했다.?
 		if err != nil {
 			Instance().LoggerMgr().Logger().Println(err.Error())
+			return
 		}
 
 		for cr := range sm.SendtoServerRequest {
-			if cr != nil && tcpclient.Conn() != nil {
-				_, err := tcpclient.Write(cr.p.MakeByte())
+			if cr != nil && tcpserversession.Conn() != nil {
+				_, err := tcpserversession.Write(cr.p.MakeByte())
 				if err != nil {
 					Instance().LoggerMgr().Logger().Println("RunSendHandle p command = ", cr.p.Command(), " err = ", err)
 				}

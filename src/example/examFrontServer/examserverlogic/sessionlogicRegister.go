@@ -15,19 +15,19 @@ func RegistClientSessionLogic(csessionhanlder *tcpserver.SessionHandler) {
 		eu := NewExamUser()
 		eu.SetConn(s.Conn())
 		eu.SetState(UserStateEnum.ConnectedSTATE)
-		Instance().ObjMgr().AddUser(s.Conn(), eu)
+		//Instance().ObjMgr().AddUser(s.Conn(), eu)
 	})
 
 	// 세션 종료시 ExamServer에서 해야 할 작업 등록
 	csessionhanlder.RegistConnectFunc(tcpserver.SessionStateEnum.OnClosed, func(s tcpserver.Session) {
-		eu := Instance().ObjMgr().FindUser(s.Conn())
+		eu := Instance().ObjMgr().FindUserByConn(s.Conn())
 		if eu != nil {
 			eu.SetConn(nil)
 			userID := eu.UserID()
 			Instance().ObjMgr().DelUserString(&userID)
 			Logger().Println("[", userID, "] 유저가 종료 하였습니다.")
 		}
-		Instance().ObjMgr().DelUser(s.Conn())
+		Instance().ObjMgr().DelUserByConn(s.Conn())
 	})
 
 	// 세션으로 데이터가 들어오면 해야 할 작업 등록
@@ -51,15 +51,19 @@ func RegistServerProxySessionLogic(spsessionhanlder *tcpserver.SessionHandler) {
 
 	// 세션 연결시 ExamServer에서 해야 할 작업 등록
 	spsessionhanlder.RegistConnectFunc(tcpserver.SessionStateEnum.OnConnected, func(s tcpserver.Session) {
-		// ServerProxy Session Read goroutine start
-		// ServerProxy Session Read goroutine start
-		err := tcpserver.Instance().TCPClientMgr().AddTCPClientSession(s)
-		tcpserver.Instance().SendManager().RunSendToServerHandle(s.Index())
-
-		if err == nil {
-			go session.HandleRead()
+		tcpsvrsession := s.(*tcpserver.TCPServerSession)
+		if nil != tcpsvrsession {
+			// ServerProxy Session Read goroutine start
+			err := tcpserver.Instance().TCPServerMgr().AddTCPServerSession(tcpsvrsession)
+			tcpserver.Instance().SendManager().RunSendToServerHandle(tcpsvrsession.Index())
+			if err == nil {
+				go tcpsvrsession.HandleRead()
+			} else {
+				Logger().Println(err.Error())
+			}
 		} else {
-			Logger().Println(err.Error())
+			println("[ChatServer] RegistConnectFunc fail")
+			Logger().Println("[ChatServer] RegistConnectFunc fail")
 		}
 	})
 

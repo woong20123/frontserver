@@ -3,7 +3,6 @@
 	// for the documentation about the tasks.json format
 	"version": "2.0.0",
 	"tasks": [
-		// protobuf build 
 		{
 			"label": "proto build",
 			"type": "shell",
@@ -13,41 +12,38 @@
 				"isDefault": true
 			}
 		},
-		// go build 
 		{
 			"label": "go build",
 			"type": "shell",
 			"command": "go",
-			"args" : [
+			"args": [
 				"build",
 				"./..."
 			],
-			"options": 
-			{
+			"options": {
 				"cwd": "${workspaceFolder}/src"
 			},
 			"group": {
-			"kind": "build",
-			"isDefault": true
+				"kind": "build",
+				"isDefault": true
 			}
 		},
-		// go install
 		{
 			"label": "go install",
 			"type": "shell",
 			"command": "go",
-			"args" : [
+			"args": [
 				"install",
 				"./..."
 			],
-			"options": 
-			{
+			"options": {
 				"cwd": "${workspaceFolder}/src"
 			},
 			"group": {
-			"kind": "build",
-			"isDefault": true
-			}
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": []
 		}
 	]
 }

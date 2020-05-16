@@ -39,7 +39,6 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 		res := examshare.CS2C_LoginUserRes{}
 
 		res.Result = examshare.ErrCode_ResultSuccess
-		var userSn uint32 = 0
 
 		// user id가 빈문자열입니다.
 		if req.UserID == "" {
@@ -51,57 +50,12 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 			res.Result = examshare.ErrCode_ResultExistUserID
 		}
 
-		if res.Result == examshare.ErrCode_ResultSuccess {
-			// user info를 셋팅힙니다.
-			eu := Instance().ObjMgr().FindUser(conn)
-			if eu != nil {
-				// SN 키 등록 및 USER ID
-				eu.SetUserID(&req.UserID)
-				userSn = Instance().ObjMgr().MakeUserSn()
-				eu.SetUserSn(userSn)
-				eu.SetState(UserStateEnum.LobbySTATE)
+		// res에 유저의 정보 셋팅
+		res.UserSn = Instance().ObjMgr().MakeUserSn()
+		res.UserID = req.UserID
 
-				// 접속한 유저의 ID 등록
-				Instance().ObjMgr().AddUserString(&req.UserID)
-
-				res.UserID = req.UserID
-				res.UserSn = userSn
-
-				Logger().Println("[", req.UserID, "] 유저가 접속하였습니다.")
-			}
-		}
-
-		// 로비에 있는 유저들에게 메시지를 보냅니다.
-		Instance().ObjMgr().ForEachFunc(func(loop_eu *ExamUser) {
-			if loop_eu != nil && loop_eu.State() == UserStateEnum.LobbySTATE {
-				// Send 응답 패킷
-				if res.UserSn == loop_eu.UserSn() {
-					sendp := packet.Pool().AcquirePacket()
-					sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_S2CLoginUserRes))
-					err := sendp.MarshalFromProto(&res)
-					if err == nil {
-						tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
-					} else {
-						Logger().Println(err)
-						packet.Pool().ReleasePacket(sendp)
-					}
-				} else {
-					sendp := packet.Pool().AcquirePacket()
-					sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_CS2CSystemMsgSend))
-					sendReq := examshare.CS2C_SystemMsgSend{}
-					sendReq.Msg = "[" + res.UserID + "] 유저가 로비에 접속하였습니다."
-					err := sendp.MarshalFromProto(&sendReq)
-					if err == nil {
-						tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Conn(), sendp)
-					} else {
-						Logger().Println(err)
-						packet.Pool().ReleasePacket(sendp)
-					}
-
-				}
-
-			}
-		})
+		// front 모드와 main 모드에서 동일한 로직을 사용하는 것을 묶습니다.
+		CommonLogicS2CLoginUserRes(&res, conn, p)
 		return
 	})
 
@@ -115,7 +69,7 @@ func chatServerModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 			return
 		}
 
-		eu := Instance().ObjMgr().FindUser(conn)
+		eu := Instance().ObjMgr().FindUserByConn(conn)
 		if eu == nil {
 			return
 		}
@@ -159,7 +113,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.ClientLogicManager) 
 		res := examshare.CS2C_RoomEnterRes{}
 		res.Result = examshare.ErrCode_ResultSuccess
 
-		eu := Instance().ObjMgr().FindUser(conn)
+		eu := Instance().ObjMgr().FindUserByConn(conn)
 		// 유저의 상태가 정상적인지 확인합니다.
 		if false == VerifyUserObj(eu, UserStateEnum.LobbySTATE) {
 			res.Result = examshare.ErrCode_ResultUserStateErr
@@ -222,7 +176,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.ClientLogicManager) 
 		res := examshare.CS2C_RoomCreateRes{}
 		res.Result = examshare.ErrCode_ResultSuccess
 
-		eu := Instance().ObjMgr().FindUser(conn)
+		eu := Instance().ObjMgr().FindUserByConn(conn)
 		// 유저의 상태가 정상적인지 확인합니다.
 		if false == VerifyUserObj(eu, UserStateEnum.LobbySTATE) {
 			res.Result = examshare.ErrCode_ResultUserStateErr
@@ -278,7 +232,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.ClientLogicManager) 
 		res.Result = examshare.ErrCode_ResultSuccess
 
 		// 유저의 상태가 정상적인지 확인합니다.
-		eu := Instance().ObjMgr().FindUser(conn)
+		eu := Instance().ObjMgr().FindUserByConn(conn)
 		if false == VerifyUserObj(eu, UserStateEnum.RoomSTATE) {
 			res.Result = examshare.ErrCode_ResultUserStateErr
 		}
@@ -326,7 +280,7 @@ func chatServerModeRegistChatRoomCommandLogic(lm *tcpserver.ClientLogicManager) 
 			return
 		}
 
-		eu := Instance().ObjMgr().FindUser(conn)
+		eu := Instance().ObjMgr().FindUserByConn(conn)
 
 		// 비정상적인 유저라면 리턴합니다.
 

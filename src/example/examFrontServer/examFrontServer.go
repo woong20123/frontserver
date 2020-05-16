@@ -92,7 +92,7 @@ func constructFrontMode() bool {
 		ChatserverIP := srvConfig.BackEndChatServerIP
 		ChatserverPort := srvConfig.BackEndChatServerPort
 
-		ChatSeverProxy := tcpserver.NewTCPClientSession()
+		ChatSeverProxy := tcpserver.NewTCPServerSession()
 		ChatSeverProxy.SetIndex(examshare.TCPCliToSvrIdxChat)
 		err := ChatSeverProxy.Connect(ChatserverIP, ChatserverPort)
 		if err != nil {
@@ -101,21 +101,14 @@ func constructFrontMode() bool {
 			examserverlogic.Logger().Println(err.Error())
 			return false
 		}
-		tcpserver.Instance().ServerProxySessionHandler().RunConnectFunc(tcpserver.SessionStateEnum.OnConnected, ChatSeverProxy)
-		err = tcpserver.Instance().TCPClientMgr().AddTCPClientSession(ChatSeverProxy)
-
-		if err != nil {
-			println("[ChatServer] Connect fail ", ChatserverIP, ":", ChatserverPort)
-			examserverlogic.Logger().Println("[ChatServer] Connect fail ", ChatserverIP, ":", ChatserverPort)
-			examserverlogic.Logger().Println(err.Error())
-			return false
-		}
-
 		println("[ChatServer] Connect success ", ChatserverIP, ":", ChatserverPort)
+
+		tcpserver.Instance().ServerProxySessionHandler().RunConnectFunc(tcpserver.SessionStateEnum.OnConnected, ChatSeverProxy)
 
 		// 서버 등록 패킷 전송
 		p := packet.Pool().AcquirePacket()
 		p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_F2CSServerRegistReq))
+
 		req := examshare.F2CS_ServerRegistReq{}
 		req.Ip = srvConfig.ServerIP
 		req.Port = int32(srvConfig.ServerPort)
@@ -152,6 +145,7 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT)
 
 	chClosed := make(chan struct{})
+	println(fmt.Sprint("[PID] = ", os.Getpid()))
 	examserverlogic.Logger().Println(fmt.Sprint("[Server build Ver ", uint32(examshare.Etc_BuildVer), "]"))
 	println(fmt.Sprint("[Server build Ver ", uint32(examshare.Etc_BuildVer), "]"))
 

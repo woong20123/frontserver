@@ -8,47 +8,67 @@ import (
 
 // SvrObjMgr is
 type SvrObjMgr struct {
-	userContainer map[*net.TCPConn]*ExamUser
+	userContainer map[uint32]*ExamUser
 	userIDChecker map[string]bool
 	userSnKey     uint32
 }
 
 // Initialize is
 func (somgr *SvrObjMgr) Initialize() {
-	somgr.userContainer = make(map[*net.TCPConn]*ExamUser)
+	somgr.userContainer = make(map[uint32]*ExamUser)
 	somgr.userIDChecker = make(map[string]bool)
 	somgr.userSnKey = 0
 }
 
 // AddUser is add the user in userContainer.
-func (somgr *SvrObjMgr) AddUser(conn *net.TCPConn, eu *ExamUser) bool {
-	_, exist := somgr.userContainer[conn]
+func (somgr *SvrObjMgr) AddUser(usersn uint32, eu *ExamUser) bool {
+	_, exist := somgr.userContainer[usersn]
 	if true == exist {
 		log.Println("already exist user")
 		return false
 	}
-	somgr.userContainer[conn] = eu
+	somgr.userContainer[usersn] = eu
 	return true
 }
 
 // DelUser is delete the user in userContainer.
-func (somgr *SvrObjMgr) DelUser(conn *net.TCPConn) {
-	delete(somgr.userContainer, conn)
+func (somgr *SvrObjMgr) DelUser(usersn uint32) {
+	delete(somgr.userContainer, usersn)
+}
+
+// DelUserByConn is
+func (somgr *SvrObjMgr) DelUserByConn(conn *net.TCPConn) {
+	eu := somgr.FindUserByConn(conn)
+	if eu != nil {
+		delete(somgr.userContainer, eu.UserSn())
+	}
+
 }
 
 // FindUser is Find the user in userContainer.
-func (somgr *SvrObjMgr) FindUser(conn *net.TCPConn) *ExamUser {
-	eu, exist := somgr.userContainer[conn]
+func (somgr *SvrObjMgr) FindUser(usersn uint32) *ExamUser {
+	eu, exist := somgr.userContainer[usersn]
 	if exist {
 		return eu
 	}
 	return nil
 }
 
+// FindUserByConn is
+func (somgr *SvrObjMgr) FindUserByConn(conn *net.TCPConn) *ExamUser {
+
+	for _, eu := range somgr.userContainer {
+		if eu.Conn() == conn {
+			return eu
+		}
+	}
+	return nil
+}
+
 // ForEachFunc is Run function to All User
 func (somgr *SvrObjMgr) ForEachFunc(f func(eu *ExamUser)) {
-	for _, user := range somgr.userContainer {
-		f(user)
+	for _, eu := range somgr.userContainer {
+		f(eu)
 	}
 }
 
