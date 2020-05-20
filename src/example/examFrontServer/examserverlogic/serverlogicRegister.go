@@ -10,6 +10,7 @@ import (
 // RegistServerLogic is regist Packet process logic from ChatServerMode
 func RegistServerLogic(slm *tcpserver.ServerLogicManager) {
 	RegistSystemServerLogic(slm)
+	RegistLobbyLogic(slm)
 }
 
 // RegistSystemServerLogic is regist Packet process logic
@@ -68,6 +69,27 @@ func RegistSystemServerLogic(slm *tcpserver.ServerLogicManager) {
 
 }
 
+// RegistLobbyLogic is
+func RegistLobbyLogic(slm *tcpserver.ServerLogicManager) {
+
+	slm.RegistLogicfun(int32(examshare.Cmd_S2CLobbyMsgRes), func(s tcpserver.Session, p *packet.Packet) {
+		res := examshare.CS2C_LobbySendMsgRes{}
+		err := p.UnMarshalFromProto(&res)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
+
+		// 서버에 등록 성공
+		if res.Result == examshare.ErrCode_ResultSuccess {
+			CommonLogicCS2CLobbySendMsgRes(&res, p)
+		} else {
+			Logger().Fatal("CS2C_LobbySendMsgRes fall")
+			println("CS2C_LobbySendMsgRes fall")
+		}
+	})
+}
+
 // CommonLogicS2CLoginUserRes is
 func CommonLogicS2CLoginUserRes(res *examshare.CS2C_LoginUserRes, s tcpserver.Session, p *packet.Packet) {
 	if res.Result == examshare.ErrCode_ResultSuccess {
@@ -112,6 +134,25 @@ func CommonLogicS2CLoginUserRes(res *examshare.CS2C_LoginUserRes, s tcpserver.Se
 
 			}
 
+		}
+	})
+}
+
+// CommonLogicCS2CLobbySendMsgRes is
+func CommonLogicCS2CLobbySendMsgRes(res *examshare.CS2C_LobbySendMsgRes, p *packet.Packet) {
+	// 로비에 있는 유저들에게 메시지를 보냅니다.
+	Instance().ObjMgr().ForEachFunc(func(loop_eu *ExamUser) {
+		if loop_eu != nil && loop_eu.State() == UserStateEnum.LobbySTATE {
+			// Send 응답 패킷
+			sendp := packet.Pool().AcquirePacket()
+			sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_S2CLobbyMsgRes))
+			err := sendp.MarshalFromProto(res)
+			if err == nil {
+				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Session(), sendp)
+			} else {
+				Logger().Println(err)
+				packet.Pool().ReleasePacket(sendp)
+			}
 		}
 	})
 }
