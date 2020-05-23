@@ -347,6 +347,7 @@ func handleScene(errProc context.CancelFunc, sendPacketChan chan<- *packet.Packe
 						p.SetHeaderByDefaultKey(0, int32(examshare.Cmd_C2SLobbyMsgReq))
 						req := examshare.C2CS_LobbySendMsgReq{}
 						req.Msg = msg
+						req.UserSn = user.Sn()
 						err := p.MarshalFromProto(&req)
 						if err == nil {
 							sendPacketChan <- p

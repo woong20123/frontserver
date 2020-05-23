@@ -105,33 +105,34 @@ func CommonLogicS2CLoginUserRes(res *examshare.CS2C_LoginUserRes, s tcpserver.Se
 		Logger().Println("[", res.UserID, "] 유저가 접속하였습니다.")
 	}
 
+	sendp := packet.Pool().AcquirePacket()
+	sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_S2CLoginUserRes))
+	err := sendp.MarshalFromProto(res)
+	if err == nil {
+		tcpserver.Instance().SendManager().SendToClientConn(s, sendp)
+	} else {
+		Logger().Println(err)
+		packet.Pool().ReleasePacket(sendp)
+	}
+
 	// 로비에 있는 유저들에게 메시지를 보냅니다.
 	Instance().ObjMgr().ForEachFunc(func(loop_eu *ExamUser) {
 		if loop_eu != nil && loop_eu.State() == UserStateEnum.LobbySTATE {
 			// Send 응답 패킷
-			if res.UserSn == loop_eu.UserSn() {
-				sendp := packet.Pool().AcquirePacket()
-				sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_S2CLoginUserRes))
-				err := sendp.MarshalFromProto(res)
-				if err == nil {
-					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Session(), sendp)
-				} else {
-					Logger().Println(err)
-					packet.Pool().ReleasePacket(sendp)
+			if res.UserSn != loop_eu.UserSn() {
+				if res.Result == examshare.ErrCode_ResultSuccess {
+					sendp := packet.Pool().AcquirePacket()
+					sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_CS2CSystemMsgSend))
+					sendReq := examshare.CS2C_SystemMsgSend{}
+					sendReq.Msg = "[" + res.UserID + "] 유저가 로비에 접속하였습니다."
+					err := sendp.MarshalFromProto(&sendReq)
+					if err == nil {
+						tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Session(), sendp)
+					} else {
+						Logger().Println(err)
+						packet.Pool().ReleasePacket(sendp)
+					}
 				}
-			} else {
-				sendp := packet.Pool().AcquirePacket()
-				sendp.SetHeaderByDefaultKey(0, int32(examshare.Cmd_CS2CSystemMsgSend))
-				sendReq := examshare.CS2C_SystemMsgSend{}
-				sendReq.Msg = "[" + res.UserID + "] 유저가 로비에 접속하였습니다."
-				err := sendp.MarshalFromProto(&sendReq)
-				if err == nil {
-					tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Session(), sendp)
-				} else {
-					Logger().Println(err)
-					packet.Pool().ReleasePacket(sendp)
-				}
-
 			}
 
 		}
@@ -149,6 +150,7 @@ func CommonLogicCS2CLobbySendMsgRes(res *examshare.CS2C_LobbySendMsgRes, p *pack
 			err := sendp.MarshalFromProto(res)
 			if err == nil {
 				tcpserver.Instance().SendManager().SendToClientConn(loop_eu.Session(), sendp)
+				Logger().Println("Id = ", loop_eu.UserID(), " msg = ", res.Msg)
 			} else {
 				Logger().Println(err)
 				packet.Pool().ReleasePacket(sendp)

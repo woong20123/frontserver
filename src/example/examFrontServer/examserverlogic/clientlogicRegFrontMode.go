@@ -31,20 +31,47 @@ func frontModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 		default:
 			Logger().Println("Session is not TCPClientSession")
 		}
-		err = p.MarshalFromProto(&req)
+
+		PacketToChat := packet.Pool().AcquirePacket()
+		PacketToChat.SetHeader(uint32(examshare.Etc_ExamplePacketSerialkey), 0, int32(examshare.Cmd_C2SLoginUserReq))
+
+		err = PacketToChat.MarshalFromProto(&req)
 		if err != nil {
 			Logger().Println(err)
 			return
 		}
 
-		tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, p)
+		tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, PacketToChat)
 		return
 	})
 
 	// C2SPacketCommandLobbyMsgReq Packet Logic
 	// 로비에 전달하는 메시지 패킷 처리 작업 등록
 	lm.RegistLogicfun(int32(examshare.Cmd_C2SLobbyMsgReq), func(s tcpserver.Session, p *packet.Packet) {
-		tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, p)
+		req := examshare.C2CS_LobbySendMsgReq{}
+		err := p.UnMarshalFromProto(&req)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
+		Logger().Println("[Cmd_C2SLobbyMsgReq] UserSn = ", req.UserSn, " msg = ", req.Msg)
+
+		PacketToChat := packet.Pool().AcquirePacket()
+		PacketToChat.SetHeader(uint32(examshare.Etc_ExamplePacketSerialkey), 0, int32(examshare.Cmd_C2SLobbyMsgReq))
+
+		eu := Instance().ObjMgr().FindUserByConn(s.Conn())
+		if eu == nil {
+			return
+		}
+		req.UserSn = eu.UserSn()
+		err = PacketToChat.MarshalFromProto(&req)
+		if err != nil {
+			Logger().Println(err)
+			return
+		}
+		Logger().Println("[Cmd_C2SLobbyMsgReq] Id = ", eu.UserID(), " msg = ", req.Msg)
+
+		tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, PacketToChat)
 		return
 	})
 }
