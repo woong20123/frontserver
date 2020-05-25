@@ -25,6 +25,13 @@ func RegistClientSessionLogic(csessionhanlder *tcpserver.SessionHandler) {
 	csessionhanlder.RegistConnectFunc(tcpserver.SessionStateEnum.OnClosed, func(s tcpserver.Session) {
 		eu := Instance().ObjMgr().FindUserByConn(s.Conn())
 		if eu != nil {
+			// chat서버에 C2SLogOutUserReq 접속 종료 패킷 전송
+			req := examshare.C2CS_LogOutUserReq{}
+			req.UserID = eu.UserID()
+			req.UserSn = eu.UserSn()
+			SendPacketToChatServer(&req, int32(examshare.Cmd_C2SLogOutUserReq))
+			// chat서버에 C2SLogOutUserReq 접속 종료 패킷 전송 End
+
 			Instance().ObjMgr().DelUserByConn(s.Conn())
 			eu.SetSession(nil)
 			userID := eu.UserID()

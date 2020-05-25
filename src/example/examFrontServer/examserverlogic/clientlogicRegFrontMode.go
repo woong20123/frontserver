@@ -5,7 +5,23 @@ import (
 
 	"github.com/woong20123/packet"
 	"github.com/woong20123/tcpserver"
+	"google.golang.org/protobuf/proto"
 )
+
+// SendPacketToChatServer is
+func SendPacketToChatServer(message proto.Message, cmd int32) bool {
+	PacketToChat := packet.Pool().AcquirePacket()
+	PacketToChat.SetHeader(uint32(examshare.Etc_ExamplePacketSerialkey), 0, cmd)
+
+	err := PacketToChat.MarshalFromProto(message)
+	if err != nil {
+		Logger().Println(err)
+		return false
+	}
+
+	tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, PacketToChat)
+	return true
+}
 
 // FrontModeRegistCommandLogic is regist Packet process logic from ChatServerMode
 func FrontModeRegistCommandLogic(lm *tcpserver.ClientLogicManager) {
@@ -32,16 +48,7 @@ func frontModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 			Logger().Println("Session is not TCPClientSession")
 		}
 
-		PacketToChat := packet.Pool().AcquirePacket()
-		PacketToChat.SetHeader(uint32(examshare.Etc_ExamplePacketSerialkey), 0, int32(examshare.Cmd_C2SLoginUserReq))
-
-		err = PacketToChat.MarshalFromProto(&req)
-		if err != nil {
-			Logger().Println(err)
-			return
-		}
-
-		tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, PacketToChat)
+		SendPacketToChatServer(&req, int32(examshare.Cmd_C2SLoginUserReq))
 		return
 	})
 
@@ -54,24 +61,16 @@ func frontModeRegistUserCommandLogic(lm *tcpserver.ClientLogicManager) {
 			Logger().Println(err)
 			return
 		}
-		Logger().Println("[Cmd_C2SLobbyMsgReq] UserSn = ", req.UserSn, " msg = ", req.Msg)
-
-		PacketToChat := packet.Pool().AcquirePacket()
-		PacketToChat.SetHeader(uint32(examshare.Etc_ExamplePacketSerialkey), 0, int32(examshare.Cmd_C2SLobbyMsgReq))
 
 		eu := Instance().ObjMgr().FindUserByConn(s.Conn())
 		if eu == nil {
 			return
 		}
 		req.UserSn = eu.UserSn()
-		err = PacketToChat.MarshalFromProto(&req)
-		if err != nil {
-			Logger().Println(err)
-			return
-		}
-		Logger().Println("[Cmd_C2SLobbyMsgReq] Id = ", eu.UserID(), " msg = ", req.Msg)
 
-		tcpserver.Instance().SendManager().SendToServerConn(examshare.TCPCliToSvrIdxChat, PacketToChat)
+		Logger().Println("[Cmd_C2SLobbyMsgReq] UserSn = ", req.UserSn, " msg = ", req.Msg)
+
+		SendPacketToChatServer(&req, int32(examshare.Cmd_C2SLobbyMsgReq))
 		return
 	})
 }
