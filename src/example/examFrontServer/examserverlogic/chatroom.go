@@ -117,14 +117,14 @@ func (rm *ChatRoomMgr) ForEachFunc(roomidx uint32, f func(eu *ExamUser)) {
 type ChatRoom struct {
 	idx           uint32
 	name          string
-	userContainer map[uint32]*ExamUser
+	userContainer map[uint64]*ExamUser
 }
 
 // Intialize is
 func (r *ChatRoom) Intialize(idx uint32) {
 	r.idx = idx
 	r.name = ""
-	r.userContainer = make(map[uint32]*ExamUser)
+	r.userContainer = make(map[uint64]*ExamUser)
 }
 
 // EnterUser is

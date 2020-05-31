@@ -4,6 +4,7 @@ option go_package = ".;examshare";
 
 enum ErrCode {
 	ResultSuccess = 0;
+    ResultTestFail = 10;
 	ResultFail = 100;
 	ResultExistUserID = 101;
 	ResultUserStateErr = 102;

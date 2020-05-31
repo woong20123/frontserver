@@ -10,16 +10,16 @@ import (
 
 // SvrObjMgr is
 type SvrObjMgr struct {
-	userContainer       map[uint32]*ExamUser
+	userContainer       map[uint64]*ExamUser
 	userIDChecker       map[string]bool
-	userSnKey           uint32
+	userSnKey           uint64
 	connSnKey           uint64
 	CliSessionContainer map[uint64]tcpserver.Session
 }
 
 // Initialize is
 func (somgr *SvrObjMgr) Initialize() {
-	somgr.userContainer = make(map[uint32]*ExamUser)
+	somgr.userContainer = make(map[uint64]*ExamUser)
 	somgr.userIDChecker = make(map[string]bool)
 	somgr.userSnKey = 0
 	somgr.connSnKey = 0
@@ -27,7 +27,7 @@ func (somgr *SvrObjMgr) Initialize() {
 }
 
 // AddUser is add the user in userContainer.
-func (somgr *SvrObjMgr) AddUser(usersn uint32, eu *ExamUser) bool {
+func (somgr *SvrObjMgr) AddUser(usersn uint64, eu *ExamUser) bool {
 	_, exist := somgr.userContainer[usersn]
 	if true == exist {
 		log.Println("already exist user")
@@ -38,7 +38,7 @@ func (somgr *SvrObjMgr) AddUser(usersn uint32, eu *ExamUser) bool {
 }
 
 // DelUser is delete the user in userContainer.
-func (somgr *SvrObjMgr) DelUser(usersn uint32) bool {
+func (somgr *SvrObjMgr) DelUser(usersn uint64) bool {
 	if nil != somgr.FindUser(usersn) {
 		delete(somgr.userContainer, usersn)
 		return true
@@ -56,7 +56,7 @@ func (somgr *SvrObjMgr) DelUserByConn(conn *net.TCPConn) {
 }
 
 // FindUser is Find the user in userContainer.
-func (somgr *SvrObjMgr) FindUser(usersn uint32) *ExamUser {
+func (somgr *SvrObjMgr) FindUser(usersn uint64) *ExamUser {
 	eu, exist := somgr.userContainer[usersn]
 	if exist {
 		return eu
@@ -99,8 +99,8 @@ func (somgr *SvrObjMgr) FindUserString(id *string) bool {
 }
 
 // MakeUserSn is return Unique User Sn
-func (somgr *SvrObjMgr) MakeUserSn() uint32 {
-	return atomic.AddUint32(&somgr.userSnKey, 1)
+func (somgr *SvrObjMgr) MakeUserSn() uint64 {
+	return atomic.AddUint64(&somgr.userSnKey, 1)
 }
 
 // IssueSessionSn is

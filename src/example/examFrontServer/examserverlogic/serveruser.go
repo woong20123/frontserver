@@ -24,7 +24,7 @@ var UserStateEnum = &statelist{
 
 // ExamUser = User object connected to the server
 type ExamUser struct {
-	sn           uint32
+	sn           uint64
 	session      tcpserver.Session
 	id           string
 	state        uint32
@@ -74,12 +74,12 @@ func (eu *ExamUser) UserID() string {
 }
 
 // SetUserSn is set user's id
-func (eu *ExamUser) SetUserSn(sn uint32) {
+func (eu *ExamUser) SetUserSn(sn uint64) {
 	eu.sn = sn
 }
 
 // GetUserSn is return user's id
-func (eu *ExamUser) UserSn() uint32 {
+func (eu *ExamUser) UserSn() uint64 {
 	return eu.sn
 }
 
