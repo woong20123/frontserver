@@ -32,7 +32,7 @@ message C2CS_LoginUserReq {
 
 message CS2C_LoginUserRes {
   ErrCode  Result = 1;
-  uint32  UserSn = 2;
+  uint64  UserSn = 2;
   string  UserID = 3;
   uint64 IssuedSessionSn = 4;
 }
@@ -40,18 +40,18 @@ message CS2C_LoginUserRes {
 message C2CS_LogOutUserReq {
   chatIssueIdx cidx = 1;
   string UserID = 2;
-  uint32 UserSn = 3;
+  uint64 UserSn = 3;
 }
 
 message CS2C_LogOutUserRes {
   ErrCode  Result = 1;
   string UserID = 2;
-  uint32 UserSn = 3;
+  uint64 UserSn = 3;
 }
 
 message C2CS_LobbySendMsgReq {
   string Msg = 1;
-  uint32 UserSn = 2;
+  uint64 UserSn = 2;
 }
 
 message CS2C_LobbySendMsgRes{
@@ -62,44 +62,44 @@ message CS2C_LobbySendMsgRes{
 
 message C2CS_RoomCreateReq{
   string RoomName = 1;
-  uint32 UserSn = 2;
+  uint64 UserSn = 2;
 }
 
 message CS2C_RoomCreateRes{
   ErrCode Result = 1;
   uint32 RoomIdx = 2;
   string RoomName = 3;
-  uint32 EnterUserSn = 4;
+  uint64 EnterUserSn = 4;
   string EnterUserID = 5;
 }
 
 message C2CS_RoomEnterReq {
   string RoomName = 1;
-  uint32 UserSn = 2;
+  uint64 UserSn = 2;
 }
 
 message CS2C_RoomEnterRes {
   ErrCode Result = 1;
   uint32 RoomIdx = 2;
   string RoomName = 3;
-  uint32 EnterUserSn = 4;
+  uint64 EnterUserSn = 4;
   string EnterUserID = 5;
 }
 
 message C2CS_RoomLeaveReq {
-  uint32 UserSn = 1;
+  uint64 UserSn = 1;
 }
 
 message CS2C_RoomLeaveRes {
   ErrCode Result = 1;
-  uint32 LeaveUserSn = 2;
+  uint64 LeaveUserSn = 2;
   string LeaveUserID = 3;
 }
 
 message C2CS_RoomSendMsgReq{
   uint32 RoomIdx = 1;
   string Msg = 2;
-  uint32 UserSn = 3;
+  uint64 UserSn = 3;
 }
 
 message CS2C_RoomSendMsgRes{

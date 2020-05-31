@@ -37,7 +37,7 @@ var UserStateEnum = &statelist{
 type ExamUser struct {
 	conn           *net.TCPConn
 	id             string
-	sn             uint32
+	sn             uint64
 	state          int
 	roomIdx        uint32
 	roomName       string
@@ -79,12 +79,12 @@ func (eu *ExamUser) ID() string {
 }
 
 // SetSn is set user serial number
-func (eu *ExamUser) SetSn(sn uint32) {
+func (eu *ExamUser) SetSn(sn uint64) {
 	eu.sn = sn
 }
 
 // GetSn is return user serial number
-func (eu *ExamUser) Sn() uint32 {
+func (eu *ExamUser) Sn() uint64 {
 	return eu.sn
 }
 
